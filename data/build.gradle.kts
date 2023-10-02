@@ -1,6 +1,9 @@
 plugins {
+    kotlin("kapt")
+
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -33,8 +36,19 @@ android {
 }
 
 dependencies {
+    val hilt_version = "2.44"
+    val room_version = "2.5.2"
 
-    implementation("androidx.core:core-ktx:1.9.0")
+    // Room
+    implementation("androidx.room:room-runtime:$room_version")
+    implementation("androidx.room:room-common:$room_version")
+    annotationProcessor("androidx.room:room-compiler:$room_version")
+
+    // Hilt
+    implementation("com.google.dagger:hilt-android:$hilt_version")
+    kapt("com.google.dagger:hilt-android-compiler:$hilt_version")
+
+    implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.9.0")
     testImplementation("junit:junit:4.13.2")

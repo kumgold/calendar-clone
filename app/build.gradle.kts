@@ -6,6 +6,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.dagger.hilt.android")
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -57,6 +58,12 @@ android {
 dependencies {
     val nav_version = "2.7.3"
     val hilt_version = "2.44"
+    val room_version = "2.5.2"
+
+    // Room
+    implementation("androidx.room:room-runtime:$room_version")
+    implementation("androidx.room:room-common:$room_version")
+    annotationProcessor("androidx.room:room-compiler:$room_version")
 
     // Navigation
     implementation("androidx.navigation:navigation-compose:$nav_version")
