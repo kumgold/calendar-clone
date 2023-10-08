@@ -6,6 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.goldcompany.apps.todoapplication.addedittask.AddEditTaskScreen
 import com.goldcompany.apps.todoapplication.home.HomeScreen
 
 @Composable
@@ -22,7 +23,15 @@ fun TodoNavGraph(
         composable(
             route = TodoDestinations.HOME
         ) {
-            HomeScreen()
+            HomeScreen(
+                addTask = { navController.navigate(TodoDestinations.ADD_EDIT_TASK) }
+            )
+        }
+
+        composable(
+            route = TodoDestinations.ADD_EDIT_TASK
+        ) {
+            AddEditTaskScreen()
         }
     }
 }
