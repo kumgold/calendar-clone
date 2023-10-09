@@ -63,9 +63,10 @@ dependencies {
     implementation(project(":data"))
 
     // Room
+    implementation("androidx.room:room-ktx:$room_version")
     implementation("androidx.room:room-runtime:$room_version")
     implementation("androidx.room:room-common:$room_version")
-    annotationProcessor("androidx.room:room-compiler:$room_version")
+    ksp("androidx.room:room-compiler:$room_version")
 
     // Navigation
     implementation("androidx.navigation:navigation-compose:$nav_version")

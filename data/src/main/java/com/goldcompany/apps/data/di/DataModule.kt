@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.room.Room
 import com.goldcompany.apps.data.db.TaskDao
 import com.goldcompany.apps.data.db.TodoDatabase
+import com.goldcompany.apps.data.repository.TaskRepository
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -17,13 +19,19 @@ object DatabaseModule {
     @Singleton
     @Provides
     fun provideDataBase(@ApplicationContext context: Context): TodoDatabase {
-        return Room.databaseBuilder(
-            context.applicationContext,
-            TodoDatabase::class.java,
-            "Tasks.db"
-        ).build()
+        return TodoDatabase.getInstance(context)
     }
 
     @Provides
     fun provideTaskDao(database: TodoDatabase): TaskDao = database.taskDao()
+}
+
+@Module
+@InstallIn(SingletonComponent::class)
+object RepositoryModule {
+    @Singleton
+    @Provides
+    fun provideTaskRepository(
+        taskDao: TaskDao
+    ): TaskRepository = TaskRepository(taskDao)
 }

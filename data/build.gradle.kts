@@ -8,7 +8,7 @@ plugins {
 
 android {
     namespace = "com.goldcompany.apps.data"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         minSdk = 26
@@ -40,9 +40,10 @@ dependencies {
     val room_version = "2.5.2"
 
     // Room
+    implementation("androidx.room:room-ktx:$room_version")
     implementation("androidx.room:room-runtime:$room_version")
     implementation("androidx.room:room-common:$room_version")
-    annotationProcessor("androidx.room:room-compiler:$room_version")
+    kapt("androidx.room:room-compiler:$room_version")
 
     // Hilt
     implementation("com.google.dagger:hilt-android:$hilt_version")
