@@ -11,6 +11,8 @@ fun TaskEntity.toExternal() = Task(
     endTimeMilli = endTimeMilli
 )
 
+fun List<TaskEntity>.toExternal() = map(TaskEntity::toExternal)
+
 fun Task.toLocal() = TaskEntity(
     id = id,
     isCompleted = isCompleted,
