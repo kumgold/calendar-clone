@@ -15,7 +15,7 @@ import javax.inject.Inject
 
 data class TaskUiState(
     val items: List<Task> = emptyList(),
-    val isLoading: LoadingState = LoadingState.INIT,
+    val loadingState: LoadingState = LoadingState.INIT,
     val userMessage: Int? = null
 )
 
@@ -39,18 +39,17 @@ class HomeViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         items = tasks,
-                        isLoading = LoadingState.SUCCESS
+                        loadingState = LoadingState.SUCCESS
                     )
                 }
             }
         }
     }
 
-
     private fun loading() {
         _uiState.update {
             it.copy(
-                isLoading = LoadingState.LOADING
+                loadingState = LoadingState.LOADING
             )
         }
     }

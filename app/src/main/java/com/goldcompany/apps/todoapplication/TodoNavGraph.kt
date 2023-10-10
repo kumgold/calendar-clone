@@ -42,7 +42,11 @@ fun TodoNavGraph(
         composable(
             route = TodoDestinations.ADD_EDIT_TASK
         ) {
-            AddEditTaskScreen()
+            AddEditTaskScreen(
+                onBack = {
+                    navController.popBackStack()
+                }
+            )
         }
     }
 }

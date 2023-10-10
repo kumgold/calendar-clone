@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.goldcompany.apps.data.data.Task
 import com.goldcompany.apps.todoapplication.R
+import com.goldcompany.apps.todoapplication.util.LoadingState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,6 +45,7 @@ fun HomeScreen(
     ) { paddingValues ->
         TaskScreen(
             modifier = modifier.padding(paddingValues),
+            loadingState = uiState.loadingState,
             tasks = uiState.items
         )
     }
@@ -52,15 +54,31 @@ fun HomeScreen(
 @Composable
 private fun TaskScreen(
     modifier: Modifier,
+    loadingState: LoadingState,
     tasks: List<Task>
 ) {
-    LazyColumn {
-        items(tasks) { task ->
-            TaskItem(
-                task = task,
-                onCheckChange = {},
-                onTaskClick = {}
-            )
+    when (loadingState) {
+        LoadingState.INIT -> {
+
+        }
+        LoadingState.LOADING -> {
+
+        }
+        LoadingState.SUCCESS -> {
+            LazyColumn(
+                modifier = modifier
+            ) {
+                items(tasks) { task ->
+                    TaskItem(
+                        task = task,
+                        onCheckChange = {},
+                        onTaskClick = {}
+                    )
+                }
+            }
+        }
+        LoadingState.ERROR -> {
+
         }
     }
 }
