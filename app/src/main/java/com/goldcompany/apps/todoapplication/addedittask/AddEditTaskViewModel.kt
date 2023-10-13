@@ -26,11 +26,7 @@ class AddEditTaskViewModel @Inject constructor(
     private val repository: TaskRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
-    private val taskId: String? =  try {
-        checkNotNull(savedStateHandle[TASK_ID])
-    } catch (e: NullPointerException) {
-        null
-    }
+    private val taskId: String? = savedStateHandle[TASK_ID]
 
     private val _uiState = MutableStateFlow(AddEditTaskUiState())
     val uiState: StateFlow<AddEditTaskUiState> = _uiState

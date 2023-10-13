@@ -8,6 +8,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.goldcompany.apps.todoapplication.R
+import com.goldcompany.apps.todoapplication.compose.TitleTopAppBar
 import com.goldcompany.apps.todoapplication.util.LoadingState
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -20,7 +22,13 @@ fun AddEditTaskScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
-        modifier = modifier
+        modifier = modifier,
+        topBar = {
+            TitleTopAppBar(
+                title = R.string.add_task,
+                navigateBack = onBack
+            )
+        }
     ) { paddingValues ->
         AddEditTaskContent(
             modifier = modifier.padding(paddingValues),
@@ -42,10 +50,19 @@ private fun AddEditTaskContent(
 
         }
         LoadingState.SUCCESS -> {
+            EditTaskScreen(
 
+            )
         }
         LoadingState.ERROR -> {
 
         }
     }
+}
+
+@Composable
+private fun EditTaskScreen(
+
+) {
+
 }
