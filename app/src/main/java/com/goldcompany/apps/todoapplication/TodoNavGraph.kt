@@ -43,7 +43,7 @@ fun TodoNavGraph(
             route = TodoDestinations.ADD_EDIT_TASK
         ) {
             AddEditTaskScreen(
-                onBack = {
+                navigateBack = {
                     navController.popBackStack()
                 }
             )

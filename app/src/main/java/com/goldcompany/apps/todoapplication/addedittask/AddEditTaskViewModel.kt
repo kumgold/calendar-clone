@@ -32,14 +32,16 @@ class AddEditTaskViewModel @Inject constructor(
     val uiState: StateFlow<AddEditTaskUiState> = _uiState
 
     init {
-        getTask()
+        loadTask()
     }
 
-    private fun getTask() {
+    private fun loadTask() {
         loading()
 
         viewModelScope.launch {
             taskId?.let { id ->
+                // Task ID is not null
+                // Load task and edit it
                 repository.getTask(id).map { task ->
                     _uiState.update {
                         it.copy(
@@ -50,6 +52,14 @@ class AddEditTaskViewModel @Inject constructor(
                         )
                     }
                 }
+            }.run {
+                // Task ID is null
+                // Add new task
+                _uiState.update {
+                    it.copy(
+                        loadingState = LoadingState.SUCCESS
+                    )
+                }
             }
         }
     }
@@ -58,6 +68,30 @@ class AddEditTaskViewModel @Inject constructor(
         _uiState.update {
             it.copy(
                 loadingState = LoadingState.LOADING
+            )
+        }
+    }
+
+    fun updateTaskCompleted(newCompleted: Boolean) {
+        _uiState.update {
+            it.copy(
+                isCompleted = newCompleted
+            )
+        }
+    }
+
+    fun updateTitle(newTitle: String) {
+        _uiState.update {
+            it.copy(
+                title = newTitle
+            )
+        }
+    }
+
+    fun updateDescription(newDescription: String) {
+        _uiState.update {
+            it.copy(
+                description = newDescription
             )
         }
     }
