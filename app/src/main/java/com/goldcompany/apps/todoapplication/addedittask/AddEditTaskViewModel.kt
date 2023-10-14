@@ -36,10 +36,9 @@ class AddEditTaskViewModel @Inject constructor(
     }
 
     private fun loadTask() {
-        loading()
-
         viewModelScope.launch {
             taskId?.let { id ->
+                loading()
                 // Task ID is not null
                 // Load task and edit it
                 repository.getTask(id).map { task ->
