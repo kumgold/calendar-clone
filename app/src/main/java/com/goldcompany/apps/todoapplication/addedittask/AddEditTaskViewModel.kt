@@ -3,6 +3,7 @@ package com.goldcompany.apps.todoapplication.addedittask
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.goldcompany.apps.data.data.Task
 import com.goldcompany.apps.data.repository.TaskRepository
 import com.goldcompany.apps.todoapplication.TASK_ID
 import com.goldcompany.apps.todoapplication.util.LoadingState
@@ -18,7 +19,8 @@ data class AddEditTaskUiState(
     val title: String = "",
     val description: String = "",
     val isCompleted: Boolean = false,
-    val loadingState: LoadingState = LoadingState.INIT
+    val loadingState: LoadingState = LoadingState.INIT,
+    val isTaskSaved: Boolean = false
 )
 
 @HiltViewModel
@@ -92,6 +94,27 @@ class AddEditTaskViewModel @Inject constructor(
             it.copy(
                 description = newDescription
             )
+        }
+    }
+
+    fun updateTask() {
+        viewModelScope.launch {
+            loading()
+
+            repository.addTask(
+                Task(
+                    isCompleted = _uiState.value.isCompleted,
+                    title = _uiState.value.title,
+                    description = _uiState.value.description,
+                    startTimeMilli = null,
+                    endTimeMilli = null
+                )
+            )
+            _uiState.update {
+                it.copy(
+                    isTaskSaved = true
+                )
+            }
         }
     }
 }

@@ -1,5 +1,9 @@
 <resources>
     <string name="app_name">To do Application</string>
+
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+
     <string name="add_task">Add Task</string>
     <string name="title_hint">Enter the title</string>
     <string name="description_hint">Enter the description</string>

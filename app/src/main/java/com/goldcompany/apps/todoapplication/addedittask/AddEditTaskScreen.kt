@@ -1,17 +1,21 @@
 package com.goldcompany.apps.todoapplication.addedittask
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -50,8 +54,16 @@ fun AddEditTaskScreen(
             title = uiState.title,
             description = uiState.description,
             onTitleChange = viewModel::updateTitle,
-            onDescriptionChange = viewModel::updateDescription
+            onDescriptionChange = viewModel::updateDescription,
+            updateTask = viewModel::updateTask,
+            navigateBack = navigateBack
         )
+    }
+
+    LaunchedEffect(uiState.isTaskSaved) {
+        if (uiState.isTaskSaved) {
+            navigateBack()
+        }
     }
 }
 
@@ -64,7 +76,9 @@ private fun AddEditTaskContent(
     title: String,
     description: String,
     onTitleChange: (String) -> Unit,
-    onDescriptionChange: (String) -> Unit
+    onDescriptionChange: (String) -> Unit,
+    updateTask: () -> Unit,
+    navigateBack: () -> Unit
 ) {
     when (loadingState) {
         LoadingState.INIT -> {}
@@ -81,7 +95,9 @@ private fun AddEditTaskContent(
                 onUpdateTaskCompleted = onUpdateTaskCompleted,
                 description = description,
                 onTitleChange = onTitleChange,
-                onDescriptionChange = onDescriptionChange
+                onDescriptionChange = onDescriptionChange,
+                updateTask = updateTask,
+                navigateBack = navigateBack
             )
         }
         LoadingState.ERROR -> {
@@ -99,7 +115,9 @@ private fun EditTaskScreen(
     title: String,
     description: String,
     onTitleChange: (String) -> Unit,
-    onDescriptionChange: (String) -> Unit
+    onDescriptionChange: (String) -> Unit,
+    updateTask: () -> Unit,
+    navigateBack: () -> Unit
 ) {
     Column(
         modifier = modifier
@@ -132,5 +150,24 @@ private fun EditTaskScreen(
             },
             textStyle = MaterialTheme.typography.bodyLarge
         )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            Button(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = dimensionResource(id = R.dimen.horizontal_margin)),
+                onClick = { updateTask() }
+            ) {
+                Text(text = stringResource(id = R.string.save))
+            }
+            Button(
+                modifier = Modifier.weight(1f),
+                onClick = { navigateBack() }
+            ) {
+                Text(text = stringResource(id = R.string.cancel))
+            }
+        }
     }
 }
