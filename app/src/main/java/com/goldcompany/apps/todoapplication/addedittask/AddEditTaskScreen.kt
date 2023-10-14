@@ -1,13 +1,11 @@
 package com.goldcompany.apps.todoapplication.addedittask
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -22,6 +20,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.goldcompany.apps.todoapplication.R
+import com.goldcompany.apps.todoapplication.compose.LoadingAnimation
 import com.goldcompany.apps.todoapplication.compose.TitleTopAppBar
 import com.goldcompany.apps.todoapplication.util.LoadingState
 
@@ -70,7 +69,9 @@ private fun AddEditTaskContent(
     when (loadingState) {
         LoadingState.INIT -> {}
         LoadingState.LOADING -> {
-
+            LoadingAnimation(
+                modifier = modifier
+            )
         }
         LoadingState.SUCCESS -> {
             EditTaskScreen(

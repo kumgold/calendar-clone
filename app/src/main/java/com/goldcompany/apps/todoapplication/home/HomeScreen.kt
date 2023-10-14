@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.goldcompany.apps.data.data.Task
 import com.goldcompany.apps.todoapplication.R
+import com.goldcompany.apps.todoapplication.compose.LoadingAnimation
 import com.goldcompany.apps.todoapplication.util.LoadingState
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -62,7 +63,9 @@ private fun TaskScreen(
 
         }
         LoadingState.LOADING -> {
-
+            LoadingAnimation(
+                modifier = modifier
+            )
         }
         LoadingState.SUCCESS -> {
             LazyColumn(
