@@ -32,10 +32,10 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun observeAllTask() {
-        loading()
-
         viewModelScope.launch {
             repository.getTasksStream().map { tasks ->
+                loading()
+
                 _uiState.update {
                     it.copy(
                         items = tasks,
