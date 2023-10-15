@@ -8,7 +8,6 @@ import com.goldcompany.apps.todoapplication.util.LoadingState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -33,15 +32,13 @@ class HomeViewModel @Inject constructor(
 
     private fun observeAllTask() {
         viewModelScope.launch {
-            repository.getTasksStream().map { tasks ->
-                loading()
+            loading()
 
-                _uiState.update {
-                    it.copy(
-                        items = tasks,
-                        loadingState = LoadingState.SUCCESS
-                    )
-                }
+            _uiState.update {
+                it.copy(
+                    items = repository.getAllTask(),
+                    loadingState = LoadingState.SUCCESS
+                )
             }
         }
     }

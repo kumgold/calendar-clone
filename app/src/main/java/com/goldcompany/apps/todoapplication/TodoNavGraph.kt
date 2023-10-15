@@ -1,6 +1,7 @@
 package com.goldcompany.apps.todoapplication
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -15,7 +16,10 @@ import com.goldcompany.apps.todoapplication.home.HomeScreen
 fun TodoNavGraph(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    startDestination: String = TodoDestinations.HOME
+    startDestination: String = TodoDestinations.HOME,
+    navActions: TodoNavigation = remember(navController) {
+        TodoNavigation(navController)
+    }
 ) {
     NavHost(
         modifier = modifier,
@@ -23,24 +27,36 @@ fun TodoNavGraph(
         startDestination = startDestination
     ) {
         composable(
-            route = TodoDestinations.HOME,
-            arguments = listOf(
-                navArgument(TASK_ID) {
-                    type = NavType.StringType
-                    nullable = true
-                }
-            )
+            route = TodoDestinations.HOME
         ) {
             HomeScreen(
                 addTask = {
                     navController.navigate(
                         TodoDestinations.ADD_EDIT_TASK
                     )
+                },
+                onTaskClick = { task ->
+                    navActions.navigateTaskDetail(task.id)
                 }
             )
         }
         composable(
             route = TodoDestinations.ADD_EDIT_TASK
+        ) {
+            AddEditTaskScreen(
+                navigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+        composable(
+            route = "${TodoDestinations.ADD_EDIT_TASK}?taskId={$TASK_ID}",
+            arguments = listOf(
+                navArgument(TASK_ID) {
+                    type = NavType.StringType
+                    nullable = true
+                }
+            )
         ) {
             AddEditTaskScreen(
                 navigateBack = {

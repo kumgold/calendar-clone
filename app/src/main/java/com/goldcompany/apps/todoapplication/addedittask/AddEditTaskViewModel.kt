@@ -43,14 +43,16 @@ class AddEditTaskViewModel @Inject constructor(
                 loading()
                 // Task ID is not null
                 // Load task and edit it
-                repository.getTask(id).map { task ->
-                    _uiState.update {
-                        it.copy(
-                            title = task.title,
-                            description = task.description,
-                            isCompleted = task.isCompleted,
-                            loadingState = LoadingState.SUCCESS
-                        )
+                repository.getTask(id).let { task ->
+                    if (task != null) {
+                        _uiState.update {
+                            it.copy(
+                                title = task.title,
+                                description = task.description,
+                                isCompleted = task.isCompleted,
+                                loadingState = LoadingState.SUCCESS
+                            )
+                        }
                     }
                 }
             }.run {

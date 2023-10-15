@@ -17,7 +17,7 @@ import androidx.compose.ui.res.stringResource
 fun TitleTopAppBar(
     modifier: Modifier = Modifier,
     @StringRes title: Int,
-    navigateBack: () -> Unit
+    navigateBack: () -> Unit = {}
 ) {
     TopAppBar(
         modifier = modifier,

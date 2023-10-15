@@ -14,6 +14,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -32,12 +33,23 @@ import com.goldcompany.apps.todoapplication.util.LoadingState
 fun HomeScreen(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
-    addTask: () -> Unit
+    addTask: () -> Unit,
+    onTaskClick: (Task) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
         modifier = modifier,
+        topBar = {
+            TopAppBar(
+                modifier = modifier,
+                title = {
+                    Text(
+                        text = stringResource(id = R.string.all_task)
+                    )
+                }
+            )
+        },
         floatingActionButton = {
             FloatingActionButton(onClick = addTask) {
                 Icon(Icons.Filled.Add, stringResource(id = R.string.add_task))
@@ -47,7 +59,8 @@ fun HomeScreen(
         TaskScreen(
             modifier = modifier.padding(paddingValues),
             loadingState = uiState.loadingState,
-            tasks = uiState.items
+            tasks = uiState.items,
+            onTaskClick = onTaskClick
         )
     }
 }
@@ -56,7 +69,8 @@ fun HomeScreen(
 private fun TaskScreen(
     modifier: Modifier,
     loadingState: LoadingState,
-    tasks: List<Task>
+    tasks: List<Task>,
+    onTaskClick: (Task) -> Unit
 ) {
     when (loadingState) {
         LoadingState.INIT -> {
@@ -75,7 +89,7 @@ private fun TaskScreen(
                     TaskItem(
                         task = task,
                         onCheckChange = {},
-                        onTaskClick = {}
+                        onTaskClick = onTaskClick
                     )
                 }
             }
