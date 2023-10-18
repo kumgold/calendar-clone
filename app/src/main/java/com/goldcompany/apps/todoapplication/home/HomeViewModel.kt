@@ -50,4 +50,10 @@ class HomeViewModel @Inject constructor(
             )
         }
     }
+
+    fun updateTaskCompleted(task: Task, completed: Boolean) {
+        viewModelScope.launch {
+            repository.updateCompleted(task.id, completed)
+        }
+    }
 }

@@ -18,6 +18,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -60,7 +63,8 @@ fun HomeScreen(
             modifier = modifier.padding(paddingValues),
             loadingState = uiState.loadingState,
             tasks = uiState.items,
-            onTaskClick = onTaskClick
+            onTaskClick = onTaskClick,
+            updateTaskCompleted = viewModel::updateTaskCompleted
         )
     }
 }
@@ -70,7 +74,8 @@ private fun TaskScreen(
     modifier: Modifier,
     loadingState: LoadingState,
     tasks: List<Task>,
-    onTaskClick: (Task) -> Unit
+    onTaskClick: (Task) -> Unit,
+    updateTaskCompleted: (Task, Boolean) -> Unit
 ) {
     when (loadingState) {
         LoadingState.INIT -> {
@@ -88,7 +93,7 @@ private fun TaskScreen(
                 items(tasks) { task ->
                     TaskItem(
                         task = task,
-                        onCheckChange = {},
+                        onCheckChange = updateTaskCompleted,
                         onTaskClick = onTaskClick
                     )
                 }
@@ -103,9 +108,11 @@ private fun TaskScreen(
 @Composable
 private fun TaskItem(
     task: Task,
-    onCheckChange: (Boolean) -> Unit,
+    onCheckChange: (Task, Boolean) -> Unit,
     onTaskClick: (Task) -> Unit
 ) {
+    val isCompleted = remember { mutableStateOf(task.isCompleted) }
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -116,8 +123,11 @@ private fun TaskItem(
             .clickable { onTaskClick(task) }
     ) {
         Checkbox(
-            checked = task.isCompleted,
-            onCheckedChange = onCheckChange
+            checked = isCompleted.value,
+            onCheckedChange = {
+                isCompleted.value = it
+                onCheckChange(task, it)
+            }
         )
         Text(text = task.title)
     }
