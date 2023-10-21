@@ -49,30 +49,6 @@ class HomeViewModel @Inject constructor(
         emit(Async.Error(R.string.error_message))
     }
 
-    private fun filterTasks(list: List<Task>, filterType: TasksFilterType): List<Task> {
-        val tasks = mutableListOf<Task>()
-
-        list.forEach { task ->
-            when (filterType) {
-                TasksFilterType.ALL_TASKS -> {
-                    tasks.add(task)
-                }
-                TasksFilterType.ACTIVE_TASKS -> {
-                    if (!task.isCompleted) {
-                        tasks.add(task)
-                    }
-                }
-                TasksFilterType.COMPLETED_TASKS -> {
-                    if (task.isCompleted) {
-                        tasks.add(task)
-                    }
-                }
-            }
-        }
-
-        return tasks
-    }
-
     val uiState: StateFlow<TaskUiState> = combine(
         _filteredTasks, _loadingState
     ) { tasksAsync, isLoading ->
@@ -98,6 +74,34 @@ class HomeViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = TaskUiState(isLoading = true)
     )
+
+    private fun filterTasks(list: List<Task>, filterType: TasksFilterType): List<Task> {
+        val tasks = mutableListOf<Task>()
+
+        list.forEach { task ->
+            when (filterType) {
+                TasksFilterType.ALL_TASKS -> {
+                    tasks.add(task)
+                }
+                TasksFilterType.ACTIVE_TASKS -> {
+                    if (!task.isCompleted) {
+                        tasks.add(task)
+                    }
+                }
+                TasksFilterType.COMPLETED_TASKS -> {
+                    if (task.isCompleted) {
+                        tasks.add(task)
+                    }
+                }
+            }
+        }
+
+        return tasks
+    }
+
+    fun setFiltering(requestType: TasksFilterType) {
+        savedStateHandle[TASKS_FILTER_SAVED_STATE_KEY] = requestType
+    }
 
     fun updateTaskCompleted(task: Task, completed: Boolean) {
         viewModelScope.launch {
