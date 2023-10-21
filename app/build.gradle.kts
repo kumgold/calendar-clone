@@ -59,8 +59,12 @@ dependencies {
     val nav_version = "2.7.3"
     val hilt_version = "2.44"
     val room_version = "2.5.2"
+    val compose_lifecycle_version = "2.6.2"
 
     implementation(project(":data"))
+
+    // Flow
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:$compose_lifecycle_version")
 
     // Room
     implementation("androidx.room:room-ktx:$room_version")

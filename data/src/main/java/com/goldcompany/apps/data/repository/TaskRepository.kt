@@ -4,8 +4,10 @@ import com.goldcompany.apps.data.data.Task
 import com.goldcompany.apps.data.data.toExternal
 import com.goldcompany.apps.data.data.toLocal
 import com.goldcompany.apps.data.db.TaskDao
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -13,9 +15,11 @@ import javax.inject.Singleton
 class TaskRepository @Inject constructor(
     private val taskDao: TaskDao
 ) {
-    suspend fun getAllTask(): List<Task> {
-        return taskDao.getAllTask().map { task ->
-            task.toExternal()
+    fun getAllTasks(): Flow<List<Task>> {
+        return taskDao.getAllTasks().map { task ->
+            withContext(Dispatchers.Main) {
+                task.toExternal()
+            }
         }
     }
 

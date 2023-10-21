@@ -12,4 +12,7 @@
     <string name="add_task">Add Task</string>
     <string name="title_hint">Enter the title</string>
     <string name="description_hint">Enter the description</string>
+
+<!--    Error-->
+    <string name="error_message">Unknown Error occurred. Please try again.</string>
 </resources>

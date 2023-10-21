@@ -16,20 +16,18 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.goldcompany.apps.data.data.Task
 import com.goldcompany.apps.todoapplication.R
 import com.goldcompany.apps.todoapplication.compose.LoadingAnimation
-import com.goldcompany.apps.todoapplication.util.LoadingState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,7 +37,7 @@ fun HomeScreen(
     addTask: () -> Unit,
     onTaskClick: (Task) -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Scaffold(
         modifier = modifier,
@@ -50,7 +48,7 @@ fun HomeScreen(
                     Text(
                         text = stringResource(id = R.string.all_task)
                     )
-                }
+                },
             )
         },
         floatingActionButton = {
@@ -61,7 +59,7 @@ fun HomeScreen(
     ) { paddingValues ->
         TaskScreen(
             modifier = modifier.padding(paddingValues),
-            loadingState = uiState.loadingState,
+            loadingState = uiState.isLoading,
             tasks = uiState.items,
             onTaskClick = onTaskClick,
             updateTaskCompleted = viewModel::updateTaskCompleted
@@ -72,21 +70,18 @@ fun HomeScreen(
 @Composable
 private fun TaskScreen(
     modifier: Modifier,
-    loadingState: LoadingState,
+    loadingState: Boolean,
     tasks: List<Task>,
     onTaskClick: (Task) -> Unit,
     updateTaskCompleted: (Task, Boolean) -> Unit
 ) {
     when (loadingState) {
-        LoadingState.INIT -> {
-
-        }
-        LoadingState.LOADING -> {
+        true -> {
             LoadingAnimation(
                 modifier = modifier
             )
         }
-        LoadingState.SUCCESS -> {
+        false -> {
             LazyColumn(
                 modifier = modifier
             ) {
@@ -98,9 +93,6 @@ private fun TaskScreen(
                     )
                 }
             }
-        }
-        LoadingState.ERROR -> {
-
         }
     }
 }
