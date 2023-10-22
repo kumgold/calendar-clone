@@ -1,6 +1,7 @@
 package com.goldcompany.apps.todoapplication.util
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.List
@@ -20,8 +21,39 @@ import androidx.compose.ui.res.stringResource
 import com.goldcompany.apps.todoapplication.R
 
 @Composable
-fun TopAppBars(
+fun TopFilterDropDownAppBar(
+    onFilterAllTasks: () -> Unit,
+    onFilterActiveTasks: () -> Unit,
+    onFilterCompletedTasks: () -> Unit
+) {
+    TopAppBarDropDownMenu { closeMenu ->
+        DropdownMenuItem(
+            text = { Text(text = stringResource(id = R.string.all_tasks)) },
+            onClick = {
+                onFilterAllTasks()
+                closeMenu()
+            }
+        )
+        DropdownMenuItem(
+            text = { Text(text = stringResource(id = R.string.active_tasks)) },
+            onClick = {
+                onFilterActiveTasks()
+                closeMenu()
+            }
+        )
+        DropdownMenuItem(
+            text = { Text(text = stringResource(id = R.string.completed_tasks)) },
+            onClick = {
+                onFilterCompletedTasks()
+                closeMenu()
+            }
+        )
+    }
+}
 
+@Composable
+private fun TopAppBarDropDownMenu(
+    content: @Composable ColumnScope.(() -> Unit) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -37,24 +69,7 @@ fun TopAppBars(
             onDismissRequest = { expanded = false },
             modifier = Modifier.wrapContentSize(Alignment.TopEnd)
         ) {
-            DropdownMenuItem(
-                text = {
-                    Text(text = stringResource(id = R.string.all_tasks))
-                },
-                onClick = {  }
-            )
-            DropdownMenuItem(
-                text = {
-                    Text(text = stringResource(id = R.string.active_tasks))
-                },
-                onClick = {  }
-            )
-            DropdownMenuItem(
-                text = {
-                    Text(text = stringResource(id = R.string.completed_tasks))
-                },
-                onClick = {  }
-            )
+            content { expanded = !expanded }
         }
     }
 }
