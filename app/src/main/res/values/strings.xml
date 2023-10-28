@@ -20,4 +20,5 @@
 <!--    Message-->
     <string name="error_message">Unknown Error occurred. Please try again.</string>
     <string name="please_check_your_input">Please Check Your Input.</string>
+    <string name="save_task_successfully">Save Task Successfully.</string>
 </resources>

@@ -13,11 +13,15 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
@@ -35,6 +39,9 @@ fun AddEditTaskScreen(
     viewModel: AddEditTaskViewModel = hiltViewModel(),
     navigateBack: () -> Unit
 ) {
+    val snackBarHostState = remember {
+        SnackbarHostState()
+    }
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -42,7 +49,8 @@ fun AddEditTaskScreen(
                 title = R.string.add_task,
                 navigateBack = navigateBack
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(snackBarHostState) }
     ) { paddingValues ->
         val uiState by viewModel.uiState.collectAsState()
 
@@ -66,9 +74,13 @@ fun AddEditTaskScreen(
         }
 
         uiState.message?.let { message ->
-            val snackbarMessage = stringResource(id = message)
-            LaunchedEffect(key1 = message) {
+            val snackBarMessage = stringResource(id = message)
 
+            LaunchedEffect(key1 = message) {
+                snackBarHostState.showSnackbar(
+                    message = snackBarMessage,
+                    duration = SnackbarDuration.Short
+                )
             }
         }
     }
