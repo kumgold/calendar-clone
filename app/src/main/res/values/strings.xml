@@ -17,6 +17,7 @@
     <string name="title_hint">Enter the title</string>
     <string name="description_hint">Enter the description</string>
 
-<!--    Error-->
+<!--    Message-->
     <string name="error_message">Unknown Error occurred. Please try again.</string>
+    <string name="please_check_your_input">Please Check Your Input.</string>
 </resources>

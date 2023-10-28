@@ -35,8 +35,6 @@ fun AddEditTaskScreen(
     viewModel: AddEditTaskViewModel = hiltViewModel(),
     navigateBack: () -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -46,23 +44,32 @@ fun AddEditTaskScreen(
             )
         }
     ) { paddingValues ->
+        val uiState by viewModel.uiState.collectAsState()
+
         AddEditTaskContent(
             modifier = modifier.padding(paddingValues),
-            loadingState = uiState.loadingState,
+            loadingState = uiState.isLoading,
             isCompleted = uiState.isCompleted,
             onUpdateTaskCompleted = viewModel::updateTaskCompleted,
             title = uiState.title,
             description = uiState.description,
             onTitleChange = viewModel::updateTitle,
             onDescriptionChange = viewModel::updateDescription,
-            updateTask = viewModel::updateTask,
+            updateTask = viewModel::saveTask,
             navigateBack = navigateBack
         )
-    }
 
-    LaunchedEffect(uiState.isTaskSaved) {
-        if (uiState.isTaskSaved) {
-            navigateBack()
+        LaunchedEffect(uiState.isTaskSaved) {
+            if (uiState.isTaskSaved) {
+                navigateBack()
+            }
+        }
+
+        uiState.message?.let { message ->
+            val snackbarMessage = stringResource(id = message)
+            LaunchedEffect(key1 = message) {
+
+            }
         }
     }
 }
@@ -70,7 +77,7 @@ fun AddEditTaskScreen(
 @Composable
 private fun AddEditTaskContent(
     modifier: Modifier,
-    loadingState: LoadingState,
+    loadingState: Boolean,
     isCompleted: Boolean,
     onUpdateTaskCompleted: (Boolean) -> Unit,
     title: String,
@@ -81,13 +88,12 @@ private fun AddEditTaskContent(
     navigateBack: () -> Unit
 ) {
     when (loadingState) {
-        LoadingState.INIT -> {}
-        LoadingState.LOADING -> {
+        true -> {
             LoadingAnimation(
                 modifier = modifier
             )
         }
-        LoadingState.SUCCESS -> {
+        false -> {
             EditTaskScreen(
                 modifier = modifier,
                 title = title,
@@ -99,9 +105,6 @@ private fun AddEditTaskContent(
                 updateTask = updateTask,
                 navigateBack = navigateBack
             )
-        }
-        LoadingState.ERROR -> {
-
         }
     }
 }
