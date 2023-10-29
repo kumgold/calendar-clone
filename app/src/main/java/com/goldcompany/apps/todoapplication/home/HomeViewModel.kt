@@ -39,7 +39,7 @@ class HomeViewModel @Inject constructor(
         TasksFilterType.ALL_TASKS
     )
 
-    private val _loadingState = MutableStateFlow(false)
+    private val _isLoading = MutableStateFlow(false)
 
     private val _filteredTasks = combine(repository.getAllTasks(), _savedFilterType) { tasks, type ->
         filterTasks(tasks, type)
@@ -50,7 +50,7 @@ class HomeViewModel @Inject constructor(
     }
 
     val uiState: StateFlow<TaskUiState> = combine(
-        _filteredTasks, _loadingState
+        _filteredTasks, _isLoading
     ) { tasksAsync, isLoading ->
         when (tasksAsync) {
             Async.Loading -> {

@@ -17,9 +17,7 @@ class TaskRepository @Inject constructor(
 ) {
     fun getAllTasks(): Flow<List<Task>> {
         return taskDao.getAllTasks().map { task ->
-            withContext(Dispatchers.Main) {
-                task.toExternal()
-            }
+            task.toExternal()
         }
     }
 

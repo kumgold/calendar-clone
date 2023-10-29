@@ -14,7 +14,6 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,7 +27,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.goldcompany.apps.data.data.Task
 import com.goldcompany.apps.todoapplication.R
 import com.goldcompany.apps.todoapplication.compose.LoadingAnimation
-import com.goldcompany.apps.todoapplication.util.TopFilterDropDownAppBar
+import com.goldcompany.apps.todoapplication.util.HomeTopAppBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,18 +40,10 @@ fun HomeScreen(
     Scaffold(
         modifier = modifier,
         topBar = {
-            TopAppBar(
-                modifier = modifier,
-                title = {
-                    Text(text = stringResource(id = R.string.all_tasks))
-                },
-                actions = {
-                    TopFilterDropDownAppBar(
-                        onFilterAllTasks = { viewModel.setFiltering(TasksFilterType.ALL_TASKS) },
-                        onFilterActiveTasks = { viewModel.setFiltering(TasksFilterType.ACTIVE_TASKS) },
-                        onFilterCompletedTasks = { viewModel.setFiltering(TasksFilterType.COMPLETED_TASKS) }
-                    )
-                }
+            HomeTopAppBar(
+                onFilterAllTasks = { viewModel.setFiltering(TasksFilterType.ALL_TASKS) },
+                onFilterActiveTasks = { viewModel.setFiltering(TasksFilterType.ACTIVE_TASKS) },
+                onFilterCompletedTasks = { viewModel.setFiltering(TasksFilterType.COMPLETED_TASKS) }
             )
         },
         floatingActionButton = {
