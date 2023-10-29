@@ -2,12 +2,9 @@ package com.goldcompany.apps.todoapplication.addedittask
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -30,7 +27,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.goldcompany.apps.todoapplication.R
 import com.goldcompany.apps.todoapplication.compose.LoadingAnimation
 import com.goldcompany.apps.todoapplication.compose.TitleTopAppBar
-import com.goldcompany.apps.todoapplication.util.LoadingState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -137,9 +133,7 @@ private fun EditTaskScreen(
     Column(
         modifier = modifier
             .padding(all = dimensionResource(id = R.dimen.horizontal_margin))
-            .verticalScroll(rememberScrollState())
             .fillMaxSize()
-
     ) {
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
@@ -156,7 +150,8 @@ private fun EditTaskScreen(
         )
         OutlinedTextField(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
+                .weight(1f)
                 .padding(vertical = dimensionResource(id = R.dimen.vertical_margin)),
             value = description,
             onValueChange = onDescriptionChange,
