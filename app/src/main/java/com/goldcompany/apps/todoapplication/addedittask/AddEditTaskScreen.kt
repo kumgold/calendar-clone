@@ -1,10 +1,15 @@
 package com.goldcompany.apps.todoapplication.addedittask
 
+import androidx.annotation.StringRes
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -20,6 +25,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -115,7 +123,6 @@ private fun AddEditTaskContent(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun EditTaskScreen(
     modifier: Modifier,
@@ -128,49 +135,29 @@ private fun EditTaskScreen(
     updateTask: () -> Unit,
     navigateBack: () -> Unit
 ) {
-    val titleLargeStyle = MaterialTheme.typography.titleLarge
-    val textMediumStyle = MaterialTheme.typography.bodyMedium
-
     Column(
         modifier = modifier
             .padding(all = dimensionResource(id = R.dimen.horizontal_margin))
             .fillMaxSize()
     ) {
-        Text(
-            text = stringResource(id = R.string.title),
-            style = titleLargeStyle
-        )
-        OutlinedTextField(
+        TaskTextInputView(
             modifier = Modifier.fillMaxWidth(),
-            value = title,
-            onValueChange = onTitleChange,
-            placeholder = {
-                Text(
-                    text = stringResource(id = R.string.title_hint),
-                    style = textMediumStyle
-                )
-            },
-            textStyle = textMediumStyle,
-            maxLines = 1
+            text = title,
+            onTextChange = onTitleChange,
+            titleResource = R.string.title,
+            hintResource = R.string.title_hint,
+            isSingleLine = true
         )
-        Text(
-            modifier = Modifier.padding(top = dimensionResource(id = R.dimen.vertical_margin)),
-            text = stringResource(id = R.string.description),
-            style = titleLargeStyle
-        )
-        OutlinedTextField(
+        Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.vertical_margin)))
+        TaskTextInputView(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f),
-            value = description,
-            onValueChange = onDescriptionChange,
-            placeholder = {
-                Text(
-                    text = stringResource(id = R.string.description_hint),
-                    style = textMediumStyle
-                )
-            },
-            textStyle = textMediumStyle
+            text = description,
+            onTextChange = onDescriptionChange,
+            titleResource = R.string.description,
+            hintResource = R.string.description_hint,
+            isSingleLine = false
         )
         Row(
             modifier = Modifier
@@ -178,13 +165,12 @@ private fun EditTaskScreen(
                 .padding(top = dimensionResource(id = R.dimen.horizontal_margin))
         ) {
             Button(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(end = dimensionResource(id = R.dimen.horizontal_margin)),
+                modifier = Modifier.weight(1f),
                 onClick = { updateTask() }
             ) {
                 Text(text = stringResource(id = R.string.save))
             }
+            Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.horizontal_margin)))
             Button(
                 modifier = Modifier.weight(1f),
                 onClick = { navigateBack() }
@@ -195,3 +181,35 @@ private fun EditTaskScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun TaskTextInputView(
+    modifier: Modifier,
+    text: String,
+    onTextChange: (String) -> Unit,
+    @StringRes titleResource: Int,
+    @StringRes hintResource: Int,
+    isSingleLine: Boolean
+
+) {
+    val titleLargeStyle = MaterialTheme.typography.titleLarge
+    val textMediumStyle = MaterialTheme.typography.bodyMedium
+
+    Text(
+        text = stringResource(id = titleResource),
+        style = titleLargeStyle
+    )
+    OutlinedTextField(
+        modifier = modifier,
+        value = text,
+        onValueChange = onTextChange,
+        placeholder = {
+            Text(
+                text = stringResource(id = hintResource),
+                style = textMediumStyle
+            )
+        },
+        textStyle = textMediumStyle,
+        singleLine = isSingleLine
+    )
+}
