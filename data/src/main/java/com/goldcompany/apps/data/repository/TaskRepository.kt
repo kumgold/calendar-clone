@@ -4,10 +4,8 @@ import com.goldcompany.apps.data.data.Task
 import com.goldcompany.apps.data.data.toExternal
 import com.goldcompany.apps.data.data.toLocal
 import com.goldcompany.apps.data.db.TaskDao
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -33,7 +31,7 @@ class TaskRepository @Inject constructor(
         taskDao.updateTask(task.toLocal())
     }
 
-    suspend fun updateCompleted(taskId: Long, completed: Boolean) {
+    suspend fun updateCompleted(taskId: String, completed: Boolean) {
         taskDao.updateCompleted(taskId, completed)
     }
 }

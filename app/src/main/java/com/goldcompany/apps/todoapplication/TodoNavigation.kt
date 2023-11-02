@@ -8,7 +8,7 @@ object TodoDestinations {
 }
 
 class TodoNavigation(private val navController: NavHostController) {
-    fun navigateTaskDetail(taskId: Long) {
+    fun navigateTaskDetail(taskId: String) {
         navController.navigate("${TodoDestinations.ADD_EDIT_TASK}?taskId=$taskId")
     }
 }

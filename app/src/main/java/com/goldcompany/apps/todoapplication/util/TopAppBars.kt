@@ -4,9 +4,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -21,7 +18,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import com.goldcompany.apps.todoapplication.R
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -55,7 +54,7 @@ private fun FilterTaskMenu(
     TopAppBarDropDownMenu(
         iconContent = {
             Icon(
-                imageVector = Icons.Filled.MoreVert,
+                painter = painterResource(id = R.drawable.ic_filter_list_24),
                 contentDescription = stringResource(id = R.string.menu)
             )
         }
@@ -103,4 +102,14 @@ private fun TopAppBarDropDownMenu(
             content { expanded = !expanded }
         }
     }
+}
+
+@Preview
+@Composable
+private fun HomeTopAppBarPreview() {
+    HomeTopAppBar(
+        onFilterAllTasks = { },
+        onFilterActiveTasks = { },
+        onFilterCompletedTasks = { }
+    )
 }

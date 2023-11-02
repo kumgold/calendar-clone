@@ -3,7 +3,7 @@ package com.goldcompany.apps.data.data
 import com.goldcompany.apps.data.db.TaskEntity
 
 fun TaskEntity.toExternal() = Task(
-    id = id,
+    id = id.toString(),
     isCompleted = isCompleted,
     title = title,
     description = description,
@@ -14,7 +14,7 @@ fun TaskEntity.toExternal() = Task(
 fun List<TaskEntity>.toExternal() = map(TaskEntity::toExternal)
 
 fun Task.toLocal() = TaskEntity(
-    id = id,
+    id = id.toLong(),
     isCompleted = isCompleted,
     title = title,
     description = description,

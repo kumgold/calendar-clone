@@ -1,7 +1,7 @@
 package com.goldcompany.apps.data.data
 
 data class Task(
-    val id: Long = System.currentTimeMillis(),
+    val id: String = System.currentTimeMillis().toString(),
     val isCompleted: Boolean,
     val title: String,
     val description: String,

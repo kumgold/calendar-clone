@@ -69,10 +69,16 @@ class AddEditTaskViewModel @Inject constructor(
         }
     }
 
-    fun updateTaskCompleted(newCompleted: Boolean) {
+    fun updateTaskCompleted() {
+        if (taskId != null) {
+            viewModelScope.launch {
+                repository.updateCompleted(taskId, !_uiState.value.isCompleted)
+            }
+        }
+
         _uiState.update {
             it.copy(
-                isCompleted = newCompleted
+                isCompleted = !it.isCompleted
             )
         }
     }
@@ -135,7 +141,7 @@ class AddEditTaskViewModel @Inject constructor(
         viewModelScope.launch {
             repository.updateTask(
                 Task(
-                    id = taskId!!.toLong(),
+                    id = taskId!!,
                     isCompleted = _uiState.value.isCompleted,
                     title = _uiState.value.title,
                     description = _uiState.value.description,
