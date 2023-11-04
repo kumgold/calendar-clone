@@ -168,11 +168,13 @@ private fun EditTaskScreen(
                 .padding(top = dimensionResource(id = R.dimen.horizontal_margin))
         ) {
             SelectTaskDatesView(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                defaultText = stringResource(id = R.string.start_date)
             )
             Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.horizontal_margin)))
             SelectTaskDatesView(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                defaultText = stringResource(id = R.string.end_date)
             )
         }
         Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.vertical_margin)))
@@ -211,9 +213,10 @@ private fun EditTaskScreen(
 @Composable
 private fun SelectTaskDatesView(
     modifier: Modifier,
+    defaultText: String
 ) {
     var date by remember {
-        mutableStateOf("Show Date Picker")
+        mutableStateOf(defaultText)
     }
     var isShowDatePickerDialog by remember {
         mutableStateOf(false)
@@ -231,8 +234,8 @@ private fun SelectTaskDatesView(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable {
-                isShowDatePickerDialog = true
-            },
+                    isShowDatePickerDialog = true
+                },
             text = date,
             textAlign = TextAlign.Center
         )
