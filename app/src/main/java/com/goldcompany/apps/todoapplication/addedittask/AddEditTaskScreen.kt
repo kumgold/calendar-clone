@@ -41,13 +41,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.goldcompany.apps.data.util.convertMilliToDate
 import com.goldcompany.apps.todoapplication.R
 import com.goldcompany.apps.todoapplication.compose.LoadingAnimation
 import com.goldcompany.apps.todoapplication.compose.TitleTopAppBar
-import java.time.Instant
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 @Composable
 fun AddEditTaskScreen(
@@ -71,15 +68,13 @@ fun AddEditTaskScreen(
 
         AddEditTaskContent(
             modifier = modifier.padding(paddingValues),
-            loadingState = uiState.isLoading,
-            isCompleted = uiState.isCompleted,
-            onUpdateTaskCompleted = viewModel::updateTaskCompleted,
-            title = uiState.title,
-            description = uiState.description,
+            state = uiState,
             onTitleChange = viewModel::updateTitle,
             onDescriptionChange = viewModel::updateDescription,
             updateTask = viewModel::saveTask,
-            navigateBack = navigateBack
+            navigateBack = navigateBack,
+            onStartDateSelected = viewModel::updateStartDate,
+            onEndDateSelected = viewModel::updateEndDate
         )
 
         LaunchedEffect(uiState.isTaskSaved) {
@@ -104,17 +99,15 @@ fun AddEditTaskScreen(
 @Composable
 private fun AddEditTaskContent(
     modifier: Modifier,
-    loadingState: Boolean,
-    isCompleted: Boolean,
-    onUpdateTaskCompleted: () -> Unit,
-    title: String,
-    description: String,
+    state: AddEditTaskUiState,
     onTitleChange: (String) -> Unit,
     onDescriptionChange: (String) -> Unit,
     updateTask: () -> Unit,
-    navigateBack: () -> Unit
+    navigateBack: () -> Unit,
+    onStartDateSelected: (String) -> Unit,
+    onEndDateSelected: (String) -> Unit
 ) {
-    when (loadingState) {
+    when (state.isLoading) {
         true -> {
             LoadingAnimation(
                 modifier = modifier
@@ -123,14 +116,13 @@ private fun AddEditTaskContent(
         false -> {
             EditTaskScreen(
                 modifier = modifier,
-                title = title,
-                isCompleted = isCompleted,
-                onUpdateTaskCompleted = onUpdateTaskCompleted,
-                description = description,
+                state = state,
                 onTitleChange = onTitleChange,
                 onDescriptionChange = onDescriptionChange,
                 updateTask = updateTask,
-                navigateBack = navigateBack
+                navigateBack = navigateBack,
+                onStartDateSelected = onStartDateSelected,
+                onEndDateSelected = onEndDateSelected
             )
         }
     }
@@ -139,14 +131,13 @@ private fun AddEditTaskContent(
 @Composable
 private fun EditTaskScreen(
     modifier: Modifier,
-    isCompleted: Boolean,
-    onUpdateTaskCompleted: () -> Unit,
-    title: String,
-    description: String,
+    state: AddEditTaskUiState,
     onTitleChange: (String) -> Unit,
     onDescriptionChange: (String) -> Unit,
     updateTask: () -> Unit,
-    navigateBack: () -> Unit
+    navigateBack: () -> Unit,
+    onStartDateSelected: (String) -> Unit,
+    onEndDateSelected: (String) -> Unit
 ) {
     Column(
         modifier = modifier
@@ -155,7 +146,7 @@ private fun EditTaskScreen(
     ) {
         TaskTextInputView(
             modifier = Modifier.fillMaxWidth(),
-            text = title,
+            text = state.title,
             onTextChange = onTitleChange,
             titleResource = R.string.title,
             hintResource = R.string.title_hint,
@@ -169,12 +160,16 @@ private fun EditTaskScreen(
         ) {
             SelectTaskDatesView(
                 modifier = Modifier.weight(1f),
-                defaultText = stringResource(id = R.string.start_date)
+                savedDate = state.startDate,
+                defaultText = stringResource(id = R.string.start_date),
+                onDateSelected = onStartDateSelected
             )
             Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.horizontal_margin)))
             SelectTaskDatesView(
                 modifier = Modifier.weight(1f),
-                defaultText = stringResource(id = R.string.end_date)
+                savedDate = state.endDate,
+                defaultText = stringResource(id = R.string.end_date),
+                onDateSelected = onEndDateSelected
             )
         }
         Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.vertical_margin)))
@@ -182,7 +177,7 @@ private fun EditTaskScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f),
-            text = description,
+            text = state.description,
             onTextChange = onDescriptionChange,
             titleResource = R.string.description,
             hintResource = R.string.description_hint,
@@ -213,10 +208,13 @@ private fun EditTaskScreen(
 @Composable
 private fun SelectTaskDatesView(
     modifier: Modifier,
-    defaultText: String
+    savedDate: String?,
+    defaultText: String,
+    onDateSelected: (String) -> Unit
 ) {
     var date by remember {
-        mutableStateOf(defaultText)
+        if (savedDate != null) mutableStateOf(savedDate)
+        else mutableStateOf(defaultText)
     }
     var isShowDatePickerDialog by remember {
         mutableStateOf(false)
@@ -243,7 +241,10 @@ private fun SelectTaskDatesView(
 
     if (isShowDatePickerDialog) {
         TaskDatePickerDialog(
-            onDateSelected = { date = it },
+            onDateSelected = {
+                onDateSelected(it)
+                date = it
+            },
             onDismiss = { isShowDatePickerDialog = false }
         )
     }
@@ -290,14 +291,6 @@ private fun TaskDatePickerDialog(
     ) {
         DatePicker(state = datePickerState)
     }
-}
-
-private fun convertMilliToDate(milli: Long): String {
-    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-    val instant = Instant.ofEpochMilli(milli)
-    val date = LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
-
-    return formatter.format(date)
 }
 
 @Composable

@@ -5,6 +5,6 @@ data class Task(
     val isCompleted: Boolean,
     val title: String,
     val description: String,
-    val startTimeMilli: Long?,
-    val endTimeMilli: Long?
+    val startDate: String?,
+    val endDate: String?
 )

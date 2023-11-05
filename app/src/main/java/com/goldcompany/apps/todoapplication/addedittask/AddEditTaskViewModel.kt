@@ -19,6 +19,8 @@ data class AddEditTaskUiState(
     val title: String = "",
     val description: String = "",
     val isCompleted: Boolean = false,
+    val startDate: String? = null,
+    val endDate: String? = null,
     val isLoading: Boolean = false,
     val message: Int? = null,
     val isTaskSaved: Boolean = false
@@ -52,7 +54,9 @@ class AddEditTaskViewModel @Inject constructor(
                                 title = task.title,
                                 description = task.description,
                                 isCompleted = task.isCompleted,
-                                isLoading = false
+                                isLoading = false,
+                                startDate = task.startDate,
+                                endDate = task.endDate
                             )
                         }
                     }
@@ -99,6 +103,22 @@ class AddEditTaskViewModel @Inject constructor(
         }
     }
 
+    fun updateStartDate(date: String) {
+        _uiState.update {
+            it.copy(
+                startDate = date
+            )
+        }
+    }
+
+    fun updateEndDate(date: String) {
+        _uiState.update {
+            it.copy(
+                endDate = date
+            )
+        }
+    }
+
     fun saveTask() {
         if (_uiState.value.title.isEmpty() || _uiState.value.description.isEmpty()) {
             _uiState.update {
@@ -123,8 +143,8 @@ class AddEditTaskViewModel @Inject constructor(
                     isCompleted = _uiState.value.isCompleted,
                     title = _uiState.value.title,
                     description = _uiState.value.description,
-                    startTimeMilli = null,
-                    endTimeMilli = null
+                    startDate = _uiState.value.startDate,
+                    endDate = _uiState.value.endDate
                 )
             )
             _uiState.update {
@@ -145,8 +165,8 @@ class AddEditTaskViewModel @Inject constructor(
                     isCompleted = _uiState.value.isCompleted,
                     title = _uiState.value.title,
                     description = _uiState.value.description,
-                    startTimeMilli = null,
-                    endTimeMilli = null
+                    startDate = _uiState.value.startDate,
+                    endDate = _uiState.value.endDate
                 )
             )
             _uiState.update {
