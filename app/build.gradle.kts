@@ -60,8 +60,12 @@ dependencies {
     val hilt_version = "2.44"
     val room_version = "2.5.2"
     val compose_lifecycle_version = "2.6.2"
+    val glance_version = "1.0.0"
 
     implementation(project(":data"))
+
+    // Glance
+    implementation("androidx.glance:glance-appwidget:$glance_version")
 
     // Flow
     implementation("androidx.lifecycle:lifecycle-runtime-compose:$compose_lifecycle_version")
