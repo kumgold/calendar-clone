@@ -33,7 +33,7 @@
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
-                android:resource="@xml/task_app_widget_info"/>
+                android:resource="@xml/task_app_widget_info" />
         </receiver>
 
     </application>
