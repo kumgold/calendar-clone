@@ -8,6 +8,7 @@
     <string name="menu">Menu</string>
     <string name="title">Title</string>
     <string name="description">Description</string>
+    <string name="app_widget_default_text">Manage your task on the widget.</string>
 
 <!--    Home-->
     <string name="all_tasks">All tasks</string>

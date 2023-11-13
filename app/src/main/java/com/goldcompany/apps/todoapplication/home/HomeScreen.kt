@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.goldcompany.apps.data.data.Task
@@ -119,6 +120,7 @@ private fun TaskItem(
         )
         Text(
             text = task.title,
+            fontSize = 15.sp,
             textDecoration = if (task.isCompleted) {
                 TextDecoration.LineThrough
             } else {
