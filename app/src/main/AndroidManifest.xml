@@ -26,7 +26,7 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".widget.TaskAppWidgetReceiver"
+        <receiver android:name=".widget.TaskWidgetReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>

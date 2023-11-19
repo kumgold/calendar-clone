@@ -19,6 +19,12 @@ class TaskRepository @Inject constructor(
         }
     }
 
+    fun getAllTasksForWidget(): List<Task> {
+        return taskDao.getAllTasksForWidget().map {
+            it.toExternal()
+        }
+    }
+
     suspend fun getTask(id: String): Task? {
         return taskDao.getTask(id)?.toExternal()
     }

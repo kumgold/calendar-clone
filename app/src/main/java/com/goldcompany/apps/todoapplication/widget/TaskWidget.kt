@@ -8,35 +8,56 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.sp
+import androidx.datastore.preferences.core.Preferences
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.LocalContext
 import androidx.glance.appwidget.CheckBox
 import androidx.glance.appwidget.GlanceAppWidget
-import androidx.glance.appwidget.GlanceAppWidgetReceiver
+import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.appWidgetBackground
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
+import androidx.glance.currentState
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Row
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.padding
+import androidx.glance.state.GlanceStateDefinition
+import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import com.goldcompany.apps.todoapplication.R
 
-class TaskAppWidget : GlanceAppWidget() {
+class TaskWidget : GlanceAppWidget() {
+
+    override val stateDefinition: GlanceStateDefinition<*>
+        get() = PreferencesGlanceStateDefinition
+
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
-            TaskContents()
+            SmallTaskWidget()
         }
     }
 
     @Composable
-    private fun TaskContents() {
-        var isChecked by remember { mutableStateOf(false) }
+    private fun SmallTaskWidget() {
+        val context = LocalContext.current
+        val preferences = currentState<Preferences>()
+
+        val task = Task(
+            task = preferences[TaskWidgetReceiver.currentTask] ?: context.getString(R.string.app_widget_default_text),
+            taskState = preferences[TaskWidgetReceiver.currentTaskState] ?: false
+        )
+
+        Task(task = task)
+    }
+
+    @Composable
+    private fun Task(task: Task) {
+        var isChecked by remember { mutableStateOf(task.taskState) }
 
         Row(
             modifier = GlanceModifier.fillMaxSize()
@@ -51,20 +72,17 @@ class TaskAppWidget : GlanceAppWidget() {
                 checked = isChecked,
                 onCheckedChange = {
                     isChecked = !isChecked
+                    actionRunCallback<UpdateTaskCallback>()
                 }
             )
             Text(
                 modifier = GlanceModifier.fillMaxWidth()
                     .padding(R.dimen.default_margin),
-                text = LocalContext.current.getString(R.string.app_widget_default_text),
+                text = task.task,
                 style = TextStyle(
                     fontSize = 15.sp
                 )
             )
         }
     }
-}
-
-class TaskAppWidgetReceiver : GlanceAppWidgetReceiver() {
-    override val glanceAppWidget: GlanceAppWidget = TaskAppWidget()
 }

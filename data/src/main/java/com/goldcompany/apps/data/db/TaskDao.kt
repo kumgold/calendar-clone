@@ -13,6 +13,9 @@ interface TaskDao {
     @Query("SELECT * FROM task")
     fun getAllTasks(): Flow<List<TaskEntity>>
 
+    @Query("SELECT * FROM task")
+    fun getAllTasksForWidget(): List<TaskEntity>
+
     @Query("SELECT * FROM task WHERE id = :id")
     suspend fun getTask(id: String): TaskEntity?
 
