@@ -103,9 +103,9 @@ class HomeViewModel @Inject constructor(
         savedStateHandle[TASKS_FILTER_SAVED_STATE_KEY] = requestType
     }
 
-    fun updateTaskCompleted(task: Task, completed: Boolean) {
+    fun updateTaskCompleted(taskId: String, completed: Boolean) {
         viewModelScope.launch {
-            repository.updateCompleted(task.id, completed)
+            repository.updateCompleted(taskId, completed)
         }
     }
 }

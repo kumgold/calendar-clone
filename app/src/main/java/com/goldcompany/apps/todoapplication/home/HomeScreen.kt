@@ -1,5 +1,9 @@
 package com.goldcompany.apps.todoapplication.home
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,21 +18,54 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.sp
+import androidx.glance.appwidget.GlanceAppWidgetManager
+import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.goldcompany.apps.data.data.Task
 import com.goldcompany.apps.todoapplication.R
 import com.goldcompany.apps.todoapplication.compose.LoadingAnimation
 import com.goldcompany.apps.todoapplication.util.HomeTopAppBar
+import com.goldcompany.apps.todoapplication.widget.TaskWidget
+import com.goldcompany.apps.todoapplication.widget.TaskWidgetReceiver
+import kotlinx.coroutines.launch
+
+@Composable
+fun TaskActionBroadcastReceiver(
+    action: String,
+    onEvent: (intent: Intent?) -> Unit
+) {
+    val context = LocalContext.current
+    val currentEvent by rememberUpdatedState(newValue = onEvent)
+
+    DisposableEffect(context, currentEvent) {
+        val filter = IntentFilter(action)
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(p0: Context?, intent: Intent?) {
+                currentEvent(intent)
+            }
+        }
+
+        context.registerReceiver(receiver, filter)
+
+        onDispose {
+            context.unregisterReceiver(receiver)
+        }
+    }
+}
 
 @Composable
 fun HomeScreen(
@@ -62,6 +99,13 @@ fun HomeScreen(
             updateTaskCompleted = viewModel::updateTaskCompleted
         )
     }
+
+    TaskActionBroadcastReceiver(TaskWidgetReceiver.UPDATE_ACTION) { intent ->
+        val id = intent?.getStringExtra(TaskWidget.KEY_TASK_ID).toString()
+        val isCompleted = intent?.getBooleanExtra(TaskWidget.KEY_TASK_STATE, false) ?: false
+
+        viewModel.updateTaskCompleted(id, isCompleted)
+    }
 }
 
 @Composable
@@ -70,7 +114,7 @@ private fun TaskScreen(
     loadingState: Boolean,
     tasks: List<Task>,
     onTaskClick: (Task) -> Unit,
-    updateTaskCompleted: (Task, Boolean) -> Unit
+    updateTaskCompleted: (String, Boolean) -> Unit
 ) {
     when (loadingState) {
         true -> {
@@ -97,10 +141,12 @@ private fun TaskScreen(
 @Composable
 private fun TaskItem(
     task: Task,
-    onCheckChange: (Task, Boolean) -> Unit,
+    onCheckChange: (String, Boolean) -> Unit,
     onTaskClick: (Task) -> Unit
 ) {
     val isCompleted = remember { mutableStateOf(task.isCompleted) }
+    val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -114,8 +160,12 @@ private fun TaskItem(
         Checkbox(
             checked = task.isCompleted,
             onCheckedChange = {
+                coroutineScope.launch {
+                    updateTaskWidget(context, it)
+                }
+
                 isCompleted.value = it
-                onCheckChange(task, it)
+                onCheckChange(task.id, it)
             }
         )
         Text(
@@ -127,5 +177,17 @@ private fun TaskItem(
                 TextDecoration.None
             }
         )
+    }
+}
+
+private suspend fun updateTaskWidget(context: Context, isCompleted: Boolean) {
+    val manager = GlanceAppWidgetManager(context)
+    manager.getGlanceIds(TaskWidget::class.java).forEach { id ->
+        updateAppWidgetState(context, id) {
+            it[TaskWidgetReceiver.currentTaskState] = isCompleted
+        }
+
+        val appWidget = TaskWidget()
+        appWidget.update(context, id)
     }
 }

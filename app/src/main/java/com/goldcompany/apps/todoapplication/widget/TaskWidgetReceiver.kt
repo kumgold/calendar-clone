@@ -3,6 +3,7 @@ package com.goldcompany.apps.todoapplication.widget
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.glance.GlanceId
@@ -14,10 +15,14 @@ import androidx.glance.appwidget.action.ActionCallback
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import com.goldcompany.apps.data.usecase.GetTasksUseCase
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
+@AndroidEntryPoint
 class TaskWidgetReceiver : GlanceAppWidgetReceiver() {
     private val coroutineScope = MainScope()
 
@@ -38,47 +43,37 @@ class TaskWidgetReceiver : GlanceAppWidgetReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
 
-        if (intent.action == UpdateTaskCallback.UPDATE_ACTION) {
+        if (intent.action == "UPDATE_ACTION") {
+            Log.d("broadcast", "update action receive")
             observeTasks(context)
         }
     }
 
     private fun observeTasks(context: Context) {
         coroutineScope.launch {
-            val id = GlanceAppWidgetManager(context).getGlanceIds(TaskWidget::class.java).firstOrNull()
-            val task = getTasksUseCase()
+            withContext(Dispatchers.IO) {
+                val id = GlanceAppWidgetManager(context).getGlanceIds(TaskWidget::class.java).firstOrNull()
+                val task = getTasksUseCase()
 
-            id?.let {
-                updateAppWidgetState(context, PreferencesGlanceStateDefinition, it) { preferences ->
-                    preferences.toMutablePreferences().apply {
-                        this[currentTask] = task.title
-                        this[currentTaskState] = task.isCompleted
+                id?.let {
+                    updateAppWidgetState(context, PreferencesGlanceStateDefinition, it) { preferences ->
+                        preferences.toMutablePreferences().apply {
+                            this[currentTaskId] = task.id
+                            this[currentTaskTitle] = task.title
+                            this[currentTaskState] = task.isCompleted
+                        }
                     }
+                    glanceAppWidget.update(context, it)
                 }
-                glanceAppWidget.update(context, it)
             }
         }
     }
 
     companion object {
-        val currentTask = stringPreferencesKey("Current Task")
+        const val UPDATE_ACTION = "UPDATE_TASK_STATE_ACTION"
+
+        val currentTaskId = stringPreferencesKey("Current Task Id")
+        val currentTaskTitle = stringPreferencesKey("Current Task Title")
         val currentTaskState = booleanPreferencesKey("Current Task State")
-    }
-}
-
-class UpdateTaskCallback : ActionCallback {
-    override suspend fun onAction(
-        context: Context,
-        glanceId: GlanceId,
-        parameters: ActionParameters
-    ) {
-        val intent = Intent(context, TaskWidgetReceiver::class.java).apply {
-            action = UPDATE_ACTION
-        }
-        context.sendBroadcast(intent)
-    }
-
-    companion object {
-        const val UPDATE_ACTION = "update task state"
     }
 }
