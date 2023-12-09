@@ -13,7 +13,7 @@ interface TaskDao {
     @Query("SELECT * FROM task")
     fun getAllTasks(): Flow<List<TaskEntity>>
 
-    @Query("SELECT * FROM task")
+    @Query("SELECT * FROM task WHERE isCompleted = 0")
     fun getAllTasksForWidget(): List<TaskEntity>
 
     @Query("SELECT * FROM task WHERE id = :id")

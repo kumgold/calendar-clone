@@ -3,15 +3,11 @@ package com.goldcompany.apps.todoapplication.widget
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.glance.GlanceId
-import androidx.glance.action.ActionParameters
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
-import androidx.glance.appwidget.action.ActionCallback
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import com.goldcompany.apps.data.usecase.GetTasksUseCase
@@ -43,8 +39,7 @@ class TaskWidgetReceiver : GlanceAppWidgetReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
 
-        if (intent.action == "UPDATE_ACTION") {
-            Log.d("broadcast", "update action receive")
+        if (intent.action == UPDATE_ACTION) {
             observeTasks(context)
         }
     }

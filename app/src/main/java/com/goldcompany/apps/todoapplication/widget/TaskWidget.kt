@@ -2,7 +2,6 @@ package com.goldcompany.apps.todoapplication.widget
 
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.sp
@@ -13,12 +12,10 @@ import androidx.glance.GlanceTheme
 import androidx.glance.LocalContext
 import androidx.glance.action.ActionParameters
 import androidx.glance.action.actionParametersOf
-import androidx.glance.action.clickable
 import androidx.glance.appwidget.CheckBox
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.action.ActionCallback
 import androidx.glance.appwidget.action.actionRunCallback
-import androidx.glance.appwidget.action.actionSendBroadcast
 import androidx.glance.appwidget.appWidgetBackground
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
@@ -78,8 +75,6 @@ class TaskWidget : GlanceAppWidget() {
 
     @Composable
     private fun Task(task: Task) {
-        Log.d("broadcast", "task $task")
-
         Row(
             modifier = GlanceModifier.fillMaxSize()
                 .background(Color.White)
