@@ -5,7 +5,9 @@
     <string name="save">Save</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
+    <string name="user">User</string>
     <string name="menu">Menu</string>
+    <string name="graph">Graph</string>
     <string name="title">Title</string>
     <string name="description">Description</string>
     <string name="app_widget_default_text">Manage your task on the widget.</string>

@@ -1,9 +1,13 @@
-package com.goldcompany.apps.todoapplication.util
+package com.goldcompany.apps.todoapplication.compose
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.DrawerState
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -11,10 +15,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,18 +28,36 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.goldcompany.apps.todoapplication.R
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeTopAppBar(
     onFilterAllTasks: () -> Unit,
     onFilterActiveTasks: () -> Unit,
-    onFilterCompletedTasks: () -> Unit
+    onFilterCompletedTasks: () -> Unit,
+    drawerState: DrawerState
 ) {
+    val coroutineScope = rememberCoroutineScope()
+
     TopAppBar(
         modifier = Modifier.fillMaxWidth(),
         title = {
             Text(text = stringResource(id = R.string.all_tasks))
+        },
+        navigationIcon = {
+            IconButton(
+                onClick = {
+                    coroutineScope.launch {
+                        drawerState.open()
+                    }
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Menu,
+                    contentDescription = stringResource(id = R.string.menu)
+                )
+            }
         },
         actions = {
             FilterTaskMenu(
@@ -110,6 +134,7 @@ private fun HomeTopAppBarPreview() {
     HomeTopAppBar(
         onFilterAllTasks = { },
         onFilterActiveTasks = { },
-        onFilterCompletedTasks = { }
+        onFilterCompletedTasks = { },
+        drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     )
 }

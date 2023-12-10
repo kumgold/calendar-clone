@@ -13,10 +13,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DrawerState
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -37,8 +41,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.goldcompany.apps.data.data.Task
 import com.goldcompany.apps.todoapplication.R
+import com.goldcompany.apps.todoapplication.compose.HomeDrawerContent
+import com.goldcompany.apps.todoapplication.compose.HomeTopAppBar
 import com.goldcompany.apps.todoapplication.compose.LoadingAnimation
-import com.goldcompany.apps.todoapplication.util.HomeTopAppBar
 import com.goldcompany.apps.todoapplication.widget.TaskWidget
 import com.goldcompany.apps.todoapplication.widget.TaskWidgetReceiver
 import kotlinx.coroutines.launch
@@ -72,32 +77,41 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
     addTask: () -> Unit,
-    onTaskClick: (Task) -> Unit
+    onTaskClick: (Task) -> Unit,
+    drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 ) {
-    Scaffold(
-        modifier = modifier,
-        topBar = {
-            HomeTopAppBar(
-                onFilterAllTasks = { viewModel.setFiltering(TasksFilterType.ALL_TASKS) },
-                onFilterActiveTasks = { viewModel.setFiltering(TasksFilterType.ACTIVE_TASKS) },
-                onFilterCompletedTasks = { viewModel.setFiltering(TasksFilterType.COMPLETED_TASKS) }
-            )
-        },
-        floatingActionButton = {
-            FloatingActionButton(onClick = addTask) {
-                Icon(Icons.Filled.Add, stringResource(id = R.string.add_task))
-            }
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            HomeDrawerContent()
         }
-    ) { paddingValues ->
-        val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    ) {
+        Scaffold(
+            modifier = modifier,
+            topBar = {
+                HomeTopAppBar(
+                    onFilterAllTasks = { viewModel.setFiltering(TasksFilterType.ALL_TASKS) },
+                    onFilterActiveTasks = { viewModel.setFiltering(TasksFilterType.ACTIVE_TASKS) },
+                    onFilterCompletedTasks = { viewModel.setFiltering(TasksFilterType.COMPLETED_TASKS) },
+                    drawerState = drawerState,
+                )
+            },
+            floatingActionButton = {
+                FloatingActionButton(onClick = addTask) {
+                    Icon(Icons.Filled.Add, stringResource(id = R.string.add_task))
+                }
+            }
+        ) { paddingValues ->
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-        TaskScreen(
-            modifier = modifier.padding(paddingValues),
-            loadingState = uiState.isLoading,
-            tasks = uiState.items,
-            onTaskClick = onTaskClick,
-            updateTaskCompleted = viewModel::updateTaskCompleted
-        )
+            TaskScreen(
+                modifier = modifier.padding(paddingValues),
+                loadingState = uiState.isLoading,
+                tasks = uiState.items,
+                onTaskClick = onTaskClick,
+                updateTaskCompleted = viewModel::updateTaskCompleted
+            )
+        }
     }
 
     TaskActionBroadcastReceiver(TaskWidgetReceiver.UPDATE_ACTION) { intent ->
