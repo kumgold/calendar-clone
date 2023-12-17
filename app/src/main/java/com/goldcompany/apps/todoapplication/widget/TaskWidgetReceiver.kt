@@ -55,6 +55,7 @@ class TaskWidgetReceiver : GlanceAppWidgetReceiver() {
                         preferences.toMutablePreferences().apply {
                             this[currentTaskId] = task.id
                             this[currentTaskTitle] = task.title
+                            this[currentTaskDescription] = task.description
                             this[currentTaskState] = task.isCompleted
                         }
                     }
@@ -69,6 +70,7 @@ class TaskWidgetReceiver : GlanceAppWidgetReceiver() {
 
         val currentTaskId = stringPreferencesKey("Current Task Id")
         val currentTaskTitle = stringPreferencesKey("Current Task Title")
+        val currentTaskDescription = stringPreferencesKey("Current Task Description")
         val currentTaskState = booleanPreferencesKey("Current Task State")
     }
 }
