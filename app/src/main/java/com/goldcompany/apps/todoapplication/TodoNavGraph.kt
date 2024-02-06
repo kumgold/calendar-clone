@@ -9,7 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.goldcompany.apps.todoapplication.addedittask.AddEditTaskScreen
+import com.goldcompany.apps.todoapplication.addedittask.EditTaskScreen
 import com.goldcompany.apps.todoapplication.home.HomeScreen
 
 @Composable
@@ -43,7 +43,7 @@ fun TodoNavGraph(
         composable(
             route = TodoDestinations.ADD_EDIT_TASK
         ) {
-            AddEditTaskScreen(
+            EditTaskScreen(
                 navigateBack = {
                     navController.popBackStack()
                 }
@@ -58,7 +58,7 @@ fun TodoNavGraph(
                 }
             )
         ) {
-            AddEditTaskScreen(
+            EditTaskScreen(
                 navigateBack = {
                     navController.popBackStack()
                 }

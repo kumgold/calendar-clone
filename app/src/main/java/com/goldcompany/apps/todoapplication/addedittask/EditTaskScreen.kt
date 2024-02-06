@@ -47,9 +47,9 @@ import com.goldcompany.apps.todoapplication.compose.LoadingAnimation
 import com.goldcompany.apps.todoapplication.compose.TitleTopAppBar
 
 @Composable
-fun AddEditTaskScreen(
+fun EditTaskScreen(
     modifier: Modifier = Modifier,
-    viewModel: AddEditTaskViewModel = hiltViewModel(),
+    viewModel: EditTaskViewModel = hiltViewModel(),
     navigateBack: () -> Unit
 ) {
     val snackBarHostState = remember { SnackbarHostState() }
@@ -66,7 +66,7 @@ fun AddEditTaskScreen(
     ) { paddingValues ->
         val uiState by viewModel.uiState.collectAsState()
 
-        AddEditTaskContent(
+        EditTaskContent(
             modifier = modifier.padding(paddingValues),
             state = uiState,
             onTitleChange = viewModel::updateTitle,
@@ -97,9 +97,9 @@ fun AddEditTaskScreen(
 }
 
 @Composable
-private fun AddEditTaskContent(
+private fun EditTaskContent(
     modifier: Modifier,
-    state: AddEditTaskUiState,
+    state: EditTaskUiState,
     onTitleChange: (String) -> Unit,
     onDescriptionChange: (String) -> Unit,
     updateTask: () -> Unit,
@@ -131,7 +131,7 @@ private fun AddEditTaskContent(
 @Composable
 private fun EditTaskScreen(
     modifier: Modifier,
-    state: AddEditTaskUiState,
+    state: EditTaskUiState,
     onTitleChange: (String) -> Unit,
     onDescriptionChange: (String) -> Unit,
     updateTask: () -> Unit,

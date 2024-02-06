@@ -1,4 +1,4 @@
-package com.goldcompany.apps.todoapplication.home
+package com.goldcompany.apps.todoapplication.util
 
 enum class TasksFilterType {
     ALL_TASKS,

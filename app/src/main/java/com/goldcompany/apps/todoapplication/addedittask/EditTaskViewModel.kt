@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class AddEditTaskUiState(
+data class EditTaskUiState(
     val title: String = "",
     val description: String = "",
     val isCompleted: Boolean = false,
@@ -27,14 +27,14 @@ data class AddEditTaskUiState(
 )
 
 @HiltViewModel
-class AddEditTaskViewModel @Inject constructor(
+class EditTaskViewModel @Inject constructor(
     private val repository: TaskRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     private val taskId: String? = savedStateHandle[TASK_ID]
 
-    private val _uiState = MutableStateFlow(AddEditTaskUiState())
-    val uiState: StateFlow<AddEditTaskUiState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(EditTaskUiState())
+    val uiState: StateFlow<EditTaskUiState> = _uiState.asStateFlow()
 
     init {
         if (taskId != null) {
