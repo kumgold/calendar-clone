@@ -44,6 +44,7 @@ import com.goldcompany.apps.todoapplication.R
 import com.goldcompany.apps.todoapplication.compose.HomeDrawerContent
 import com.goldcompany.apps.todoapplication.compose.HomeTopAppBar
 import com.goldcompany.apps.todoapplication.compose.LoadingAnimation
+import com.goldcompany.apps.todoapplication.util.TasksFilterType
 import com.goldcompany.apps.todoapplication.widget.TaskWidget
 import com.goldcompany.apps.todoapplication.widget.TaskWidgetReceiver
 import kotlinx.coroutines.launch
@@ -175,7 +176,7 @@ private fun TaskItem(
             checked = task.isCompleted,
             onCheckedChange = {
                 coroutineScope.launch {
-                    updateTaskWidget(context, it)
+                    updateTaskWidget(context, task)
                 }
 
                 isCompleted.value = it
@@ -194,11 +195,21 @@ private fun TaskItem(
     }
 }
 
-private suspend fun updateTaskWidget(context: Context, isCompleted: Boolean) {
+private suspend fun updateTaskWidget(
+    context: Context,
+    task: Task
+) {
     val manager = GlanceAppWidgetManager(context)
     manager.getGlanceIds(TaskWidget::class.java).forEach { id ->
+
         updateAppWidgetState(context, id) {
-            it[TaskWidgetReceiver.currentTaskState] = isCompleted
+            val taskId = it[TaskWidgetReceiver.currentTaskId]
+
+            if (taskId == task.id) {
+                it[TaskWidgetReceiver.currentTaskState] = !task.isCompleted
+                it[TaskWidgetReceiver.currentTaskTitle] = task.title
+                it[TaskWidgetReceiver.currentTaskDescription] = task.description
+            }
         }
 
         val appWidget = TaskWidget()

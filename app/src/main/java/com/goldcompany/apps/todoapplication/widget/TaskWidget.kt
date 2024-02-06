@@ -15,6 +15,8 @@ import androidx.glance.LocalContext
 import androidx.glance.LocalSize
 import androidx.glance.action.ActionParameters
 import androidx.glance.action.actionParametersOf
+import androidx.glance.action.actionStartActivity
+import androidx.glance.action.clickable
 import androidx.glance.appwidget.CheckBox
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.SizeMode
@@ -34,9 +36,9 @@ import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.padding
 import androidx.glance.state.GlanceStateDefinition
 import androidx.glance.state.PreferencesGlanceStateDefinition
-import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
+import com.goldcompany.apps.todoapplication.MainActivity
 import com.goldcompany.apps.todoapplication.R
 
 class TaskWidget : GlanceAppWidget() {
@@ -76,7 +78,7 @@ class TaskWidget : GlanceAppWidget() {
         val context = LocalContext.current
         val preferences = currentState<Preferences>()
 
-        val task = Task(
+        val taskForWidget = TaskForWidget(
             id = preferences[TaskWidgetReceiver.currentTaskId].toString(),
             title = preferences[TaskWidgetReceiver.currentTaskTitle] ?: context.getString(R.string.app_widget_default_text),
             description = preferences[TaskWidgetReceiver.currentTaskDescription] ?: "",
@@ -85,36 +87,39 @@ class TaskWidget : GlanceAppWidget() {
 
         GlanceTheme {
             when (size) {
-                smallMode -> SmallTask(task = task)
-                largeMode -> LargeTask(task = task)
+                smallMode -> SmallTask(taskForWidget = taskForWidget)
+                largeMode -> LargeTask(taskForWidget = taskForWidget)
             }
         }
     }
 
     @Composable
-    private fun SmallTask(task: Task) {
+    private fun SmallTask(taskForWidget: TaskForWidget) {
         Row(
             modifier = GlanceModifier.fillMaxSize()
                 .background(Color.White)
                 .padding(R.dimen.default_margin)
                 .cornerRadius(R.dimen.default_corner_radius)
-                .appWidgetBackground(),
+                .appWidgetBackground()
+                .clickable(
+                    actionStartActivity<MainActivity>()
+                ),
             verticalAlignment = Alignment.CenterVertically,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             CheckBox(
-                checked = task.isCompleted,
+                checked = taskForWidget.isCompleted,
                 onCheckedChange = actionRunCallback<UpdateTaskCallback>(
                     actionParametersOf(
-                        getTaskIdParameterKey() to task.id,
-                        getTaskStateParameterKey() to task.isCompleted
+                        getTaskIdParameterKey() to taskForWidget.id,
+                        getTaskStateParameterKey() to taskForWidget.isCompleted
                     )
                 )
             )
             Text(
                 modifier = GlanceModifier.fillMaxWidth()
                     .padding(R.dimen.default_margin),
-                text = task.title,
+                text = taskForWidget.title,
                 style = TextStyle(
                     fontSize = 18.sp
                 )
@@ -123,7 +128,7 @@ class TaskWidget : GlanceAppWidget() {
     }
 
     @Composable
-    private fun LargeTask(task: Task) {
+    private fun LargeTask(taskForWidget: TaskForWidget) {
         Column(
             modifier = GlanceModifier.fillMaxSize()
                 .background(Color.White)
@@ -134,25 +139,25 @@ class TaskWidget : GlanceAppWidget() {
         ) {
             Row {
                 CheckBox(
-                    checked = task.isCompleted,
+                    checked = taskForWidget.isCompleted,
                     onCheckedChange = actionRunCallback<UpdateTaskCallback>(
                         actionParametersOf(
-                            getTaskIdParameterKey() to task.id,
-                            getTaskStateParameterKey() to task.isCompleted
+                            getTaskIdParameterKey() to taskForWidget.id,
+                            getTaskStateParameterKey() to taskForWidget.isCompleted
                         )
                     )
                 )
                 Text(
                     modifier = GlanceModifier.fillMaxWidth()
                         .padding(R.dimen.default_margin),
-                    text = task.title,
+                    text = taskForWidget.title,
                     style = TextStyle(
                         fontSize = 18.sp
                     )
                 )
             }
             Text(
-                text = task.description,
+                text = taskForWidget.description,
                 style = TextStyle(
                     fontSize = 15.sp
                 )

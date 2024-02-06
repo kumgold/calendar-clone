@@ -7,6 +7,7 @@ import com.goldcompany.apps.data.data.Task
 import com.goldcompany.apps.data.repository.TaskRepository
 import com.goldcompany.apps.todoapplication.R
 import com.goldcompany.apps.todoapplication.util.Async
+import com.goldcompany.apps.todoapplication.util.TasksFilterType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -53,9 +54,6 @@ class HomeViewModel @Inject constructor(
         _filteredTasks, _isLoading
     ) { tasksAsync, isLoading ->
         when (tasksAsync) {
-            Async.Loading -> {
-                TaskUiState(isLoading = true)
-            }
             is Async.Success -> {
                 TaskUiState(
                     items = tasksAsync.data,
@@ -76,27 +74,17 @@ class HomeViewModel @Inject constructor(
     )
 
     private fun filterTasks(list: List<Task>, filterType: TasksFilterType): List<Task> {
-        val tasks = mutableListOf<Task>()
-
-        list.forEach { task ->
-            when (filterType) {
-                TasksFilterType.ALL_TASKS -> {
-                    tasks.add(task)
-                }
-                TasksFilterType.ACTIVE_TASKS -> {
-                    if (!task.isCompleted) {
-                        tasks.add(task)
-                    }
-                }
-                TasksFilterType.COMPLETED_TASKS -> {
-                    if (task.isCompleted) {
-                        tasks.add(task)
-                    }
-                }
+        return when (filterType) {
+            TasksFilterType.ALL_TASKS -> {
+                list
+            }
+            TasksFilterType.ACTIVE_TASKS -> {
+                list.filter { !it.isCompleted }
+            }
+            TasksFilterType.COMPLETED_TASKS -> {
+                list.filter { it.isCompleted }
             }
         }
-
-        return tasks
     }
 
     fun setFiltering(requestType: TasksFilterType) {
