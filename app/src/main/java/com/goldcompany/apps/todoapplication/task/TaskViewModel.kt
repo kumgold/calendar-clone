@@ -1,12 +1,13 @@
-package com.goldcompany.apps.todoapplication.addedittask
+package com.goldcompany.apps.todoapplication.task
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.goldcompany.apps.data.data.Task
 import com.goldcompany.apps.data.repository.TaskRepository
+import com.goldcompany.apps.data.util.convertMilliToDate
 import com.goldcompany.apps.todoapplication.R
-import com.goldcompany.apps.todoapplication.TASK_ID
+import com.goldcompany.apps.todoapplication.util.TASK_ID
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,26 +16,24 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class EditTaskUiState(
+data class TaskUiState(
     val title: String = "",
     val description: String = "",
     val isCompleted: Boolean = false,
-    val startDate: String? = null,
-    val endDate: String? = null,
+    val date: String = convertMilliToDate(System.currentTimeMillis()),
     val isLoading: Boolean = false,
-    val message: Int? = null,
-    val isTaskSaved: Boolean = false
+    val message: Int? = null
 )
 
 @HiltViewModel
-class EditTaskViewModel @Inject constructor(
+class TaskViewModel @Inject constructor(
     private val repository: TaskRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     private val taskId: String? = savedStateHandle[TASK_ID]
 
-    private val _uiState = MutableStateFlow(EditTaskUiState())
-    val uiState: StateFlow<EditTaskUiState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(TaskUiState())
+    val uiState: StateFlow<TaskUiState> = _uiState.asStateFlow()
 
     init {
         if (taskId != null) {
@@ -55,8 +54,7 @@ class EditTaskViewModel @Inject constructor(
                                 description = task.description,
                                 isCompleted = task.isCompleted,
                                 isLoading = false,
-                                startDate = task.startDate,
-                                endDate = task.endDate
+                                date = task.date,
                             )
                         }
                     }
@@ -69,20 +67,6 @@ class EditTaskViewModel @Inject constructor(
         _uiState.update {
             it.copy(
                 isLoading = true
-            )
-        }
-    }
-
-    fun updateTaskCompleted() {
-        if (taskId != null) {
-            viewModelScope.launch {
-                repository.updateCompleted(taskId, !_uiState.value.isCompleted)
-            }
-        }
-
-        _uiState.update {
-            it.copy(
-                isCompleted = !it.isCompleted
             )
         }
     }
@@ -106,15 +90,7 @@ class EditTaskViewModel @Inject constructor(
     fun updateStartDate(date: String) {
         _uiState.update {
             it.copy(
-                startDate = date
-            )
-        }
-    }
-
-    fun updateEndDate(date: String) {
-        _uiState.update {
-            it.copy(
-                endDate = date
+                date = date
             )
         }
     }
@@ -143,15 +119,9 @@ class EditTaskViewModel @Inject constructor(
                     isCompleted = _uiState.value.isCompleted,
                     title = _uiState.value.title,
                     description = _uiState.value.description,
-                    startDate = _uiState.value.startDate,
-                    endDate = _uiState.value.endDate
+                    date = _uiState.value.date,
                 )
             )
-            _uiState.update {
-                it.copy(
-                    isTaskSaved = true
-                )
-            }
         }
     }
 
@@ -165,15 +135,9 @@ class EditTaskViewModel @Inject constructor(
                     isCompleted = _uiState.value.isCompleted,
                     title = _uiState.value.title,
                     description = _uiState.value.description,
-                    startDate = _uiState.value.startDate,
-                    endDate = _uiState.value.endDate
+                    date = _uiState.value.date,
                 )
             )
-            _uiState.update {
-                it.copy(
-                    isTaskSaved = true
-                )
-            }
         }
     }
 }

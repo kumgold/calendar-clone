@@ -1,4 +1,4 @@
-package com.goldcompany.apps.todoapplication.addedittask
+package com.goldcompany.apps.todoapplication.task
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.border
@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
@@ -35,6 +36,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
@@ -47,9 +49,9 @@ import com.goldcompany.apps.todoapplication.compose.LoadingAnimation
 import com.goldcompany.apps.todoapplication.compose.TitleTopAppBar
 
 @Composable
-fun EditTaskScreen(
+fun TaskScreen(
     modifier: Modifier = Modifier,
-    viewModel: EditTaskViewModel = hiltViewModel(),
+    viewModel: TaskViewModel = hiltViewModel(),
     navigateBack: () -> Unit
 ) {
     val snackBarHostState = remember { SnackbarHostState() }
@@ -66,21 +68,18 @@ fun EditTaskScreen(
     ) { paddingValues ->
         val uiState by viewModel.uiState.collectAsState()
 
-        EditTaskContent(
-            modifier = modifier.padding(paddingValues),
-            state = uiState,
-            onTitleChange = viewModel::updateTitle,
-            onDescriptionChange = viewModel::updateDescription,
-            updateTask = viewModel::saveTask,
-            navigateBack = navigateBack,
-            onStartDateSelected = viewModel::updateStartDate,
-            onEndDateSelected = viewModel::updateEndDate
-        )
-
-        LaunchedEffect(uiState.isTaskSaved) {
-            if (uiState.isTaskSaved) {
-                navigateBack()
-            }
+        if (uiState.isLoading) {
+            LoadingAnimation(modifier = modifier.padding(paddingValues))
+        } else {
+            EditTaskScreen(
+                modifier = modifier.padding(paddingValues),
+                state = uiState,
+                onTitleChange = viewModel::updateTitle,
+                onDescriptionChange = viewModel::updateDescription,
+                saveTask = viewModel::saveTask,
+                navigateBack = navigateBack,
+                onStartDateSelected = viewModel::updateStartDate
+            )
         }
 
         uiState.message?.let { message ->
@@ -97,54 +96,21 @@ fun EditTaskScreen(
 }
 
 @Composable
-private fun EditTaskContent(
-    modifier: Modifier,
-    state: EditTaskUiState,
-    onTitleChange: (String) -> Unit,
-    onDescriptionChange: (String) -> Unit,
-    updateTask: () -> Unit,
-    navigateBack: () -> Unit,
-    onStartDateSelected: (String) -> Unit,
-    onEndDateSelected: (String) -> Unit
-) {
-    when (state.isLoading) {
-        true -> {
-            LoadingAnimation(
-                modifier = modifier
-            )
-        }
-        false -> {
-            EditTaskScreen(
-                modifier = modifier,
-                state = state,
-                onTitleChange = onTitleChange,
-                onDescriptionChange = onDescriptionChange,
-                updateTask = updateTask,
-                navigateBack = navigateBack,
-                onStartDateSelected = onStartDateSelected,
-                onEndDateSelected = onEndDateSelected
-            )
-        }
-    }
-}
-
-@Composable
 private fun EditTaskScreen(
     modifier: Modifier,
-    state: EditTaskUiState,
+    state: TaskUiState,
     onTitleChange: (String) -> Unit,
     onDescriptionChange: (String) -> Unit,
-    updateTask: () -> Unit,
+    saveTask: () -> Unit,
     navigateBack: () -> Unit,
-    onStartDateSelected: (String) -> Unit,
-    onEndDateSelected: (String) -> Unit
+    onStartDateSelected: (String) -> Unit
 ) {
     Column(
         modifier = modifier
             .padding(all = dimensionResource(id = R.dimen.horizontal_margin))
             .fillMaxSize()
     ) {
-        TaskTextInputView(
+        TaskTextInput(
             modifier = Modifier.fillMaxWidth(),
             text = state.title,
             onTextChange = onTitleChange,
@@ -154,26 +120,18 @@ private fun EditTaskScreen(
         )
         Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.vertical_margin)))
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = dimensionResource(id = R.dimen.horizontal_margin))
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            SelectTaskDatesView(
-                modifier = Modifier.weight(1f),
-                savedDate = state.startDate,
-                defaultText = stringResource(id = R.string.start_date),
+            Text(text = stringResource(id = R.string.date))
+            Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.vertical_margin)))
+            SelectTaskDate(
+                savedDate = state.date,
                 onDateSelected = onStartDateSelected
-            )
-            Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.horizontal_margin)))
-            SelectTaskDatesView(
-                modifier = Modifier.weight(1f),
-                savedDate = state.endDate,
-                defaultText = stringResource(id = R.string.end_date),
-                onDateSelected = onEndDateSelected
             )
         }
         Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.vertical_margin)))
-        TaskTextInputView(
+        TaskTextInput(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f),
@@ -183,14 +141,13 @@ private fun EditTaskScreen(
             hintResource = R.string.description_hint,
             isSingleLine = false
         )
+        Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.vertical_margin)))
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = dimensionResource(id = R.dimen.horizontal_margin))
+            modifier = Modifier.fillMaxWidth()
         ) {
             Button(
                 modifier = Modifier.weight(1f),
-                onClick = { updateTask() }
+                onClick = { saveTask() }
             ) {
                 Text(text = stringResource(id = R.string.save))
             }
@@ -206,34 +163,31 @@ private fun EditTaskScreen(
 }
 
 @Composable
-private fun SelectTaskDatesView(
-    modifier: Modifier,
-    savedDate: String?,
-    defaultText: String,
+private fun SelectTaskDate(
+    modifier: Modifier = Modifier,
+    savedDate: String,
     onDateSelected: (String) -> Unit
 ) {
-    var date by remember {
-        if (savedDate != null) mutableStateOf(savedDate)
-        else mutableStateOf(defaultText)
-    }
+    var date by remember { mutableStateOf(savedDate) }
     var isShowDatePickerDialog by remember {
         mutableStateOf(false)
     }
 
     Box(
-        modifier = modifier.border(
-            width = 1.dp,
-            color = colorResource(id = R.color.black),
-            shape = RoundedCornerShape(2.dp)
-        ),
+        modifier = modifier
+            .wrapContentSize()
+            .clip(RoundedCornerShape(2.dp))
+            .border(
+                width = 1.dp,
+                color = colorResource(id = R.color.black)
+            )
+            .clickable {
+                isShowDatePickerDialog = true
+            }
+            .padding(horizontal = dimensionResource(id = R.dimen.default_margin)),
         contentAlignment = Alignment.Center
     ) {
         Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable {
-                    isShowDatePickerDialog = true
-                },
             text = date,
             textAlign = TextAlign.Center
         )
@@ -294,7 +248,7 @@ private fun TaskDatePickerDialog(
 }
 
 @Composable
-private fun TaskTextInputView(
+private fun TaskTextInput(
     modifier: Modifier,
     text: String,
     onTextChange: (String) -> Unit,

@@ -9,8 +9,7 @@ fun TaskEntity.toExternal() = Task(
     isCompleted = isCompleted,
     title = title,
     description = description,
-    startDate = convertMilliToDate(startTimeMilli),
-    endDate = convertMilliToDate(endTimeMilli)
+    date = convertMilliToDate(dateTimeMilli)
 )
 
 fun List<TaskEntity>.toExternal() = map(TaskEntity::toExternal)
@@ -20,6 +19,5 @@ fun Task.toLocal() = TaskEntity(
     isCompleted = isCompleted,
     title = title,
     description = description,
-    startTimeMilli = convertDateToMilli(startDate),
-    endTimeMilli = convertDateToMilli(endDate)
+    dateTimeMilli = convertDateToMilli(date)
 )

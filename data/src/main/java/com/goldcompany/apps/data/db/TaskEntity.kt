@@ -10,6 +10,5 @@ data class TaskEntity(
     @ColumnInfo val isCompleted: Boolean = false,
     @ColumnInfo val title: String = "",
     @ColumnInfo val description: String = "",
-    @ColumnInfo val startTimeMilli: Long? = null,
-    @ColumnInfo val endTimeMilli: Long? = null
+    @ColumnInfo val dateTimeMilli: Long = System.currentTimeMillis()
 )
