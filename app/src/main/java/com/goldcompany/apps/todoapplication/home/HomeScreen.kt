@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -40,7 +41,9 @@ import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.goldcompany.apps.data.data.Task
+import com.goldcompany.apps.data.util.convertMilliToDate
 import com.goldcompany.apps.todoapplication.R
+import com.goldcompany.apps.todoapplication.compose.CalendarView
 import com.goldcompany.apps.todoapplication.compose.HomeDrawerContent
 import com.goldcompany.apps.todoapplication.compose.HomeTopAppBar
 import com.goldcompany.apps.todoapplication.compose.LoadingAnimation
@@ -87,10 +90,13 @@ fun HomeScreen(
             HomeDrawerContent()
         }
     ) {
+        val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
         Scaffold(
             modifier = modifier,
             topBar = {
                 HomeTopAppBar(
+                    title = "",
                     onFilterAllTasks = { viewModel.setFiltering(TasksFilterType.ALL_TASKS) },
                     onFilterActiveTasks = { viewModel.setFiltering(TasksFilterType.ACTIVE_TASKS) },
                     onFilterCompletedTasks = { viewModel.setFiltering(TasksFilterType.COMPLETED_TASKS) },
@@ -103,15 +109,18 @@ fun HomeScreen(
                 }
             }
         ) { paddingValues ->
-            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
-            TaskScreen(
+            Column(
                 modifier = modifier.padding(paddingValues),
-                loadingState = uiState.isLoading,
-                tasks = uiState.items,
-                onTaskClick = onTaskClick,
-                updateTaskCompleted = viewModel::updateTaskCompleted
-            )
+            ) {
+                CalendarView()
+                TaskList(
+                    loadingState = uiState.isLoading,
+                    tasks = uiState.items,
+                    onTaskClick = onTaskClick,
+                    updateTaskCompleted = viewModel::updateTaskCompleted
+                )
+            }
+
         }
     }
 
@@ -124,8 +133,8 @@ fun HomeScreen(
 }
 
 @Composable
-private fun TaskScreen(
-    modifier: Modifier,
+private fun TaskList(
+    modifier: Modifier = Modifier,
     loadingState: Boolean,
     tasks: List<Task>,
     onTaskClick: (Task) -> Unit,

@@ -33,6 +33,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeTopAppBar(
+    title: String,
     onFilterAllTasks: () -> Unit,
     onFilterActiveTasks: () -> Unit,
     onFilterCompletedTasks: () -> Unit,
@@ -43,7 +44,7 @@ fun HomeTopAppBar(
     TopAppBar(
         modifier = Modifier.fillMaxWidth(),
         title = {
-            Text(text = stringResource(id = R.string.all_tasks))
+            Text(text = title)
         },
         navigationIcon = {
             IconButton(
@@ -132,6 +133,7 @@ private fun TopAppBarDropDownMenu(
 @Composable
 private fun HomeTopAppBarPreview() {
     HomeTopAppBar(
+        title = "title",
         onFilterAllTasks = { },
         onFilterActiveTasks = { },
         onFilterCompletedTasks = { },
