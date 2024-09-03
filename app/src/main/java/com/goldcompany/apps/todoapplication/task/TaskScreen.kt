@@ -71,12 +71,15 @@ fun TaskScreen(
         if (uiState.isLoading) {
             LoadingAnimation(modifier = modifier.padding(paddingValues))
         } else {
-            EditTaskScreen(
+            EditTask(
                 modifier = modifier.padding(paddingValues),
                 state = uiState,
                 onTitleChange = viewModel::updateTitle,
                 onDescriptionChange = viewModel::updateDescription,
-                saveTask = viewModel::saveTask,
+                saveTask = {
+                    viewModel.saveTask()
+                    navigateBack()
+                },
                 navigateBack = navigateBack,
                 onStartDateSelected = viewModel::updateStartDate
             )
@@ -96,7 +99,7 @@ fun TaskScreen(
 }
 
 @Composable
-private fun EditTaskScreen(
+private fun EditTask(
     modifier: Modifier,
     state: TaskUiState,
     onTitleChange: (String) -> Unit,
@@ -210,13 +213,7 @@ private fun TaskDatePickerDialog(
     onDateSelected: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
-    val datePickerState = rememberDatePickerState(
-        selectableDates = object : SelectableDates {
-            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
-                return utcTimeMillis <= System.currentTimeMillis()
-            }
-        }
-    )
+    val datePickerState = rememberDatePickerState()
     val selectedDate = datePickerState.selectedDateMillis?.let {
         convertMilliToDate(it)
     } ?: ""

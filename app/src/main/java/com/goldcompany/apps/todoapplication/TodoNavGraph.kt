@@ -7,6 +7,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.dialog
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.goldcompany.apps.todoapplication.task.TaskScreen
@@ -41,7 +42,7 @@ fun TodoNavGraph(
                 }
             )
         }
-        composable(
+        dialog(
             route = TodoDestinations.ADD_EDIT_TASK
         ) {
             TaskScreen(
@@ -50,7 +51,7 @@ fun TodoNavGraph(
                 }
             )
         }
-        composable(
+        dialog(
             route = "${TodoDestinations.ADD_EDIT_TASK}?taskId={$TASK_ID}",
             arguments = listOf(
                 navArgument(TASK_ID) {

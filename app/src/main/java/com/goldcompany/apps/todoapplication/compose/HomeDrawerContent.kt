@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -32,7 +33,7 @@ fun HomeDrawerContent(
 
 ) {
     ModalDrawerSheet(
-        drawerShape = RoundedCornerShape(0.dp)
+        drawerShape = RectangleShape
     ) {
         Surface(color = MaterialTheme.colorScheme.background) {
             LazyColumn(
