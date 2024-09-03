@@ -1,8 +1,4 @@
-import org.jetbrains.kotlin.kapt3.base.Kapt.kapt
-
 plugins {
-    kotlin("kapt")
-
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.dagger.hilt.android")
@@ -57,8 +53,8 @@ android {
 
 dependencies {
     val nav_version = "2.7.3"
-    val hilt_version = "2.44"
-    val room_version = "2.5.2"
+    val hilt_version = "2.48"
+    val room_version = "2.6.1"
     val compose_lifecycle_version = "2.6.2"
     val glance_version = "1.0.0"
 
@@ -82,7 +78,7 @@ dependencies {
     // Hilt
     implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
     implementation("com.google.dagger:hilt-android:$hilt_version")
-    kapt("com.google.dagger:hilt-android-compiler:$hilt_version")
+    ksp("com.google.dagger:hilt-android-compiler:$hilt_version")
 
     // Compose
     implementation("androidx.core:core-ktx:1.12.0")
@@ -103,8 +99,4 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
-}
-
-kapt {
-    correctErrorTypes = true
 }
