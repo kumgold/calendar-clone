@@ -14,13 +14,15 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.ZoneOffset
 import javax.inject.Inject
 
 data class TaskUiState(
     val title: String = "",
     val description: String = "",
     val isCompleted: Boolean = false,
-    val date: String = convertMilliToDate(System.currentTimeMillis()),
+    val date: String = convertMilliToDate(LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli()),
     val isLoading: Boolean = false,
     val message: Int? = null
 )
@@ -87,11 +89,9 @@ class TaskViewModel @Inject constructor(
         }
     }
 
-    fun updateStartDate(date: String) {
+    fun updateStartDate(millis: Long) {
         _uiState.update {
-            it.copy(
-                date = date
-            )
+            it.copy(date = convertMilliToDate(millis))
         }
     }
 

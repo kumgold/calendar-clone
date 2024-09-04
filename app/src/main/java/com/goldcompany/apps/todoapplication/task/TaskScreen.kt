@@ -21,7 +21,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -47,6 +46,8 @@ import com.goldcompany.apps.data.util.convertMilliToDate
 import com.goldcompany.apps.todoapplication.R
 import com.goldcompany.apps.todoapplication.compose.LoadingAnimation
 import com.goldcompany.apps.todoapplication.compose.TitleTopAppBar
+import java.time.LocalDate
+import java.time.ZoneOffset
 
 @Composable
 fun TaskScreen(
@@ -81,7 +82,7 @@ fun TaskScreen(
                     navigateBack()
                 },
                 navigateBack = navigateBack,
-                onStartDateSelected = viewModel::updateStartDate
+                onDateSelected = viewModel::updateStartDate
             )
         }
 
@@ -106,7 +107,7 @@ private fun EditTask(
     onDescriptionChange: (String) -> Unit,
     saveTask: () -> Unit,
     navigateBack: () -> Unit,
-    onStartDateSelected: (String) -> Unit
+    onDateSelected: (Long) -> Unit
 ) {
     Column(
         modifier = modifier
@@ -130,7 +131,7 @@ private fun EditTask(
             Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.vertical_margin)))
             SelectTaskDate(
                 savedDate = state.date,
-                onDateSelected = onStartDateSelected
+                onDateSelected = onDateSelected
             )
         }
         Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.vertical_margin)))
@@ -169,7 +170,7 @@ private fun EditTask(
 private fun SelectTaskDate(
     modifier: Modifier = Modifier,
     savedDate: String,
-    onDateSelected: (String) -> Unit
+    onDateSelected: (Long) -> Unit
 ) {
     var date by remember { mutableStateOf(savedDate) }
     var isShowDatePickerDialog by remember {
@@ -199,8 +200,9 @@ private fun SelectTaskDate(
     if (isShowDatePickerDialog) {
         TaskDatePickerDialog(
             onDateSelected = {
+                println(it)
+                date = convertMilliToDate(it)
                 onDateSelected(it)
-                date = it
             },
             onDismiss = { isShowDatePickerDialog = false }
         )
@@ -210,20 +212,20 @@ private fun SelectTaskDate(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TaskDatePickerDialog(
-    onDateSelected: (String) -> Unit,
+    onDateSelected: (Long) -> Unit,
     onDismiss: () -> Unit
 ) {
     val datePickerState = rememberDatePickerState()
-    val selectedDate = datePickerState.selectedDateMillis?.let {
-        convertMilliToDate(it)
-    } ?: ""
+    val selectedDate = datePickerState.selectedDateMillis
 
     DatePickerDialog(
         onDismissRequest = { onDismiss() },
         confirmButton = {
             Button(
                 onClick = {
-                    onDateSelected(selectedDate)
+                    val currentTime = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli()
+
+                    onDateSelected(selectedDate ?: currentTime)
                     onDismiss()
                 }
             ) {
@@ -254,12 +256,9 @@ private fun TaskTextInput(
     isSingleLine: Boolean
 
 ) {
-    val titleLargeStyle = MaterialTheme.typography.titleLarge
-    val textMediumStyle = MaterialTheme.typography.bodyMedium
-
     Text(
         text = stringResource(id = titleResource),
-        style = titleLargeStyle
+        style = MaterialTheme.typography.titleLarge
     )
     OutlinedTextField(
         modifier = modifier,
@@ -268,10 +267,10 @@ private fun TaskTextInput(
         placeholder = {
             Text(
                 text = stringResource(id = hintResource),
-                style = textMediumStyle
+                style = MaterialTheme.typography.bodyMedium
             )
         },
-        textStyle = textMediumStyle,
+        textStyle = MaterialTheme.typography.bodyMedium,
         singleLine = isSingleLine
     )
 }

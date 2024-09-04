@@ -1,99 +1,73 @@
 package com.goldcompany.apps.todoapplication.home
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.goldcompany.apps.data.data.Task
 import com.goldcompany.apps.data.repository.TaskRepository
-import com.goldcompany.apps.todoapplication.R
-import com.goldcompany.apps.todoapplication.util.Async
 import com.goldcompany.apps.todoapplication.util.TasksFilterType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.ZoneOffset
 import javax.inject.Inject
 
 data class TaskUiState(
     val items: List<Task> = emptyList(),
+    val currentDateMillis: Long = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli(),
     val isLoading: Boolean = false,
     val userMessage: Int? = null
 )
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val repository: TaskRepository,
-    private val savedStateHandle: SavedStateHandle
+    private val repository: TaskRepository
 ) : ViewModel() {
 
-    companion object {
-        private const val TASKS_FILTER_SAVED_STATE_KEY = "TASKS_FILTER_SAVED_STATE_KEY"
-    }
-
-    private val _savedFilterType = savedStateHandle.getStateFlow(
-        TASKS_FILTER_SAVED_STATE_KEY,
-        TasksFilterType.ALL_TASKS
-    )
-
+    private val _dailyTasks = MutableStateFlow<List<Task>>(emptyList())
+    private val _currentDateMillis = MutableStateFlow(System.currentTimeMillis())
     private val _isLoading = MutableStateFlow(false)
 
-    private val _filteredTasks = combine(repository.getAllTasks(), _savedFilterType) { tasks, type ->
-        filterTasks(tasks, type)
-    }.map {
-        Async.Success(it)
-    }.catch<Async<List<Task>>> {
-        emit(Async.Error(R.string.error_message))
-    }
-
     val uiState: StateFlow<TaskUiState> = combine(
-        _filteredTasks, _isLoading
-    ) { tasksAsync, isLoading ->
-        when (tasksAsync) {
-            is Async.Success -> {
-                TaskUiState(
-                    items = tasksAsync.data,
-                    isLoading = isLoading
-                )
-            }
-            is Async.Error -> {
-                TaskUiState(
-                    isLoading = false,
-                    userMessage = tasksAsync.errorMessage
-                )
-            }
-        }
+        _dailyTasks, _currentDateMillis, _isLoading
+    ) { tasks, millis, isLoading ->
+        TaskUiState(
+            items = tasks,
+            currentDateMillis = millis,
+            isLoading = isLoading
+        )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = TaskUiState(isLoading = true)
     )
 
-    private fun filterTasks(list: List<Task>, filterType: TasksFilterType): List<Task> {
-        return when (filterType) {
-            TasksFilterType.ALL_TASKS -> {
-                list
-            }
-            TasksFilterType.ACTIVE_TASKS -> {
-                list.filter { !it.isCompleted }
-            }
-            TasksFilterType.COMPLETED_TASKS -> {
-                list.filter { it.isCompleted }
-            }
-        }
+    init {
+        getDailyTasks()
     }
 
-    fun setFiltering(requestType: TasksFilterType) {
-        savedStateHandle[TASKS_FILTER_SAVED_STATE_KEY] = requestType
+    private fun getDailyTasks(
+        millis: Long = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli()
+    ) {
+        viewModelScope.launch {
+            _dailyTasks.value = repository.getDailyTasks(millis)
+            println(System.currentTimeMillis())
+            println(repository.getDailyTasks(millis))
+        }
     }
 
     fun updateTaskCompleted(taskId: String, completed: Boolean) {
         viewModelScope.launch {
             repository.updateCompleted(taskId, completed)
         }
+    }
+
+    fun setCurrentDateMillis(millis: Long) {
+        _currentDateMillis.value = millis
+        getDailyTasks(millis)
     }
 }

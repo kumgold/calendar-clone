@@ -96,10 +96,7 @@ fun HomeScreen(
             modifier = modifier,
             topBar = {
                 HomeTopAppBar(
-                    title = "",
-                    onFilterAllTasks = { viewModel.setFiltering(TasksFilterType.ALL_TASKS) },
-                    onFilterActiveTasks = { viewModel.setFiltering(TasksFilterType.ACTIVE_TASKS) },
-                    onFilterCompletedTasks = { viewModel.setFiltering(TasksFilterType.COMPLETED_TASKS) },
+                    title = convertMilliToDate(uiState.currentDateMillis),
                     drawerState = drawerState,
                 )
             },
@@ -112,7 +109,12 @@ fun HomeScreen(
             Column(
                 modifier = modifier.padding(paddingValues),
             ) {
-                CalendarView()
+                CalendarView(
+                    currentDateMilli = uiState.currentDateMillis,
+                    onCalendarItemClick = { millis ->
+                        viewModel.setCurrentDateMillis(millis)
+                    }
+                )
                 TaskList(
                     loadingState = uiState.isLoading,
                     tasks = uiState.items,

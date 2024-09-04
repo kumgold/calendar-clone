@@ -51,7 +51,7 @@ fun TodoNavGraph(
                 }
             )
         }
-        dialog(
+        composable(
             route = "${TodoDestinations.ADD_EDIT_TASK}?taskId={$TASK_ID}",
             arguments = listOf(
                 navArgument(TASK_ID) {

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -28,21 +29,25 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
+import com.goldcompany.apps.todoapplication.R
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.ZoneOffset
 import java.time.format.TextStyle
 import java.util.Locale
 
 @Composable
 fun CalendarView(
-    modifier: Modifier = Modifier
+    onCalendarItemClick: (Long) -> Unit = {},
+    currentDateMilli: Long
 ) {
     Column(
-        modifier = modifier
+        modifier = Modifier
+            .padding(horizontal = dimensionResource(id = R.dimen.default_margin))
             .fillMaxWidth()
             .wrapContentHeight()
-            .clip(RoundedCornerShape(20.dp))
     ) {
         var currentSelectedDate by remember { mutableStateOf(LocalDate.now()) }
         val lastDay by remember { mutableIntStateOf(currentSelectedDate.lengthOfMonth()) }
@@ -62,14 +67,18 @@ fun CalendarView(
         DayOfWeekView()
         Spacer(modifier = defaultMargin)
         LazyVerticalGrid(
-            columns = GridCells.Fixed(7)
+            columns = GridCells.Fixed(7),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             items(days) { day ->
                 val date = currentSelectedDate.withDayOfMonth(day)
 
                 CalendarItem(
-                    date = currentSelectedDate.withDayOfMonth(day),
+                    date = date,
                     isToday = (date == LocalDate.now()),
+                    currentDateMilli = currentDateMilli,
+                    onItemClick = onCalendarItemClick
                 )
             }
         }
@@ -94,29 +103,38 @@ private fun DayOfWeekView() {
 
 @Composable
 private fun CalendarItem(
-    date: LocalDate?,
+    date: LocalDate,
     isToday: Boolean,
-    onClick: () -> Unit = {}
+    currentDateMilli: Long,
+    onItemClick: (Long) -> Unit = {},
 ) {
+    val millis = date.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli()
+
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
             .aspectRatio(1.0f)
             .border(
                 width = 1.dp,
                 color = if (isToday) {
                     Color.Red
+                } else if (currentDateMilli == millis) {
+                    Color.Gray
                 } else {
                     MaterialTheme.colorScheme.background
                 },
+                shape = RoundedCornerShape(10.dp)
             )
+            .clip(shape = RoundedCornerShape(10.dp))
             .clickable {
-                onClick()
+                println(millis)
+                onItemClick(millis)
             },
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = (date?.dayOfMonth ?: "").toString(),
+            text = (date.dayOfMonth).toString(),
         )
     }
 }

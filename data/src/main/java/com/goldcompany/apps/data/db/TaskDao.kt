@@ -13,6 +13,9 @@ interface TaskDao {
     @Query("SELECT * FROM task")
     fun getAllTasks(): Flow<List<TaskEntity>>
 
+    @Query("SELECT * FROM task WHERE dateTimeMilli = :millis")
+    suspend fun getDailyTasks(millis: Long): List<TaskEntity>
+
     @Query("SELECT * FROM task WHERE isCompleted = 0")
     fun getAllTasksForWidget(): List<TaskEntity>
 
