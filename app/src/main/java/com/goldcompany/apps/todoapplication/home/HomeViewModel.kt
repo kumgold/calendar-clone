@@ -62,7 +62,7 @@ class HomeViewModel @Inject constructor(
 
     fun updateTaskCompleted(taskId: String, completed: Boolean) {
         viewModelScope.launch {
-            repository.updateCompleted(taskId, completed)
+            repository.updateCompleted(taskId.toLong(), completed)
         }
     }
 

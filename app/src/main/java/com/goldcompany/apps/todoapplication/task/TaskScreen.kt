@@ -32,6 +32,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,10 +43,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.goldcompany.apps.data.util.convertMilliToDate
 import com.goldcompany.apps.todoapplication.R
 import com.goldcompany.apps.todoapplication.compose.LoadingAnimation
-import com.goldcompany.apps.todoapplication.compose.TitleTopAppBar
+import com.goldcompany.apps.todoapplication.compose.TaskDetailAppBar
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.ZoneOffset
 
@@ -56,18 +59,26 @@ fun TaskScreen(
     navigateBack: () -> Unit
 ) {
     val snackBarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         modifier = modifier,
         topBar = {
-            TitleTopAppBar(
+            TaskDetailAppBar(
                 title = R.string.add_task,
+                deleteTask = {
+                    coroutineScope.launch {
+                        viewModel.deleteTask()
+                        navigateBack()
+                    }
+                },
                 navigateBack = navigateBack
             )
         },
-        snackbarHost = { SnackbarHost(snackBarHostState) }
+        snackbarHost = { SnackbarHost(snackBarHostState) },
+
     ) { paddingValues ->
-        val uiState by viewModel.uiState.collectAsState()
+        val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
         if (uiState.isLoading) {
             LoadingAnimation(modifier = modifier.padding(paddingValues))

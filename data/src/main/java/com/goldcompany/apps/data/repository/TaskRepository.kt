@@ -45,7 +45,11 @@ class TaskRepository @Inject constructor(
         taskDao.updateTask(task.toLocal())
     }
 
-    suspend fun updateCompleted(taskId: String, completed: Boolean) {
+    suspend fun updateCompleted(taskId: Long, completed: Boolean) {
         taskDao.updateCompleted(taskId, completed)
+    }
+
+    suspend fun deleteTask(taskId: Long) {
+        taskDao.deleteTask(taskId)
     }
 }

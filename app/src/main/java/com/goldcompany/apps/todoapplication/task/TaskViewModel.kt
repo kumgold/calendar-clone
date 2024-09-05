@@ -140,4 +140,8 @@ class TaskViewModel @Inject constructor(
             )
         }
     }
+
+    suspend fun deleteTask() {
+        repository.deleteTask(taskId!!.toLong())
+    }
 }
