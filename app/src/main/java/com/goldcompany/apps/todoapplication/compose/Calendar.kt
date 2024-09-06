@@ -1,8 +1,10 @@
 package com.goldcompany.apps.todoapplication.compose
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,16 +17,18 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,16 +36,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
 import com.goldcompany.apps.todoapplication.R
+import com.goldcompany.apps.todoapplication.util.dateToMilli
+import kotlinx.coroutines.flow.collectLatest
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.ZoneOffset
 import java.time.format.TextStyle
 import java.util.Locale
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CalendarView(
-    onCalendarItemClick: (Long) -> Unit = {},
-    currentDateMilli: Long
+    selectedDateMilli: Long,
+    onCalendarItemClick: (Long) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -49,37 +56,71 @@ fun CalendarView(
             .fillMaxWidth()
             .wrapContentHeight()
     ) {
-        var currentSelectedDate by remember { mutableStateOf(LocalDate.now()) }
-        val lastDay by remember { mutableIntStateOf(currentSelectedDate.lengthOfMonth()) }
-        val firstDayOfWeek = LocalDate.of(LocalDate.now().year, LocalDate.now().month, 1).dayOfWeek.value
-        val previousWeekLength = if (firstDayOfWeek == 7) {
-            0
-        } else {
-            firstDayOfWeek
+        var currentLocalDate by remember { mutableStateOf(LocalDate.now()) }
+        val yearRange = IntRange(currentLocalDate.year - 40, currentLocalDate.year + 40)
+        val initialPage = (currentLocalDate.year - yearRange.first) * 12 + currentLocalDate.monthValue - 1
+        val pagerState = rememberPagerState(initialPage = initialPage) {
+            (yearRange.last - yearRange.first) * 12
         }
-        val days by remember { mutableStateOf(IntArray(previousWeekLength).toList() +  IntRange(1, lastDay).toList()) }
-        val defaultMargin = Modifier.height(20.dp)
 
-        LaunchedEffect(key1 = currentSelectedDate.dayOfWeek) {
-            currentSelectedDate = LocalDate.now()
+        LaunchedEffect(key1 = currentLocalDate.dayOfWeek) {
+            currentLocalDate = LocalDate.now()
+        }
+
+        LaunchedEffect(key1 = pagerState) {
+            snapshotFlow { pagerState.currentPage }.collectLatest { page ->
+                val displayDate = if (page == initialPage) {
+                    LocalDate.of(
+                        yearRange.first + page/12,
+                        page % 12 + 1,
+                        currentLocalDate.dayOfMonth
+                    )
+                } else {
+                    LocalDate.of(
+                        yearRange.first + page/12,
+                        page % 12 + 1,
+                        1
+                    )
+                }
+
+                onCalendarItemClick(displayDate.dateToMilli())
+            }
         }
 
         DayOfWeekView()
-        Spacer(modifier = defaultMargin)
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(7),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            items(days) { day ->
-                val date = currentSelectedDate.withDayOfMonth(day)
+        Spacer(modifier = Modifier.height(20.dp))
+        HorizontalPager(state = pagerState) { page ->
+            val month = LocalDate.of(
+                yearRange.first + page/12,
+                page % 12 + 1,
+                1
+            )
+            val lastDay = month.lengthOfMonth()
+            val firstDayOfWeek = month.dayOfWeek.value
+            val days = IntRange(1, lastDay).toList()
 
-                CalendarItem(
-                    date = date,
-                    isToday = (date == LocalDate.now()),
-                    currentDateMilli = currentDateMilli,
-                    onItemClick = onCalendarItemClick
-                )
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(7),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                if (firstDayOfWeek != 7) {
+                    repeat(firstDayOfWeek) {
+                        item {
+                            EmptyDay()
+                        }
+                    }
+                }
+                items(days) { day ->
+                    val date = month.withDayOfMonth(day)
+
+                    CalendarItem(
+                        date = date,
+                        isToday = (date == LocalDate.now()),
+                        currentDateMilli = selectedDateMilli,
+                        onItemClick = onCalendarItemClick
+                    )
+                }
             }
         }
     }
@@ -108,7 +149,7 @@ private fun CalendarItem(
     currentDateMilli: Long,
     onItemClick: (Long) -> Unit = {},
 ) {
-    val millis = date.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli()
+    val millis = date.dateToMilli()
 
     Column(
         modifier = Modifier
@@ -137,4 +178,13 @@ private fun CalendarItem(
             text = (date.dayOfMonth).toString(),
         )
     }
+}
+
+@Composable
+private fun EmptyDay() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .aspectRatio(1.0f)
+    )
 }

@@ -1,24 +1,27 @@
 package com.goldcompany.apps.todoapplication.home
 
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.toMutableStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.goldcompany.apps.data.data.Task
 import com.goldcompany.apps.data.repository.TaskRepository
-import com.goldcompany.apps.todoapplication.util.TasksFilterType
+import com.goldcompany.apps.todoapplication.util.dateToMilli
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.time.ZoneOffset
 import javax.inject.Inject
 
 data class TaskUiState(
-    val items: List<Task> = emptyList(),
-    val currentDateMillis: Long = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli(),
+    val tasks: SnapshotStateList<Task> = mutableStateListOf(),
+    val selectedDateMilli: Long = LocalDate.now().dateToMilli(),
     val isLoading: Boolean = false,
     val userMessage: Int? = null
 )
@@ -28,16 +31,16 @@ class HomeViewModel @Inject constructor(
     private val repository: TaskRepository
 ) : ViewModel() {
 
-    private val _dailyTasks = MutableStateFlow<List<Task>>(emptyList())
-    private val _currentDateMillis = MutableStateFlow(System.currentTimeMillis())
+    private val _tasks = MutableStateFlow<SnapshotStateList<Task>>(mutableStateListOf())
+    private val _selectedDateMilli = MutableStateFlow(System.currentTimeMillis())
     private val _isLoading = MutableStateFlow(false)
 
     val uiState: StateFlow<TaskUiState> = combine(
-        _dailyTasks, _currentDateMillis, _isLoading
-    ) { tasks, millis, isLoading ->
+        _tasks, _selectedDateMilli, _isLoading
+    ) { tasks, selectedDateMilli, isLoading ->
         TaskUiState(
-            items = tasks,
-            currentDateMillis = millis,
+            tasks = tasks,
+            selectedDateMilli = selectedDateMilli,
             isLoading = isLoading
         )
     }.stateIn(
@@ -51,23 +54,31 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun getDailyTasks(
-        millis: Long = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli()
+        millis: Long = LocalDate.now().dateToMilli()
     ) {
         viewModelScope.launch {
-            _dailyTasks.value = repository.getDailyTasks(millis)
-            println(System.currentTimeMillis())
-            println(repository.getDailyTasks(millis))
+            _tasks.update { repository.getDailyTasks(millis).toMutableStateList() }
         }
     }
 
-    fun updateTaskCompleted(taskId: String, completed: Boolean) {
+    fun updateTask(taskId: String, isCompleted: Boolean) {
         viewModelScope.launch {
-            repository.updateCompleted(taskId.toLong(), completed)
+            repository.updateCompleted(taskId.toLong(), isCompleted)
         }
     }
 
-    fun setCurrentDateMillis(millis: Long) {
-        _currentDateMillis.value = millis
-        getDailyTasks(millis)
+    fun updateTask(index: Int, isCompleted: Boolean) {
+        val task = _tasks.value[index]
+
+        viewModelScope.launch {
+            _tasks.value[index] = task.copy(isCompleted = isCompleted)
+            repository.updateCompleted(task.id.toLong(), isCompleted)
+
+        }
+    }
+
+    fun selectDateMilli(milli: Long) {
+        _selectedDateMilli.update { milli }
+        getDailyTasks(milli)
     }
 }

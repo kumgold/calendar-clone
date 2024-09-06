@@ -10,11 +10,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -25,8 +24,6 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
@@ -47,7 +44,6 @@ import com.goldcompany.apps.todoapplication.compose.CalendarView
 import com.goldcompany.apps.todoapplication.compose.HomeDrawerContent
 import com.goldcompany.apps.todoapplication.compose.HomeTopAppBar
 import com.goldcompany.apps.todoapplication.compose.LoadingAnimation
-import com.goldcompany.apps.todoapplication.util.TasksFilterType
 import com.goldcompany.apps.todoapplication.widget.TaskWidget
 import com.goldcompany.apps.todoapplication.widget.TaskWidgetReceiver
 import kotlinx.coroutines.launch
@@ -57,8 +53,8 @@ fun TaskActionBroadcastReceiver(
     action: String,
     onEvent: (intent: Intent?) -> Unit
 ) {
-    val context = LocalContext.current
     val currentEvent by rememberUpdatedState(newValue = onEvent)
+    val context = LocalContext.current
 
     DisposableEffect(context, currentEvent) {
         val filter = IntentFilter(action)
@@ -80,10 +76,10 @@ fun TaskActionBroadcastReceiver(
 fun HomeScreen(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
-    addTask: () -> Unit,
-    onTaskClick: (Task) -> Unit,
-    drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    goToTaskDetail: (Long, String?) -> Unit,
 ) {
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
@@ -96,12 +92,16 @@ fun HomeScreen(
             modifier = modifier,
             topBar = {
                 HomeTopAppBar(
-                    title = convertMilliToDate(uiState.currentDateMillis),
+                    title = convertMilliToDate(uiState.selectedDateMilli),
                     drawerState = drawerState,
                 )
             },
             floatingActionButton = {
-                FloatingActionButton(onClick = addTask) {
+                FloatingActionButton(
+                    onClick = {
+                        goToTaskDetail(uiState.selectedDateMilli, null)
+                    }
+                ) {
                     Icon(Icons.Filled.Add, stringResource(id = R.string.add_task))
                 }
             }
@@ -110,16 +110,20 @@ fun HomeScreen(
                 modifier = modifier.padding(paddingValues),
             ) {
                 CalendarView(
-                    currentDateMilli = uiState.currentDateMillis,
+                    selectedDateMilli = uiState.selectedDateMilli,
                     onCalendarItemClick = { millis ->
-                        viewModel.setCurrentDateMillis(millis)
+                        viewModel.selectDateMilli(millis)
                     }
                 )
                 TaskList(
                     loadingState = uiState.isLoading,
-                    tasks = uiState.items,
-                    onTaskClick = onTaskClick,
-                    updateTaskCompleted = viewModel::updateTaskCompleted
+                    tasks = uiState.tasks,
+                    onTaskClick = { id ->
+                        goToTaskDetail(uiState.selectedDateMilli, id)
+                    },
+                    updateTask = { id, isCompleted ->
+                        viewModel.updateTask(id, isCompleted)
+                    }
                 )
             }
 
@@ -130,7 +134,7 @@ fun HomeScreen(
         val id = intent?.getStringExtra(TaskWidget.KEY_TASK_ID).toString()
         val isCompleted = intent?.getBooleanExtra(TaskWidget.KEY_TASK_STATE, false) ?: false
 
-        viewModel.updateTaskCompleted(id, isCompleted)
+        viewModel.updateTask(id, isCompleted)
     }
 }
 
@@ -139,8 +143,8 @@ private fun TaskList(
     modifier: Modifier = Modifier,
     loadingState: Boolean,
     tasks: List<Task>,
-    onTaskClick: (Task) -> Unit,
-    updateTaskCompleted: (String, Boolean) -> Unit
+    onTaskClick: (String) -> Unit,
+    updateTask: (Int, Boolean) -> Unit
 ) {
     when (loadingState) {
         true -> {
@@ -152,10 +156,11 @@ private fun TaskList(
             LazyColumn(
                 modifier = modifier
             ) {
-                items(tasks) { task ->
+                itemsIndexed(tasks) { index, task ->
                     TaskItem(
                         task = task,
-                        onCheckChange = updateTaskCompleted,
+                        index = index,
+                        updateTask = updateTask,
                         onTaskClick = onTaskClick
                     )
                 }
@@ -167,10 +172,10 @@ private fun TaskList(
 @Composable
 private fun TaskItem(
     task: Task,
-    onCheckChange: (String, Boolean) -> Unit,
-    onTaskClick: (Task) -> Unit
+    index: Int,
+    updateTask: (Int, Boolean) -> Unit,
+    onTaskClick: (String) -> Unit
 ) {
-    val isCompleted = remember { mutableStateOf(task.isCompleted) }
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 
@@ -181,7 +186,7 @@ private fun TaskItem(
             .padding(
                 vertical = dimensionResource(id = R.dimen.vertical_margin)
             )
-            .clickable { onTaskClick(task) }
+            .clickable { onTaskClick(task.id) }
     ) {
         Checkbox(
             checked = task.isCompleted,
@@ -190,8 +195,7 @@ private fun TaskItem(
                     updateTaskWidget(context, task)
                 }
 
-                isCompleted.value = it
-                onCheckChange(task.id, it)
+                updateTask(index, it)
             }
         )
         Text(
