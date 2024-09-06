@@ -7,11 +7,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -20,15 +20,10 @@ import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,24 +43,26 @@ import com.goldcompany.apps.data.util.convertMilliToDate
 import com.goldcompany.apps.todoapplication.R
 import com.goldcompany.apps.todoapplication.compose.LoadingAnimation
 import com.goldcompany.apps.todoapplication.compose.TaskDetailAppBar
+import com.goldcompany.apps.todoapplication.util.dateToMilli
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.time.ZoneOffset
 
 @Composable
 fun TaskScreen(
-    modifier: Modifier = Modifier,
     viewModel: TaskViewModel = hiltViewModel(),
     navigateBack: () -> Unit
 ) {
-    val snackBarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
 
-    Scaffold(
-        modifier = modifier,
-        topBar = {
+    Surface(
+        modifier = Modifier.wrapContentSize()
+            .clip(RoundedCornerShape(10.dp))
+    ) {
+        Column {
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
             TaskDetailAppBar(
-                title = R.string.add_task,
+                isEdit = uiState.isEdit,
                 deleteTask = {
                     coroutineScope.launch {
                         viewModel.deleteTask()
@@ -74,36 +71,20 @@ fun TaskScreen(
                 },
                 navigateBack = navigateBack
             )
-        },
-        snackbarHost = { SnackbarHost(snackBarHostState) },
-
-    ) { paddingValues ->
-        val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
-        if (uiState.isLoading) {
-            LoadingAnimation(modifier = modifier.padding(paddingValues))
-        } else {
-            EditTask(
-                modifier = modifier.padding(paddingValues),
-                state = uiState,
-                onTitleChange = viewModel::updateTitle,
-                onDescriptionChange = viewModel::updateDescription,
-                saveTask = {
-                    viewModel.saveTask()
-                    navigateBack()
-                },
-                navigateBack = navigateBack,
-                onDateSelected = viewModel::updateStartDate
-            )
-        }
-
-        uiState.message?.let { message ->
-            val snackBarMessage = stringResource(id = message)
-
-            LaunchedEffect(key1 = message) {
-                snackBarHostState.showSnackbar(
-                    message = snackBarMessage,
-                    duration = SnackbarDuration.Short
+            if (uiState.isLoading) {
+                LoadingAnimation(modifier = Modifier.wrapContentSize())
+            } else {
+                EditTask(
+                    modifier = Modifier.wrapContentSize(),
+                    state = uiState,
+                    onTitleChange = viewModel::updateTitle,
+                    onDescriptionChange = viewModel::updateDescription,
+                    saveTask = {
+                        viewModel.saveTask()
+                        navigateBack()
+                    },
+                    navigateBack = navigateBack,
+                    onDateSelected = viewModel::updateStartDate
                 )
             }
         }
@@ -121,15 +102,12 @@ private fun EditTask(
     onDateSelected: (Long) -> Unit
 ) {
     Column(
-        modifier = modifier
-            .padding(all = dimensionResource(id = R.dimen.horizontal_margin))
-            .fillMaxSize()
+        modifier = modifier.padding(all = dimensionResource(id = R.dimen.horizontal_margin))
     ) {
         TaskTextInput(
             modifier = Modifier.fillMaxWidth(),
             text = state.title,
             onTextChange = onTitleChange,
-            titleResource = R.string.title,
             hintResource = R.string.title_hint,
             isSingleLine = true
         )
@@ -140,7 +118,7 @@ private fun EditTask(
         ) {
             Text(text = stringResource(id = R.string.date))
             Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.vertical_margin)))
-            SelectTaskDate(
+            TaskDateSelector(
                 savedDate = state.date,
                 onDateSelected = onDateSelected
             )
@@ -149,10 +127,9 @@ private fun EditTask(
         TaskTextInput(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f),
+                .wrapContentHeight(),
             text = state.description,
             onTextChange = onDescriptionChange,
-            titleResource = R.string.description,
             hintResource = R.string.description_hint,
             isSingleLine = false
         )
@@ -162,14 +139,16 @@ private fun EditTask(
         ) {
             Button(
                 modifier = Modifier.weight(1f),
-                onClick = { saveTask() }
+                onClick = { saveTask() },
+                shape = RoundedCornerShape(10.dp)
             ) {
                 Text(text = stringResource(id = R.string.save))
             }
             Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.horizontal_margin)))
             Button(
                 modifier = Modifier.weight(1f),
-                onClick = { navigateBack() }
+                onClick = { navigateBack() },
+                shape = RoundedCornerShape(10.dp)
             ) {
                 Text(text = stringResource(id = R.string.cancel))
             }
@@ -178,7 +157,7 @@ private fun EditTask(
 }
 
 @Composable
-private fun SelectTaskDate(
+private fun TaskDateSelector(
     modifier: Modifier = Modifier,
     savedDate: String,
     onDateSelected: (Long) -> Unit
@@ -191,11 +170,12 @@ private fun SelectTaskDate(
     Box(
         modifier = modifier
             .wrapContentSize()
-            .clip(RoundedCornerShape(2.dp))
             .border(
                 width = 1.dp,
-                color = colorResource(id = R.color.black)
+                color = colorResource(id = R.color.black),
+                shape = RoundedCornerShape(5.dp)
             )
+            .clip(RoundedCornerShape(5.dp))
             .clickable {
                 isShowDatePickerDialog = true
             }
@@ -211,7 +191,6 @@ private fun SelectTaskDate(
     if (isShowDatePickerDialog) {
         TaskDatePickerDialog(
             onDateSelected = {
-                println(it)
                 date = convertMilliToDate(it)
                 onDateSelected(it)
             },
@@ -234,11 +213,12 @@ private fun TaskDatePickerDialog(
         confirmButton = {
             Button(
                 onClick = {
-                    val currentTime = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli()
+                    val currentTime = LocalDate.now().dateToMilli()
 
                     onDateSelected(selectedDate ?: currentTime)
                     onDismiss()
-                }
+                },
+                shape = RoundedCornerShape(10.dp)
             ) {
                 Text(text = stringResource(id = R.string.ok))
             }
@@ -247,7 +227,8 @@ private fun TaskDatePickerDialog(
             Button(
                 onClick = {
                     onDismiss()
-                }
+                },
+                shape = RoundedCornerShape(10.dp)
             ) {
                 Text(text = stringResource(id = R.string.cancel))
             }
@@ -262,17 +243,13 @@ private fun TaskTextInput(
     modifier: Modifier,
     text: String,
     onTextChange: (String) -> Unit,
-    @StringRes titleResource: Int,
     @StringRes hintResource: Int,
     isSingleLine: Boolean
 
 ) {
-    Text(
-        text = stringResource(id = titleResource),
-        style = MaterialTheme.typography.titleLarge
-    )
     OutlinedTextField(
         modifier = modifier,
+        shape = RoundedCornerShape(5.dp),
         value = text,
         onValueChange = onTextChange,
         placeholder = {

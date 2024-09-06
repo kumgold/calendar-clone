@@ -7,7 +7,9 @@ import com.goldcompany.apps.data.data.Task
 import com.goldcompany.apps.data.repository.TaskRepository
 import com.goldcompany.apps.data.util.convertMilliToDate
 import com.goldcompany.apps.todoapplication.R
+import com.goldcompany.apps.todoapplication.util.CURRENT_DATE_MILLI
 import com.goldcompany.apps.todoapplication.util.TASK_ID
+import com.goldcompany.apps.todoapplication.util.dateToMilli
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,8 +24,9 @@ data class TaskUiState(
     val title: String = "",
     val description: String = "",
     val isCompleted: Boolean = false,
-    val date: String = convertMilliToDate(LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli()),
+    val date: String = convertMilliToDate(LocalDate.now().dateToMilli()),
     val isLoading: Boolean = false,
+    val isEdit: Boolean = false,
     val message: Int? = null
 )
 
@@ -33,6 +36,7 @@ class TaskViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     private val taskId: String? = savedStateHandle[TASK_ID]
+    private val currentDateMilli: Long = savedStateHandle[CURRENT_DATE_MILLI] ?: LocalDate.now().dateToMilli()
 
     private val _uiState = MutableStateFlow(TaskUiState())
     val uiState: StateFlow<TaskUiState> = _uiState.asStateFlow()
@@ -40,6 +44,14 @@ class TaskViewModel @Inject constructor(
     init {
         if (taskId != null) {
             loadTask(taskId)
+        } else {
+            _uiState.update {
+                it.copy(
+                    isLoading = false,
+                    isEdit = false,
+                    date = convertMilliToDate(currentDateMilli),
+                )
+            }
         }
     }
 
@@ -56,6 +68,7 @@ class TaskViewModel @Inject constructor(
                                 description = task.description,
                                 isCompleted = task.isCompleted,
                                 isLoading = false,
+                                isEdit = true,
                                 date = task.date,
                             )
                         }
