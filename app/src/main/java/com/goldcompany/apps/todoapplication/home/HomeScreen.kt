@@ -21,6 +21,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
@@ -128,7 +130,7 @@ fun HomeScreen(
             TaskList(
                 loadingState = uiState.isLoading,
                 tasks = uiState.tasks,
-                onTaskClick = { id ->
+                goToTaskDetail = { id ->
                     goToTaskDetail(uiState.selectedDateMilli, id)
                 },
                 updateTask = { id, isCompleted ->
@@ -152,7 +154,7 @@ private fun TaskList(
     modifier: Modifier = Modifier,
     loadingState: Boolean,
     tasks: List<Task>,
-    onTaskClick: (String) -> Unit,
+    goToTaskDetail: (String) -> Unit,
     updateTask: (Int, Boolean) -> Unit
 ) {
     when (loadingState) {
@@ -165,12 +167,15 @@ private fun TaskList(
             LazyColumn(
                 modifier = modifier
             ) {
-                itemsIndexed(tasks) { index, task ->
+                itemsIndexed(
+                    items = tasks,
+                    key = { _, task -> task.id }
+                ) { index, task ->
                     TaskItem(
                         task = task,
                         index = index,
                         updateTask = updateTask,
-                        onTaskClick = onTaskClick
+                        goToTaskDetail = goToTaskDetail
                     )
                 }
             }
@@ -183,8 +188,9 @@ private fun TaskItem(
     task: Task,
     index: Int,
     updateTask: (Int, Boolean) -> Unit,
-    onTaskClick: (String) -> Unit
+    goToTaskDetail: (String) -> Unit
 ) {
+    val isChecked = remember { mutableStateOf(task.isCompleted) }
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 
@@ -195,16 +201,17 @@ private fun TaskItem(
             .padding(
                 vertical = dimensionResource(id = R.dimen.vertical_margin)
             )
-            .clickable { onTaskClick(task.id) }
+            .clickable { goToTaskDetail(task.id) }
     ) {
         Checkbox(
-            checked = task.isCompleted,
+            checked = isChecked.value,
             onCheckedChange = {
                 coroutineScope.launch {
                     updateTaskWidget(context, task)
                 }
 
                 updateTask(index, it)
+                isChecked.value = it
             }
         )
         Text(
