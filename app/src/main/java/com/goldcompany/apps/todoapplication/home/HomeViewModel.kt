@@ -39,7 +39,7 @@ class HomeViewModel @Inject constructor(
         _tasks, _selectedDateMilli, _isLoading
     ) { tasks, selectedDateMilli, isLoading ->
         TaskUiState(
-            tasks = tasks,
+            tasks = tasks.toMutableStateList(),
             selectedDateMilli = selectedDateMilli,
             isLoading = isLoading
         )
@@ -54,10 +54,10 @@ class HomeViewModel @Inject constructor(
     }
 
     fun getDailyTasks(
-        millis: Long = LocalDate.now().dateToMilli()
+        milli: Long = LocalDate.now().dateToMilli()
     ) {
         viewModelScope.launch {
-            _tasks.update { repository.getDailyTasks(millis).toMutableStateList() }
+            _tasks.update { repository.getDailyTasks(milli).toMutableStateList() }
         }
     }
 
@@ -73,7 +73,6 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             _tasks.value[index] = task.copy(isCompleted = isCompleted)
             repository.updateCompleted(task.id.toLong(), isCompleted)
-
         }
     }
 

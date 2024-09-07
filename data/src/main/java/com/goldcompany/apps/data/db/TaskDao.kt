@@ -1,7 +1,6 @@
 package com.goldcompany.apps.data.db
 
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -13,8 +12,11 @@ interface TaskDao {
     @Query("SELECT * FROM task")
     fun getAllTasks(): Flow<List<TaskEntity>>
 
-    @Query("SELECT * FROM task WHERE dateTimeMilli = :millis")
-    suspend fun getDailyTasks(millis: Long): List<TaskEntity>
+    @Query("SELECT * FROM task WHERE dateTimeMilli = :milli")
+    suspend fun getDailyTasks(milli: Long): List<TaskEntity>
+
+    @Query("SELECT * FROM task WHERE dateTimeMilli >= :startMilli AND dateTimeMilli < :endMilli")
+    suspend fun getMonthlyTasks(startMilli: Long, endMilli: Long): List<TaskEntity>
 
     @Query("SELECT * FROM task WHERE isCompleted = 0")
     fun getAllTasksForWidget(): List<TaskEntity>

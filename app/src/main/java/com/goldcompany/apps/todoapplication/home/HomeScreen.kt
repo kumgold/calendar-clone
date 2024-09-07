@@ -121,7 +121,7 @@ fun HomeScreen(
         ) {
             CalendarView(
                 selectedDateMilli = uiState.selectedDateMilli,
-                onCalendarItemClick = { millis ->
+                selectDateMilli = { millis ->
                     viewModel.selectDateMilli(millis)
                 }
             )

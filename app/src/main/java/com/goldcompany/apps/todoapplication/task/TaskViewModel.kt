@@ -132,7 +132,7 @@ class TaskViewModel @Inject constructor(
                     isCompleted = _uiState.value.isCompleted,
                     title = _uiState.value.title,
                     description = _uiState.value.description,
-                    date = _uiState.value.date,
+                    date = _uiState.value.date
                 )
             )
         }
@@ -148,7 +148,7 @@ class TaskViewModel @Inject constructor(
                     isCompleted = _uiState.value.isCompleted,
                     title = _uiState.value.title,
                     description = _uiState.value.description,
-                    date = _uiState.value.date,
+                    date = _uiState.value.date
                 )
             )
         }

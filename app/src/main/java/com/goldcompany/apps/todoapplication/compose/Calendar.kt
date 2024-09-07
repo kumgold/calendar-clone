@@ -40,7 +40,6 @@ import com.goldcompany.apps.todoapplication.util.dateToMilli
 import kotlinx.coroutines.flow.collectLatest
 import java.time.DayOfWeek
 import java.time.LocalDate
-import java.time.ZoneOffset
 import java.time.format.TextStyle
 import java.util.Locale
 
@@ -48,7 +47,7 @@ import java.util.Locale
 @Composable
 fun CalendarView(
     selectedDateMilli: Long,
-    onCalendarItemClick: (Long) -> Unit
+    selectDateMilli: (Long) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -83,7 +82,7 @@ fun CalendarView(
                     )
                 }
 
-                onCalendarItemClick(displayDate.dateToMilli())
+                selectDateMilli(displayDate.dateToMilli())
             }
         }
 
@@ -118,7 +117,7 @@ fun CalendarView(
                         date = date,
                         isToday = (date == LocalDate.now()),
                         currentDateMilli = selectedDateMilli,
-                        onItemClick = onCalendarItemClick
+                        getDailyTasks = selectDateMilli
                     )
                 }
             }
@@ -147,11 +146,11 @@ private fun CalendarItem(
     date: LocalDate,
     isToday: Boolean,
     currentDateMilli: Long,
-    onItemClick: (Long) -> Unit = {},
+    getDailyTasks: (Long) -> Unit,
 ) {
-    val millis = date.dateToMilli()
+    val milli = date.dateToMilli()
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .aspectRatio(1.0f)
@@ -159,7 +158,7 @@ private fun CalendarItem(
                 width = 1.dp,
                 color = if (isToday) {
                     Color.Red
-                } else if (currentDateMilli == millis) {
+                } else if (currentDateMilli == milli) {
                     Color.Gray
                 } else {
                     MaterialTheme.colorScheme.background
@@ -168,13 +167,11 @@ private fun CalendarItem(
             )
             .clip(shape = RoundedCornerShape(10.dp))
             .clickable {
-                println(millis)
-                onItemClick(millis)
-            },
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+                getDailyTasks(milli)
+            }
     ) {
         Text(
+            modifier = Modifier.align(Alignment.Center),
             text = (date.dayOfMonth).toString(),
         )
     }
