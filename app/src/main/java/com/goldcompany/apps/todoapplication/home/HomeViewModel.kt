@@ -53,7 +53,7 @@ class HomeViewModel @Inject constructor(
         getDailyTasks()
     }
 
-    private fun getDailyTasks(
+    fun getDailyTasks(
         millis: Long = LocalDate.now().dateToMilli()
     ) {
         viewModelScope.launch {

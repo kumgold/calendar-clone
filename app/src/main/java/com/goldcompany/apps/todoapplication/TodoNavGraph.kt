@@ -49,6 +49,9 @@ fun TodoNavGraph(
                 navArgument(CURRENT_DATE_MILLI) {
                     type = NavType.LongType
                 }
+            ),
+            dialogProperties = DialogProperties(
+                usePlatformDefaultWidth = false
             )
         ) {
             TaskScreen(

@@ -14,13 +14,10 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -29,6 +26,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
@@ -36,12 +34,13 @@ import androidx.compose.ui.unit.sp
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.goldcompany.apps.data.data.Task
 import com.goldcompany.apps.data.util.convertMilliToDate
 import com.goldcompany.apps.todoapplication.R
 import com.goldcompany.apps.todoapplication.compose.CalendarView
-import com.goldcompany.apps.todoapplication.compose.HomeDrawerContent
 import com.goldcompany.apps.todoapplication.compose.HomeTopAppBar
 import com.goldcompany.apps.todoapplication.compose.LoadingAnimation
 import com.goldcompany.apps.todoapplication.widget.TaskWidget
@@ -78,56 +77,66 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
     goToTaskDetail: (Long, String?) -> Unit,
 ) {
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val lifecycleOwner = rememberUpdatedState(newValue = LocalLifecycleOwner.current)
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    ModalNavigationDrawer(
-        drawerState = drawerState,
-        drawerContent = {
-            HomeDrawerContent()
-        }
-    ) {
-        val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
-        Scaffold(
-            modifier = modifier,
-            topBar = {
-                HomeTopAppBar(
-                    title = convertMilliToDate(uiState.selectedDateMilli),
-                    drawerState = drawerState,
-                )
-            },
-            floatingActionButton = {
-                FloatingActionButton(
-                    onClick = {
-                        goToTaskDetail(uiState.selectedDateMilli, null)
-                    }
-                ) {
-                    Icon(Icons.Filled.Add, stringResource(id = R.string.add_task))
+    DisposableEffect(key1 = lifecycleOwner) {
+        val lifecycle = lifecycleOwner.value.lifecycle
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_RESUME -> {
+                    viewModel.getDailyTasks(uiState.selectedDateMilli)
+                    println("daily task update")
                 }
+                else -> {}
             }
-        ) { paddingValues ->
-            Column(
-                modifier = modifier.padding(paddingValues),
-            ) {
-                CalendarView(
-                    selectedDateMilli = uiState.selectedDateMilli,
-                    onCalendarItemClick = { millis ->
-                        viewModel.selectDateMilli(millis)
-                    }
-                )
-                TaskList(
-                    loadingState = uiState.isLoading,
-                    tasks = uiState.tasks,
-                    onTaskClick = { id ->
-                        goToTaskDetail(uiState.selectedDateMilli, id)
-                    },
-                    updateTask = { id, isCompleted ->
-                        viewModel.updateTask(id, isCompleted)
-                    }
-                )
-            }
-
         }
+
+        lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycle.removeObserver(observer)
+        }
+    }
+
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+            HomeTopAppBar(
+                title = convertMilliToDate(uiState.selectedDateMilli)
+            )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+                    goToTaskDetail(uiState.selectedDateMilli, null)
+                }
+            ) {
+                Icon(Icons.Filled.Add, stringResource(id = R.string.add_task))
+            }
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = modifier.padding(paddingValues),
+        ) {
+            CalendarView(
+                selectedDateMilli = uiState.selectedDateMilli,
+                onCalendarItemClick = { millis ->
+                    viewModel.selectDateMilli(millis)
+                }
+            )
+            TaskList(
+                loadingState = uiState.isLoading,
+                tasks = uiState.tasks,
+                onTaskClick = { id ->
+                    goToTaskDetail(uiState.selectedDateMilli, id)
+                },
+                updateTask = { id, isCompleted ->
+                    viewModel.updateTask(id, isCompleted)
+                }
+            )
+        }
+
     }
 
     TaskActionBroadcastReceiver(TaskWidgetReceiver.UPDATE_ACTION) { intent ->
