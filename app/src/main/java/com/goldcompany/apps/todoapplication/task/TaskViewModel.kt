@@ -109,7 +109,7 @@ class TaskViewModel @Inject constructor(
     }
 
     fun saveTask() {
-        if (_uiState.value.title.isEmpty() || _uiState.value.description.isEmpty()) {
+        if (_uiState.value.title.isEmpty()) {
             _uiState.update {
                 it.copy(message = R.string.please_check_your_input)
             }

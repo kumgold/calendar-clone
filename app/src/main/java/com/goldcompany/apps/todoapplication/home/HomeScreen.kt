@@ -87,7 +87,10 @@ fun HomeScreen(
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_RESUME -> {
-                    viewModel.getDailyTasks(uiState.selectedDateMilli)
+                    viewModel.getMonthlyTasks(
+                        uiState.startLocalDate,
+                        uiState.startLocalDate.plusMonths(1)
+                    )
                 }
                 else -> {}
             }
@@ -122,13 +125,17 @@ fun HomeScreen(
         ) {
             CalendarView(
                 selectedDateMilli = uiState.selectedDateMilli,
+                monthlyTasks = uiState.monthlyTasks,
                 selectDateMilli = { millis ->
                     viewModel.selectDateMilli(millis)
+                },
+                getMonthlyTasks = { startDate, endDate ->
+                    viewModel.getMonthlyTasks(startDate, endDate)
                 }
             )
             TaskList(
                 loadingState = uiState.isLoading,
-                tasks = uiState.tasks,
+                tasks = uiState.monthlyTasks[uiState.selectedDateMilli] ?: emptyList(),
                 goToTaskDetail = { id ->
                     goToTaskDetail(uiState.selectedDateMilli, id)
                 },
@@ -154,7 +161,7 @@ private fun TaskList(
     loadingState: Boolean,
     tasks: List<Task>,
     goToTaskDetail: (String) -> Unit,
-    updateTask: (Int, Boolean) -> Unit
+    updateTask: (String, Boolean) -> Unit
 ) {
     when (loadingState) {
         true -> {
@@ -186,7 +193,7 @@ private fun TaskList(
 private fun TaskItem(
     task: Task,
     index: Int,
-    updateTask: (Int, Boolean) -> Unit,
+    updateTask: (String, Boolean) -> Unit,
     goToTaskDetail: (String) -> Unit
 ) {
     val isChecked = remember { mutableStateOf(task.isCompleted) }
@@ -209,7 +216,7 @@ private fun TaskItem(
                     updateTaskWidget(context, task)
                 }
 
-                updateTask(index, it)
+                updateTask(task.id, it)
                 isChecked.value = it
             }
         )

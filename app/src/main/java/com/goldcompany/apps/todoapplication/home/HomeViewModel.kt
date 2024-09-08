@@ -21,7 +21,9 @@ import javax.inject.Inject
 
 data class TaskUiState(
     val tasks: SnapshotStateList<Task> = mutableStateListOf(),
+    val monthlyTasks: Map<Long, List<Task>> = mapOf(),
     val selectedDateMilli: Long = LocalDate.now().dateToMilli(),
+    val startLocalDate: LocalDate = LocalDate.now(),
     val isLoading: Boolean = false,
     val userMessage: Int? = null
 )
@@ -32,15 +34,19 @@ class HomeViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _tasks = MutableStateFlow<SnapshotStateList<Task>>(mutableStateListOf())
-    private val _selectedDateMilli = MutableStateFlow(System.currentTimeMillis())
+    private val _monthlyTasks = MutableStateFlow<Map<Long, List<Task>>>(mapOf())
+    private val _selectedDateMilli = MutableStateFlow(LocalDate.now().dateToMilli())
+    private val _startLocalDate = MutableStateFlow(LocalDate.now())
     private val _isLoading = MutableStateFlow(false)
 
     val uiState: StateFlow<TaskUiState> = combine(
-        _tasks, _selectedDateMilli, _isLoading
-    ) { tasks, selectedDateMilli, isLoading ->
+        _tasks, _monthlyTasks, _selectedDateMilli, _startLocalDate, _isLoading
+    ) { tasks, monthlyTasks, selectedDateMilli, startLocalDate, isLoading ->
         TaskUiState(
             tasks = tasks.toMutableStateList(),
+            monthlyTasks = monthlyTasks,
             selectedDateMilli = selectedDateMilli,
+            startLocalDate = startLocalDate,
             isLoading = isLoading
         )
     }.stateIn(
@@ -50,15 +56,24 @@ class HomeViewModel @Inject constructor(
     )
 
     init {
-        getDailyTasks()
+        getMonthlyTasks()
     }
 
-    fun getDailyTasks(
-        milli: Long = LocalDate.now().dateToMilli()
+    fun getMonthlyTasks(
+        startDate: LocalDate = LocalDate.now(),
+        endDate: LocalDate = LocalDate.now().plusMonths(1)
     ) {
         viewModelScope.launch {
-            _tasks.update { repository.getDailyTasks(milli).toMutableStateList() }
+            val map = mutableMapOf<Long, List<Task>>()
+            val list = repository.getMonthlyTasks(startDate.dateToMilli(), endDate.dateToMilli())
+
+            list.map { task ->
+                map[task.dateMilli] = list.filter { it.dateMilli == task.dateMilli }
+            }
+
+            _monthlyTasks.update { map }
         }
+        _startLocalDate.update { startDate }
     }
 
     fun updateTask(taskId: String, isCompleted: Boolean) {
@@ -67,17 +82,7 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun updateTask(index: Int, isCompleted: Boolean) {
-        val task = _tasks.value[index]
-
-        viewModelScope.launch {
-            _tasks.value[index] = task.copy(isCompleted = isCompleted)
-            repository.updateCompleted(task.id.toLong(), isCompleted)
-        }
-    }
-
     fun selectDateMilli(milli: Long) {
         _selectedDateMilli.update { milli }
-        getDailyTasks(milli)
     }
 }

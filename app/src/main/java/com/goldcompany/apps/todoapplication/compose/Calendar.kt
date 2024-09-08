@@ -1,6 +1,7 @@
 package com.goldcompany.apps.todoapplication.compose
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -13,12 +14,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -35,6 +38,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
+import com.goldcompany.apps.data.data.Task
 import com.goldcompany.apps.todoapplication.R
 import com.goldcompany.apps.todoapplication.util.dateToMilli
 import kotlinx.coroutines.flow.collectLatest
@@ -47,7 +51,9 @@ import java.util.Locale
 @Composable
 fun CalendarView(
     selectedDateMilli: Long,
-    selectDateMilli: (Long) -> Unit
+    monthlyTasks: Map<Long, List<Task>>,
+    selectDateMilli: (Long) -> Unit,
+    getMonthlyTasks: (LocalDate, LocalDate) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -83,6 +89,18 @@ fun CalendarView(
                 }
 
                 selectDateMilli(displayDate.dateToMilli())
+                getMonthlyTasks(
+                    LocalDate.of(
+                        yearRange.first + page/12,
+                        page % 12 + 1,
+                        1
+                    ),
+                    LocalDate.of(
+                        yearRange.first + page/12,
+                        page % 12 + 2,
+                        1
+                    )
+                )
             }
         }
 
@@ -116,6 +134,7 @@ fun CalendarView(
                     CalendarItem(
                         date = date,
                         isToday = (date == LocalDate.now()),
+                        isContainTasks = monthlyTasks.keys.contains(date.dateToMilli()),
                         currentDateMilli = selectedDateMilli,
                         getDailyTasks = selectDateMilli
                     )
@@ -145,6 +164,7 @@ private fun DayOfWeekView() {
 private fun CalendarItem(
     date: LocalDate,
     isToday: Boolean,
+    isContainTasks: Boolean,
     currentDateMilli: Long,
     getDailyTasks: (Long) -> Unit,
 ) {
@@ -170,10 +190,23 @@ private fun CalendarItem(
                 getDailyTasks(milli)
             }
     ) {
-        Text(
-            modifier = Modifier.align(Alignment.Center),
-            text = (date.dayOfMonth).toString(),
-        )
+        Column(
+            modifier = Modifier.align(Alignment.Center)
+        ) {
+            Text(
+                text = (date.dayOfMonth).toString(),
+            )
+            if (isContainTasks) {
+                Box(
+                    modifier = Modifier.size(5.dp)
+                        .background(
+                            color = MaterialTheme.colorScheme.primary,
+                            shape = CircleShape
+                        )
+                        .align(Alignment.CenterHorizontally)
+                )
+            }
+        }
     }
 }
 
