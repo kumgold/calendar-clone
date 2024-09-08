@@ -88,7 +88,6 @@ fun HomeScreen(
             when (event) {
                 Lifecycle.Event.ON_RESUME -> {
                     viewModel.getDailyTasks(uiState.selectedDateMilli)
-                    println("daily task update")
                 }
                 else -> {}
             }

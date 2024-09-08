@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.goldcompany.apps.data.data.Task
 import com.goldcompany.apps.data.repository.TaskRepository
-import com.goldcompany.apps.data.util.convertMilliToDate
 import com.goldcompany.apps.todoapplication.R
 import com.goldcompany.apps.todoapplication.util.CURRENT_DATE_MILLI
 import com.goldcompany.apps.todoapplication.util.TASK_ID
@@ -17,14 +16,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.time.ZoneOffset
 import javax.inject.Inject
 
 data class TaskUiState(
     val title: String = "",
     val description: String = "",
     val isCompleted: Boolean = false,
-    val date: String = convertMilliToDate(LocalDate.now().dateToMilli()),
+    val dateMilli: Long = LocalDate.now().dateToMilli(),
     val isLoading: Boolean = false,
     val isEdit: Boolean = false,
     val message: Int? = null
@@ -49,7 +47,7 @@ class TaskViewModel @Inject constructor(
                 it.copy(
                     isLoading = false,
                     isEdit = false,
-                    date = convertMilliToDate(currentDateMilli),
+                    dateMilli = currentDateMilli,
                 )
             }
         }
@@ -69,7 +67,7 @@ class TaskViewModel @Inject constructor(
                                 isCompleted = task.isCompleted,
                                 isLoading = false,
                                 isEdit = true,
-                                date = task.date,
+                                dateMilli = task.dateMilli,
                             )
                         }
                     }
@@ -102,9 +100,11 @@ class TaskViewModel @Inject constructor(
         }
     }
 
-    fun updateStartDate(millis: Long) {
+    fun updateDateMilli(milli: Long) {
         _uiState.update {
-            it.copy(date = convertMilliToDate(millis))
+            it.copy(
+                dateMilli = milli,
+            )
         }
     }
 
@@ -132,7 +132,7 @@ class TaskViewModel @Inject constructor(
                     isCompleted = _uiState.value.isCompleted,
                     title = _uiState.value.title,
                     description = _uiState.value.description,
-                    date = _uiState.value.date
+                    dateMilli = _uiState.value.dateMilli
                 )
             )
         }
@@ -148,7 +148,7 @@ class TaskViewModel @Inject constructor(
                     isCompleted = _uiState.value.isCompleted,
                     title = _uiState.value.title,
                     description = _uiState.value.description,
-                    date = _uiState.value.date
+                    dateMilli = _uiState.value.dateMilli
                 )
             )
         }

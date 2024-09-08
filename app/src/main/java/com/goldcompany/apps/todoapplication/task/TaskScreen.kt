@@ -84,7 +84,7 @@ fun TaskScreen(
                         navigateBack()
                     },
                     navigateBack = navigateBack,
-                    onDateSelected = viewModel::updateStartDate
+                    onDateSelected = viewModel::updateDateMilli
                 )
             }
         }
@@ -119,7 +119,7 @@ private fun EditTask(
             Text(text = stringResource(id = R.string.date))
             Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.vertical_margin)))
             TaskDateSelector(
-                savedDate = state.date,
+                savedDate = convertMilliToDate(state.dateMilli),
                 onDateSelected = onDateSelected
             )
         }
