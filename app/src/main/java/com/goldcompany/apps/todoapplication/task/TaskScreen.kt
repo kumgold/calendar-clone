@@ -25,10 +25,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,6 +36,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -45,7 +47,6 @@ import com.goldcompany.apps.todoapplication.R
 import com.goldcompany.apps.todoapplication.compose.LoadingAnimation
 import com.goldcompany.apps.todoapplication.compose.TaskDetailAppBar
 import com.goldcompany.apps.todoapplication.util.dateToMilli
-import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 @Composable
@@ -53,22 +54,15 @@ fun TaskScreen(
     viewModel: TaskViewModel = hiltViewModel(),
     navigateBack: () -> Unit
 ) {
-    val coroutineScope = rememberCoroutineScope()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Surface(
         modifier = Modifier.fillMaxSize()
     ) {
         Column {
-            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
             TaskDetailAppBar(
                 isEdit = uiState.isEdit,
-                deleteTask = {
-                    coroutineScope.launch {
-                        viewModel.deleteTask()
-                        navigateBack()
-                    }
-                },
+                deleteTask = { viewModel.deleteTask() },
                 navigateBack = navigateBack
             )
             if (uiState.isLoading) {
@@ -76,12 +70,13 @@ fun TaskScreen(
             } else {
                 EditTask(
                     modifier = Modifier.wrapContentSize(),
-                    state = uiState,
+                    title = uiState.title,
+                    description = uiState.description,
+                    dateMilli = uiState.dateMilli,
                     onTitleChange = viewModel::updateTitle,
                     onDescriptionChange = viewModel::updateDescription,
                     saveTask = {
                         viewModel.saveTask()
-                        navigateBack()
                     },
                     navigateBack = navigateBack,
                     onDateSelected = viewModel::updateDateMilli
@@ -89,12 +84,20 @@ fun TaskScreen(
             }
         }
     }
+
+    LaunchedEffect(key1 = uiState.isDone) {
+        if (uiState.isDone) {
+            navigateBack()
+        }
+    }
 }
 
 @Composable
 private fun EditTask(
     modifier: Modifier,
-    state: TaskUiState,
+    title: String,
+    description: String,
+    dateMilli: Long,
     onTitleChange: (String) -> Unit,
     onDescriptionChange: (String) -> Unit,
     saveTask: () -> Unit,
@@ -106,9 +109,9 @@ private fun EditTask(
     ) {
         TaskTextInput(
             modifier = Modifier.fillMaxWidth(),
-            text = state.title,
+            text = title,
             onTextChange = onTitleChange,
-            hintResource = R.string.title_hint,
+            hintResource = R.string.title,
             isSingleLine = true
         )
         Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.vertical_margin)))
@@ -119,7 +122,7 @@ private fun EditTask(
             Text(text = stringResource(id = R.string.date))
             Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.vertical_margin)))
             TaskDateSelector(
-                savedDate = convertMilliToDate(state.dateMilli),
+                savedDate = convertMilliToDate(dateMilli),
                 onDateSelected = onDateSelected
             )
         }
@@ -128,9 +131,9 @@ private fun EditTask(
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight(),
-            text = state.description,
+            text = description,
             onTextChange = onDescriptionChange,
-            hintResource = R.string.description_hint,
+            hintResource = R.string.description,
             isSingleLine = false
         )
         Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.vertical_margin)))
@@ -247,12 +250,23 @@ private fun TaskTextInput(
     isSingleLine: Boolean
 
 ) {
+    val textState = remember {
+        mutableStateOf(
+            TextFieldValue(
+                text = text,
+                selection = TextRange(text.length)
+            )
+        )
+    }
     OutlinedTextField(
         modifier = modifier,
         shape = RoundedCornerShape(5.dp),
-        value = text,
-        onValueChange = onTextChange,
-        placeholder = {
+        value = textState.value,
+        onValueChange = {
+            onTextChange(it.text)
+            textState.value = it
+        },
+        label = {
             Text(
                 text = stringResource(id = hintResource),
                 style = MaterialTheme.typography.bodyMedium

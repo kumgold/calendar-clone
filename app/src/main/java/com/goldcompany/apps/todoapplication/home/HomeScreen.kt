@@ -4,18 +4,26 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,11 +35,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.state.updateAppWidgetState
@@ -82,7 +94,7 @@ fun HomeScreen(
     val lifecycleOwner = rememberUpdatedState(newValue = LocalLifecycleOwner.current)
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    DisposableEffect(key1 = lifecycleOwner) {
+    DisposableEffect(key1 = lifecycleOwner, uiState.startLocalDate) {
         val lifecycle = lifecycleOwner.value.lifecycle
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
@@ -126,13 +138,14 @@ fun HomeScreen(
             CalendarView(
                 selectedDateMilli = uiState.selectedDateMilli,
                 monthlyTasks = uiState.monthlyTasks,
-                selectDateMilli = { millis ->
-                    viewModel.selectDateMilli(millis)
+                selectDateMilli = { milli ->
+                    viewModel.selectDateMilli(milli)
                 },
                 getMonthlyTasks = { startDate, endDate ->
                     viewModel.getMonthlyTasks(startDate, endDate)
                 }
             )
+            Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.vertical_margin)))
             TaskList(
                 loadingState = uiState.isLoading,
                 tasks = uiState.monthlyTasks[uiState.selectedDateMilli] ?: emptyList(),
@@ -170,19 +183,29 @@ private fun TaskList(
             )
         }
         false -> {
-            LazyColumn(
-                modifier = modifier
-            ) {
-                itemsIndexed(
-                    items = tasks,
-                    key = { _, task -> task.id }
-                ) { index, task ->
-                    TaskItem(
-                        task = task,
-                        index = index,
-                        updateTask = updateTask,
-                        goToTaskDetail = goToTaskDetail
-                    )
+            if (tasks.isEmpty()) {
+                EmptyTask()
+            } else {
+                LazyColumn(
+                    modifier = modifier
+                        .padding(horizontal = dimensionResource(id = R.dimen.horizontal_margin))
+                        .border(
+                            width = 1.dp,
+                            color = Color.Gray,
+                            shape = RoundedCornerShape(5.dp)
+                        ),
+                    verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.vertical_margin))
+                ) {
+                    items(
+                        items = tasks,
+                        key = { task -> task.id }
+                    ) { task ->
+                        TaskItem(
+                            task = task,
+                            updateTask = updateTask,
+                            goToTaskDetail = goToTaskDetail
+                        )
+                    }
                 }
             }
         }
@@ -190,9 +213,31 @@ private fun TaskList(
 }
 
 @Composable
+private fun EmptyTask() {
+    val color = MaterialTheme.colorScheme.primary
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = dimensionResource(id = R.dimen.horizontal_margin))
+            .drawBehind {
+                val height = size.height
+
+                drawLine(
+                    color = color,
+                    start = Offset(0f, 0f),
+                    end = Offset(0f, height),
+                    strokeWidth = 10f
+                )
+            }
+    ) {
+        Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.horizontal_margin)))
+        Text(text = "일정이 없습니다.")
+    }
+}
+
+@Composable
 private fun TaskItem(
     task: Task,
-    index: Int,
     updateTask: (String, Boolean) -> Unit,
     goToTaskDetail: (String) -> Unit
 ) {

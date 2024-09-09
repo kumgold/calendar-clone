@@ -10,6 +10,7 @@ import com.goldcompany.apps.todoapplication.util.CURRENT_DATE_MILLI
 import com.goldcompany.apps.todoapplication.util.TASK_ID
 import com.goldcompany.apps.todoapplication.util.dateToMilli
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,6 +26,7 @@ data class TaskUiState(
     val dateMilli: Long = LocalDate.now().dateToMilli(),
     val isLoading: Boolean = false,
     val isEdit: Boolean = false,
+    val isDone: Boolean = false,
     val message: Int? = null
 )
 
@@ -56,7 +58,7 @@ class TaskViewModel @Inject constructor(
     private fun loadTask(taskId: String) {
         loading()
 
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             taskId.let { id ->
                 repository.getTask(id).let { task ->
                     if (task != null) {
@@ -65,9 +67,9 @@ class TaskViewModel @Inject constructor(
                                 title = task.title,
                                 description = task.description,
                                 isCompleted = task.isCompleted,
+                                dateMilli = task.dateMilli,
                                 isLoading = false,
                                 isEdit = true,
-                                dateMilli = task.dateMilli,
                             )
                         }
                     }
@@ -78,33 +80,25 @@ class TaskViewModel @Inject constructor(
 
     private fun loading() {
         _uiState.update {
-            it.copy(
-                isLoading = true
-            )
+            it.copy(isLoading = true)
         }
     }
 
     fun updateTitle(newTitle: String) {
         _uiState.update {
-            it.copy(
-                title = newTitle
-            )
+            it.copy(title = newTitle)
         }
     }
 
     fun updateDescription(newDescription: String) {
         _uiState.update {
-            it.copy(
-                description = newDescription
-            )
+            it.copy(description = newDescription)
         }
     }
 
     fun updateDateMilli(milli: Long) {
         _uiState.update {
-            it.copy(
-                dateMilli = milli,
-            )
+            it.copy(dateMilli = milli,)
         }
     }
 
@@ -126,7 +120,7 @@ class TaskViewModel @Inject constructor(
     private fun addTask() {
         loading()
 
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             repository.addTask(
                 Task(
                     isCompleted = _uiState.value.isCompleted,
@@ -135,13 +129,14 @@ class TaskViewModel @Inject constructor(
                     dateMilli = _uiState.value.dateMilli
                 )
             )
+            done()
         }
     }
 
     private fun updateTask() {
         loading()
 
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             repository.updateTask(
                 Task(
                     id = taskId!!,
@@ -151,10 +146,20 @@ class TaskViewModel @Inject constructor(
                     dateMilli = _uiState.value.dateMilli
                 )
             )
+            done()
         }
     }
 
-    suspend fun deleteTask() {
-        repository.deleteTask(taskId!!.toLong())
+    fun deleteTask() {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.deleteTask(taskId!!.toLong())
+            done()
+        }
+    }
+
+    private fun done() {
+        _uiState.update {
+            it.copy(isDone = true)
+        }
     }
 }
