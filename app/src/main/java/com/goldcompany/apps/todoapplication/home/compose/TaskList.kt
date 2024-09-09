@@ -119,10 +119,10 @@ private fun TaskItem(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
+            .clickable { goToTaskDetail(task.id) }
             .padding(
                 vertical = dimensionResource(id = R.dimen.vertical_margin)
             )
-            .clickable { goToTaskDetail(task.id) }
     ) {
         Checkbox(
             checked = isChecked.value,
