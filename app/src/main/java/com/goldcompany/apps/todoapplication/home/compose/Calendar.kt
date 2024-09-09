@@ -1,4 +1,4 @@
-package com.goldcompany.apps.todoapplication.compose
+package com.goldcompany.apps.todoapplication.home.compose
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
