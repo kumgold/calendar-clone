@@ -19,13 +19,14 @@
     <string name="active_tasks">All active tasks</string>
     <string name="completed_tasks">All completed tasks</string>
 
-<!--    Add Task-->
+<!--    Task-->
     <string name="add_task">Add Task</string>
     <string name="title_hint">Enter the title</string>
     <string name="description_hint">Enter the description</string>
     <string name="date">Date</string>
 
-<!--    Edit Task-->
+<!--    Schedule-->
+    <string name="add_schedule">Add Schedule</string>
 
 <!--    Message-->
     <string name="error_message">Unknown Error occurred. Please try again.</string>

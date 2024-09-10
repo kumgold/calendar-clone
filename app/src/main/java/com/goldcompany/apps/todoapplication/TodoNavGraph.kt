@@ -12,6 +12,7 @@ import androidx.navigation.compose.dialog
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.goldcompany.apps.todoapplication.home.HomeScreen
+import com.goldcompany.apps.todoapplication.schedule.ScheduleScreen
 import com.goldcompany.apps.todoapplication.task.TaskScreen
 import com.goldcompany.apps.todoapplication.util.CURRENT_DATE_MILLI
 import com.goldcompany.apps.todoapplication.util.TASK_ID
@@ -34,13 +35,21 @@ fun TodoNavGraph(
             route = TodoDestinations.HOME
         ) {
             HomeScreen(
-                goToTaskDetail = { milli, id ->
+                goToAddTask = { milli, id ->
                     navActions.navigateTaskDetail(milli, id)
+                },
+                goToAddSchedule = {
+                    navActions.navigateScheduleDetail()
                 }
             )
         }
+        composable(
+            route = TodoDestinations.SCHEDULE
+        ) {
+            ScheduleScreen()
+        }
         dialog(
-            route = "${TodoDestinations.ADD_EDIT_TASK}?currentDateMilli={$CURRENT_DATE_MILLI}&taskId={$TASK_ID}",
+            route = "${TodoDestinations.TASK}?currentDateMilli={$CURRENT_DATE_MILLI}&taskId={$TASK_ID}",
             arguments = listOf(
                 navArgument(TASK_ID) {
                     type = NavType.StringType

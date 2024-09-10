@@ -1,5 +1,6 @@
 package com.goldcompany.apps.todoapplication.home
 
+import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -29,6 +30,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.goldcompany.apps.data.util.convertMilliToDate
 import com.goldcompany.apps.todoapplication.R
 import com.goldcompany.apps.todoapplication.compose.HomeTopAppBar
+import com.goldcompany.apps.todoapplication.home.compose.AddSchedulesButton
 import com.goldcompany.apps.todoapplication.home.compose.CalendarView
 import com.goldcompany.apps.todoapplication.home.compose.TaskList
 import com.goldcompany.apps.todoapplication.widget.TaskWidget
@@ -58,11 +60,13 @@ fun TaskActionBroadcastReceiver(
     }
 }
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
-    goToTaskDetail: (Long, String?) -> Unit,
+    goToAddTask: (Long, String?) -> Unit,
+    goToAddSchedule: () -> Unit
 ) {
     val lifecycleOwner = rememberUpdatedState(newValue = LocalLifecycleOwner.current)
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -96,13 +100,14 @@ fun HomeScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    goToTaskDetail(uiState.selectedDateMilli, null)
+            AddSchedulesButton(
+                goToAddTask = {
+                    goToAddTask(uiState.selectedDateMilli, null)
+                },
+                goToAddSchedule = {
+                    goToAddSchedule()
                 }
-            ) {
-                Icon(Icons.Filled.Add, stringResource(id = R.string.add_task))
-            }
+            )
         }
     ) { paddingValues ->
         Column(
@@ -123,7 +128,7 @@ fun HomeScreen(
                 loadingState = uiState.isLoading,
                 tasks = uiState.monthlyTasks[uiState.selectedDateMilli] ?: emptyList(),
                 goToTaskDetail = { id ->
-                    goToTaskDetail(uiState.selectedDateMilli, id)
+                    goToAddTask(uiState.selectedDateMilli, id)
                 },
                 updateTask = { id, isCompleted ->
                     viewModel.updateTask(id, isCompleted)
