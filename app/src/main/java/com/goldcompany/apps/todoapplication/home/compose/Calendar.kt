@@ -24,6 +24,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -37,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.goldcompany.apps.data.data.Task
 import com.goldcompany.apps.todoapplication.R
@@ -123,9 +125,7 @@ fun CalendarView(
             ) {
                 if (firstDayOfWeek != 7) {
                     repeat(firstDayOfWeek) {
-                        item {
-                            EmptyDay()
-                        }
+                        item { EmptyDay() }
                     }
                 }
                 items(days) { day ->
@@ -155,6 +155,7 @@ private fun DayOfWeekView() {
             Text(
                 text = dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.US)
                     .uppercase(Locale.ROOT),
+                color = MaterialTheme.colorScheme.secondary
             )
         }
     }
@@ -177,9 +178,9 @@ private fun CalendarItem(
             .border(
                 width = 1.dp,
                 color = if (isToday) {
-                    Color.Red
+                    MaterialTheme.colorScheme.primary
                 } else if (currentDateMilli == milli) {
-                    Color.Gray
+                    MaterialTheme.colorScheme.outline
                 } else {
                     MaterialTheme.colorScheme.background
                 },
@@ -217,4 +218,17 @@ private fun EmptyDay() {
             .fillMaxSize()
             .aspectRatio(1.0f)
     )
+}
+
+@Preview
+@Composable
+private fun CalendarPreview() {
+    Surface {
+        CalendarView(
+            selectedDateMilli = 0L,
+            monthlyTasks = mapOf(),
+            selectDateMilli = {},
+            getMonthlyTasks = { x,y -> }
+        )
+    }
 }

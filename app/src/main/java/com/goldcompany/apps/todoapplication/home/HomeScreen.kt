@@ -5,24 +5,27 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -63,13 +66,14 @@ fun TaskActionBroadcastReceiver(
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun HomeScreen(
-    modifier: Modifier = Modifier,
+    modifier: Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
     goToAddTask: (Long, String?) -> Unit,
     goToAddSchedule: () -> Unit
 ) {
     val lifecycleOwner = rememberUpdatedState(newValue = LocalLifecycleOwner.current)
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isExpanded = remember { mutableStateOf(false) }
 
     DisposableEffect(key1 = lifecycleOwner, uiState.startLocalDate) {
         val lifecycle = lifecycleOwner.value.lifecycle
@@ -94,13 +98,9 @@ fun HomeScreen(
 
     Scaffold(
         modifier = modifier,
-        topBar = {
-            HomeTopAppBar(
-                title = convertMilliToDate(uiState.selectedDateMilli)
-            )
-        },
         floatingActionButton = {
             AddSchedulesButton(
+                isExpanded = isExpanded,
                 goToAddTask = {
                     goToAddTask(uiState.selectedDateMilli, null)
                 },
@@ -111,8 +111,12 @@ fun HomeScreen(
         }
     ) { paddingValues ->
         Column(
-            modifier = modifier.padding(paddingValues),
+            modifier = modifier
+                .padding(paddingValues)
+                .background(MaterialTheme.colorScheme.background),
         ) {
+            HomeTopAppBar(title = convertMilliToDate(uiState.selectedDateMilli))
+            Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.vertical_margin)))
             CalendarView(
                 selectedDateMilli = uiState.selectedDateMilli,
                 monthlyTasks = uiState.monthlyTasks,
@@ -136,6 +140,14 @@ fun HomeScreen(
             )
         }
 
+        if (isExpanded.value) {
+            Box(
+                modifier = modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(0.7f))
+                    .clickable { isExpanded.value = false }
+            )
+        }
     }
 
     TaskActionBroadcastReceiver(TaskWidgetReceiver.UPDATE_ACTION) { intent ->

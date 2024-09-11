@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -46,37 +47,28 @@ fun TaskList(
     goToTaskDetail: (String) -> Unit,
     updateTask: (String, Boolean) -> Unit
 ) {
-    when (loadingState) {
-        true -> {
-            LoadingAnimation(
-                modifier = modifier
-            )
-        }
-        false -> {
-            if (tasks.isEmpty()) {
-                EmptyTask()
-            } else {
-                LazyColumn(
-                    modifier = modifier
-                        .padding(horizontal = dimensionResource(id = R.dimen.horizontal_margin))
-                        .border(
-                            width = 1.dp,
-                            color = Color.Gray,
-                            shape = RoundedCornerShape(5.dp)
-                        ),
-                    verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.vertical_margin))
-                ) {
-                    items(
-                        items = tasks,
-                        key = { task -> task.id }
-                    ) { task ->
-                        TaskItem(
-                            task = task,
-                            updateTask = updateTask,
-                            goToTaskDetail = goToTaskDetail
-                        )
-                    }
-                }
+    if (tasks.isEmpty()) {
+        EmptyTask()
+    } else {
+        LazyColumn(
+            modifier = modifier
+                .padding(horizontal = dimensionResource(id = R.dimen.horizontal_margin))
+                .border(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.outline,
+                    shape = RoundedCornerShape(5.dp)
+                ),
+            verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.vertical_margin))
+        ) {
+            items(
+                items = tasks,
+                key = { task -> task.id }
+            ) { task ->
+                TaskItem(
+                    task = task,
+                    updateTask = updateTask,
+                    goToTaskDetail = goToTaskDetail
+                )
             }
         }
     }
@@ -85,6 +77,7 @@ fun TaskList(
 @Composable
 private fun EmptyTask() {
     val color = MaterialTheme.colorScheme.primary
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -133,7 +126,10 @@ private fun TaskItem(
 
                 updateTask(task.id, it)
                 isChecked.value = it
-            }
+            },
+            colors = CheckboxDefaults.colors().copy(
+                uncheckedBorderColor = MaterialTheme.colorScheme.outline
+            )
         )
         Text(
             text = task.title,

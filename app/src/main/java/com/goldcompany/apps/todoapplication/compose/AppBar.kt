@@ -3,12 +3,15 @@ package com.goldcompany.apps.todoapplication.compose
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -17,19 +20,25 @@ import com.goldcompany.apps.todoapplication.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TaskDetailAppBar(
+fun DetailScreenAppBar(
     modifier: Modifier = Modifier,
     isEdit: Boolean,
     deleteTask: () -> Unit,
+    saveTask: () -> Unit,
     navigateBack: () -> Unit
 ) {
     TopAppBar(
         modifier = modifier,
+        colors = TopAppBarColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            scrolledContainerColor = MaterialTheme.colorScheme.background,
+            navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+            titleContentColor = MaterialTheme.colorScheme.onPrimary,
+            actionIconContentColor = MaterialTheme.colorScheme.onPrimary
+        ),
         title = {},
         navigationIcon = {
-            IconButton(
-                onClick = navigateBack
-            ) {
+            IconButton(onClick = navigateBack) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = null
@@ -38,12 +47,15 @@ fun TaskDetailAppBar(
         },
         actions = {
             if (isEdit) {
-                TextButton(
-                    onClick = {
-                        deleteTask()
-                    }
-                ) {
-                    Text(text = stringResource(id = R.string.delete))
+                TextButton(onClick = { deleteTask() }) {
+                    Text(
+                        text = stringResource(id = R.string.delete),
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
+            } else {
+                IconButton(onClick = { saveTask() }) {
+                    Icon(imageVector = Icons.Default.Check, contentDescription = null)
                 }
             }
         }
@@ -55,36 +67,28 @@ fun TaskDetailAppBar(
 fun HomeTopAppBar(
     title: String
 ) {
-//    val coroutineScope = rememberCoroutineScope()
-
     TopAppBar(
         modifier = Modifier.fillMaxWidth(),
+        colors = TopAppBarColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            scrolledContainerColor = MaterialTheme.colorScheme.background,
+            navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+            titleContentColor = MaterialTheme.colorScheme.onPrimary,
+            actionIconContentColor = MaterialTheme.colorScheme.onPrimary
+        ),
         title = {
             Text(text = title)
-        },
-//        navigationIcon = {
-//            IconButton(
-//                onClick = {
-//                    coroutineScope.launch {
-//                        drawerState.open()
-//                    }
-//                }
-//            ) {
-//                Icon(
-//                    imageVector = Icons.Filled.Menu,
-//                    contentDescription = stringResource(id = R.string.menu)
-//                )
-//            }
-//        }
+        }
     )
 }
 
 @Preview
 @Composable
 private fun TaskDetailAppBarPreview() {
-    TaskDetailAppBar(
+    DetailScreenAppBar(
         isEdit = true,
         deleteTask = {},
+        saveTask = {},
         navigateBack = {}
     )
 }
