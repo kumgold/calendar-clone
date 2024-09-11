@@ -35,6 +35,7 @@ fun TodoNavGraph(
             route = TodoDestinations.HOME
         ) {
             HomeScreen(
+                modifier = modifier,
                 goToAddTask = { milli, id ->
                     navActions.navigateTaskDetail(milli, id)
                 },
@@ -43,10 +44,17 @@ fun TodoNavGraph(
                 }
             )
         }
-        composable(
-            route = TodoDestinations.SCHEDULE
+        dialog(
+            route = TodoDestinations.SCHEDULE,
+            dialogProperties = DialogProperties(
+                usePlatformDefaultWidth = false
+            )
         ) {
-            ScheduleScreen()
+            ScheduleScreen(
+                navigateBack = {
+                    navController.popBackStack()
+                }
+            )
         }
         dialog(
             route = "${TodoDestinations.TASK}?currentDateMilli={$CURRENT_DATE_MILLI}&taskId={$TASK_ID}",

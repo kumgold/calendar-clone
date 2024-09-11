@@ -162,4 +162,8 @@ class TaskViewModel @Inject constructor(
             it.copy(isDone = true)
         }
     }
+
+    fun shownSnackBarMessage() {
+        _uiState.update { it.copy(message = null) }
+    }
 }

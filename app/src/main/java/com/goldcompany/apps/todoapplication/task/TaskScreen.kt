@@ -1,6 +1,6 @@
 package com.goldcompany.apps.todoapplication.task
 
-import androidx.annotation.StringRes
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -20,8 +20,9 @@ import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
@@ -36,16 +37,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.goldcompany.apps.data.util.convertMilliToDate
 import com.goldcompany.apps.todoapplication.R
+import com.goldcompany.apps.todoapplication.compose.DetailScreenAppBar
 import com.goldcompany.apps.todoapplication.compose.LoadingAnimation
-import com.goldcompany.apps.todoapplication.compose.TaskDetailAppBar
+import com.goldcompany.apps.todoapplication.compose.TaskTextInput
 import com.goldcompany.apps.todoapplication.util.dateToMilli
 import java.time.LocalDate
 
@@ -55,33 +55,52 @@ fun TaskScreen(
     navigateBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val snackBarState = remember { SnackbarHostState() }
 
-    Surface(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        Column {
-            TaskDetailAppBar(
+    Scaffold(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
+        snackbarHost = {
+            SnackbarHost(hostState = snackBarState)
+        },
+        topBar = {
+            DetailScreenAppBar(
                 isEdit = uiState.isEdit,
-                deleteTask = { viewModel.deleteTask() },
+                deleteTask = {
+                    viewModel.deleteTask()
+                },
+                saveTask = {
+                    viewModel.saveTask()
+                },
                 navigateBack = navigateBack
             )
-            if (uiState.isLoading) {
-                LoadingAnimation(modifier = Modifier.wrapContentSize())
-            } else {
-                EditTask(
-                    modifier = Modifier.wrapContentSize(),
-                    title = uiState.title,
-                    description = uiState.description,
-                    dateMilli = uiState.dateMilli,
-                    onTitleChange = viewModel::updateTitle,
-                    onDescriptionChange = viewModel::updateDescription,
-                    saveTask = {
-                        viewModel.saveTask()
-                    },
-                    navigateBack = navigateBack,
-                    onDateSelected = viewModel::updateDateMilli
-                )
-            }
+        }
+    ) { paddingValue ->
+        if (uiState.isLoading) {
+            LoadingAnimation(modifier = Modifier.padding(paddingValue).wrapContentSize())
+        } else {
+            EditTask(
+                modifier = Modifier.padding(paddingValue).wrapContentSize(),
+                title = uiState.title,
+                description = uiState.description,
+                dateMilli = uiState.dateMilli,
+                onTitleChange = viewModel::updateTitle,
+                onDescriptionChange = viewModel::updateDescription,
+                saveTask = {
+                    viewModel.saveTask()
+                },
+                navigateBack = navigateBack,
+                onDateSelected = viewModel::updateDateMilli
+            )
+        }
+    }
+
+    uiState.message?.let { message ->
+        val snackBarMessage = stringResource(id = message)
+        LaunchedEffect(uiState.message) {
+            snackBarState.showSnackbar(snackBarMessage)
+            viewModel.shownSnackBarMessage()
         }
     }
 
@@ -105,7 +124,7 @@ private fun EditTask(
     onDateSelected: (Long) -> Unit
 ) {
     Column(
-        modifier = modifier.padding(all = dimensionResource(id = R.dimen.horizontal_margin))
+        modifier = modifier.padding(all = dimensionResource(id = R.dimen.default_margin))
     ) {
         TaskTextInput(
             modifier = Modifier.fillMaxWidth(),
@@ -114,13 +133,16 @@ private fun EditTask(
             hintResource = R.string.title,
             isSingleLine = true
         )
-        Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.vertical_margin)))
+        Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.horizontal_margin)))
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = stringResource(id = R.string.date))
-            Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.vertical_margin)))
+            Text(
+                text = stringResource(id = R.string.date),
+                color = MaterialTheme.colorScheme.outline
+            )
+            Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.default_margin)))
             TaskDateSelector(
                 savedDate = convertMilliToDate(dateMilli),
                 onDateSelected = onDateSelected
@@ -239,40 +261,4 @@ private fun TaskDatePickerDialog(
     ) {
         DatePicker(state = datePickerState)
     }
-}
-
-@Composable
-private fun TaskTextInput(
-    modifier: Modifier,
-    text: String,
-    onTextChange: (String) -> Unit,
-    @StringRes hintResource: Int,
-    isSingleLine: Boolean
-
-) {
-    val textState = remember {
-        mutableStateOf(
-            TextFieldValue(
-                text = text,
-                selection = TextRange(text.length)
-            )
-        )
-    }
-    OutlinedTextField(
-        modifier = modifier,
-        shape = RoundedCornerShape(5.dp),
-        value = textState.value,
-        onValueChange = {
-            onTextChange(it.text)
-            textState.value = it
-        },
-        label = {
-            Text(
-                text = stringResource(id = hintResource),
-                style = MaterialTheme.typography.bodyMedium
-            )
-        },
-        textStyle = MaterialTheme.typography.bodyMedium,
-        singleLine = isSingleLine
-    )
 }
