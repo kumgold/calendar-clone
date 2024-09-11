@@ -197,7 +197,7 @@ private fun TaskDateSelector(
             .wrapContentSize()
             .border(
                 width = 1.dp,
-                color = colorResource(id = R.color.black),
+                color = MaterialTheme.colorScheme.outline,
                 shape = RoundedCornerShape(5.dp)
             )
             .clip(RoundedCornerShape(5.dp))
