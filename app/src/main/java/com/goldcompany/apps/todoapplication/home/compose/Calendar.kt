@@ -39,7 +39,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.goldcompany.apps.data.data.task.Todo
+import com.goldcompany.apps.data.data.todo.Todo
 import com.goldcompany.apps.todoapplication.R
 import com.goldcompany.apps.todoapplication.util.convertDateToMilli
 import kotlinx.coroutines.flow.collectLatest

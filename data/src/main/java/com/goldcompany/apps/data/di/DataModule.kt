@@ -1,7 +1,7 @@
 package com.goldcompany.apps.data.di
 
 import android.content.Context
-import com.goldcompany.apps.data.db.task.TodoDao
+import com.goldcompany.apps.data.db.todo.TodoDao
 import com.goldcompany.apps.data.db.AppDatabase
 import com.goldcompany.apps.data.repository.TaskRepository
 import dagger.Module

@@ -5,7 +5,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.goldcompany.apps.data.data.task.Todo
+import com.goldcompany.apps.data.data.todo.Todo
 import com.goldcompany.apps.data.repository.TaskRepository
 import com.goldcompany.apps.todoapplication.util.convertDateToMilli
 import dagger.hilt.android.lifecycle.HiltViewModel

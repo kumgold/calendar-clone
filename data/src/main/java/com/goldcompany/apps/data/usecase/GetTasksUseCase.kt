@@ -1,6 +1,6 @@
 package com.goldcompany.apps.data.usecase
 
-import com.goldcompany.apps.data.data.task.Todo
+import com.goldcompany.apps.data.data.todo.Todo
 import com.goldcompany.apps.data.repository.TaskRepository
 import javax.inject.Inject
 

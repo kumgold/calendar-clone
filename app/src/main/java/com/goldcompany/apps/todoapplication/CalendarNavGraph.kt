@@ -13,7 +13,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.goldcompany.apps.todoapplication.home.HomeScreen
 import com.goldcompany.apps.todoapplication.schedule.ScheduleScreen
-import com.goldcompany.apps.todoapplication.task.TaskScreen
+import com.goldcompany.apps.todoapplication.todo.TaskScreen
 import com.goldcompany.apps.todoapplication.util.CURRENT_DATE_MILLI
 import com.goldcompany.apps.todoapplication.util.TASK_ID
 
