@@ -1,6 +1,6 @@
-package com.goldcompany.apps.data.data.task
+package com.goldcompany.apps.data.data.todo
 
-import com.goldcompany.apps.data.db.task.TodoEntity
+import com.goldcompany.apps.data.db.todo.TodoEntity
 
 fun TodoEntity.toExternal() = Todo(
     id = id.toString(),

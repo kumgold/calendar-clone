@@ -1,4 +1,4 @@
-package com.goldcompany.apps.data.data.task
+package com.goldcompany.apps.data.data.todo
 
 data class Todo(
     val id: String = System.currentTimeMillis().toString(),

@@ -1,4 +1,4 @@
-package com.goldcompany.apps.todoapplication.task
+package com.goldcompany.apps.todoapplication.todo
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

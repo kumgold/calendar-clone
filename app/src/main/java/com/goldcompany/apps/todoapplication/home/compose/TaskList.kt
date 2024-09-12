@@ -30,7 +30,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.state.updateAppWidgetState
-import com.goldcompany.apps.data.data.task.Todo
+import com.goldcompany.apps.data.data.todo.Todo
 import com.goldcompany.apps.todoapplication.R
 import com.goldcompany.apps.todoapplication.widget.TaskWidget
 import com.goldcompany.apps.todoapplication.widget.TaskWidgetReceiver

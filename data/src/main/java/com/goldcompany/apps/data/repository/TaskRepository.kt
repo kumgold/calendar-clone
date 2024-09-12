@@ -1,9 +1,9 @@
 package com.goldcompany.apps.data.repository
 
-import com.goldcompany.apps.data.data.task.Todo
-import com.goldcompany.apps.data.data.task.toExternal
-import com.goldcompany.apps.data.data.task.toLocal
-import com.goldcompany.apps.data.db.task.TodoDao
+import com.goldcompany.apps.data.data.todo.Todo
+import com.goldcompany.apps.data.data.todo.toExternal
+import com.goldcompany.apps.data.data.todo.toLocal
+import com.goldcompany.apps.data.db.todo.TodoDao
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject

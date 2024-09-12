@@ -1,4 +1,4 @@
-package com.goldcompany.apps.data.db.task
+package com.goldcompany.apps.data.db.todo
 
 import androidx.room.Dao
 import androidx.room.Insert

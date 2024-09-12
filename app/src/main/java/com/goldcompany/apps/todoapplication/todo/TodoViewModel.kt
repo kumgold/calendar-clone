@@ -1,9 +1,9 @@
-package com.goldcompany.apps.todoapplication.task
+package com.goldcompany.apps.todoapplication.todo
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.goldcompany.apps.data.data.task.Todo
+import com.goldcompany.apps.data.data.todo.Todo
 import com.goldcompany.apps.data.repository.TaskRepository
 import com.goldcompany.apps.todoapplication.R
 import com.goldcompany.apps.todoapplication.util.CURRENT_DATE_MILLI
