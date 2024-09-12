@@ -42,7 +42,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun TaskList(
     modifier: Modifier = Modifier,
-    loadingState: Boolean,
     tasks: List<Task>,
     goToTaskDetail: (String) -> Unit,
     updateTask: (String, Boolean) -> Unit
@@ -94,7 +93,7 @@ private fun EmptyTask() {
             }
     ) {
         Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.horizontal_margin)))
-        Text(text = "일정이 없습니다.")
+        Text(text = "일정이 없습니다.", style = MaterialTheme.typography.bodyMedium)
     }
 }
 
@@ -133,12 +132,12 @@ private fun TaskItem(
         )
         Text(
             text = task.title,
-            fontSize = 15.sp,
             textDecoration = if (task.isCompleted) {
                 TextDecoration.LineThrough
             } else {
                 TextDecoration.None
-            }
+            },
+            style = MaterialTheme.typography.titleMedium
         )
     }
 }

@@ -8,7 +8,7 @@ import com.goldcompany.apps.data.repository.TaskRepository
 import com.goldcompany.apps.todoapplication.R
 import com.goldcompany.apps.todoapplication.util.CURRENT_DATE_MILLI
 import com.goldcompany.apps.todoapplication.util.TASK_ID
-import com.goldcompany.apps.todoapplication.util.dateToMilli
+import com.goldcompany.apps.todoapplication.util.convertDateToMilli
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,7 +23,7 @@ data class TaskUiState(
     val title: String = "",
     val description: String = "",
     val isCompleted: Boolean = false,
-    val dateMilli: Long = LocalDate.now().dateToMilli(),
+    val dateMilli: Long = LocalDate.now().convertDateToMilli(),
     val isLoading: Boolean = false,
     val isEdit: Boolean = false,
     val isDone: Boolean = false,
@@ -36,7 +36,7 @@ class TaskViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     private val taskId: String? = savedStateHandle[TASK_ID]
-    private val currentDateMilli: Long = savedStateHandle[CURRENT_DATE_MILLI] ?: LocalDate.now().dateToMilli()
+    private val currentDateMilli: Long = savedStateHandle[CURRENT_DATE_MILLI] ?: LocalDate.now().convertDateToMilli()
 
     private val _uiState = MutableStateFlow(TaskUiState())
     val uiState: StateFlow<TaskUiState> = _uiState.asStateFlow()

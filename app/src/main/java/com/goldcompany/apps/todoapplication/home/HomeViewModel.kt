@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.goldcompany.apps.data.data.Task
 import com.goldcompany.apps.data.repository.TaskRepository
-import com.goldcompany.apps.todoapplication.util.dateToMilli
+import com.goldcompany.apps.todoapplication.util.convertDateToMilli
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -22,7 +22,7 @@ import javax.inject.Inject
 data class TaskUiState(
     val tasks: SnapshotStateList<Task> = mutableStateListOf(),
     val monthlyTasks: Map<Long, List<Task>> = mapOf(),
-    val selectedDateMilli: Long = LocalDate.now().dateToMilli(),
+    val selectedDateMilli: Long = LocalDate.now().convertDateToMilli(),
     val startLocalDate: LocalDate = LocalDate.now(),
     val isLoading: Boolean = false,
     val userMessage: Int? = null
@@ -35,7 +35,7 @@ class HomeViewModel @Inject constructor(
 
     private val _tasks = MutableStateFlow<SnapshotStateList<Task>>(mutableStateListOf())
     private val _monthlyTasks = MutableStateFlow<Map<Long, List<Task>>>(mapOf())
-    private val _selectedDateMilli = MutableStateFlow(LocalDate.now().dateToMilli())
+    private val _selectedDateMilli = MutableStateFlow(LocalDate.now().convertDateToMilli())
     private val _startLocalDate = MutableStateFlow(LocalDate.now())
     private val _isLoading = MutableStateFlow(false)
 
@@ -65,7 +65,7 @@ class HomeViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             val map = mutableMapOf<Long, List<Task>>()
-            val list = repository.getMonthlyTasks(startDate.dateToMilli(), endDate.dateToMilli())
+            val list = repository.getMonthlyTasks(startDate.convertDateToMilli(), endDate.convertDateToMilli())
 
             list.map { task ->
                 map[task.dateMilli] = list.filter { it.dateMilli == task.dateMilli }

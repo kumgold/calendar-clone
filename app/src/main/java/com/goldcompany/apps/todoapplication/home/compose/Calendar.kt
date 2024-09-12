@@ -36,13 +36,12 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.goldcompany.apps.data.data.Task
 import com.goldcompany.apps.todoapplication.R
-import com.goldcompany.apps.todoapplication.util.dateToMilli
+import com.goldcompany.apps.todoapplication.util.convertDateToMilli
 import kotlinx.coroutines.flow.collectLatest
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -89,8 +88,9 @@ fun CalendarView(
                         1
                     )
                 }
+                val isNextYear = (page%12 + 2 > 12)
 
-                selectDateMilli(displayDate.dateToMilli())
+                selectDateMilli(displayDate.convertDateToMilli())
                 getMonthlyTasks(
                     LocalDate.of(
                         yearRange.first + page/12,
@@ -98,8 +98,8 @@ fun CalendarView(
                         1
                     ),
                     LocalDate.of(
-                        yearRange.first + page/12,
-                        page % 12 + 2,
+                        if (isNextYear) yearRange.first + page/12 + 1 else yearRange.first + page/12,
+                        if (isNextYear) 1 else page % 12 + 1,
                         1
                     )
                 )
@@ -134,7 +134,7 @@ fun CalendarView(
                     CalendarItem(
                         date = date,
                         isToday = (date == LocalDate.now()),
-                        isContainTasks = monthlyTasks.keys.contains(date.dateToMilli()),
+                        isContainTasks = monthlyTasks.keys.contains(date.convertDateToMilli()),
                         currentDateMilli = selectedDateMilli,
                         getDailyTasks = selectDateMilli
                     )
@@ -169,7 +169,7 @@ private fun CalendarItem(
     currentDateMilli: Long,
     getDailyTasks: (Long) -> Unit,
 ) {
-    val milli = date.dateToMilli()
+    val milli = date.convertDateToMilli()
 
     Box(
         modifier = Modifier

@@ -34,19 +34,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.goldcompany.apps.data.util.convertMilliToDate
 import com.goldcompany.apps.todoapplication.R
 import com.goldcompany.apps.todoapplication.compose.DetailScreenAppBar
 import com.goldcompany.apps.todoapplication.compose.LoadingAnimation
 import com.goldcompany.apps.todoapplication.compose.TaskTextInput
-import com.goldcompany.apps.todoapplication.util.dateToMilli
+import com.goldcompany.apps.todoapplication.util.convertDateToMilli
+import com.goldcompany.apps.todoapplication.util.convertMilliToDate
 import java.time.LocalDate
 
 @Composable
@@ -144,7 +143,7 @@ private fun EditTask(
             )
             Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.default_margin)))
             TaskDateSelector(
-                savedDate = convertMilliToDate(dateMilli),
+                savedDate = dateMilli.convertMilliToDate(),
                 onDateSelected = onDateSelected
             )
         }
@@ -216,7 +215,7 @@ private fun TaskDateSelector(
     if (isShowDatePickerDialog) {
         TaskDatePickerDialog(
             onDateSelected = {
-                date = convertMilliToDate(it)
+                date = it.convertMilliToDate()
                 onDateSelected(it)
             },
             onDismiss = { isShowDatePickerDialog = false }
@@ -238,24 +237,28 @@ private fun TaskDatePickerDialog(
         confirmButton = {
             Button(
                 onClick = {
-                    val currentTime = LocalDate.now().dateToMilli()
+                    val currentTime = LocalDate.now().convertDateToMilli()
 
                     onDateSelected(selectedDate ?: currentTime)
                     onDismiss()
                 },
                 shape = RoundedCornerShape(10.dp)
             ) {
-                Text(text = stringResource(id = R.string.ok))
+                Text(
+                    text = stringResource(id = R.string.ok),
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
         },
         dismissButton = {
             Button(
-                onClick = {
-                    onDismiss()
-                },
+                onClick = { onDismiss() },
                 shape = RoundedCornerShape(10.dp)
             ) {
-                Text(text = stringResource(id = R.string.cancel))
+                Text(
+                    text = stringResource(id = R.string.cancel),
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
         }
     ) {

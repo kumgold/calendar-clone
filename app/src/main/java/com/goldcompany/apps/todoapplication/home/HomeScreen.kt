@@ -30,12 +30,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.goldcompany.apps.data.util.convertMilliToDate
 import com.goldcompany.apps.todoapplication.R
 import com.goldcompany.apps.todoapplication.compose.HomeTopAppBar
 import com.goldcompany.apps.todoapplication.home.compose.AddSchedulesButton
 import com.goldcompany.apps.todoapplication.home.compose.CalendarView
 import com.goldcompany.apps.todoapplication.home.compose.TaskList
+import com.goldcompany.apps.todoapplication.util.convertMilliToDate
 import com.goldcompany.apps.todoapplication.widget.TaskWidget
 import com.goldcompany.apps.todoapplication.widget.TaskWidgetReceiver
 
@@ -115,7 +115,7 @@ fun HomeScreen(
                 .padding(paddingValues)
                 .background(MaterialTheme.colorScheme.background),
         ) {
-            HomeTopAppBar(title = convertMilliToDate(uiState.selectedDateMilli))
+            HomeTopAppBar(title = uiState.selectedDateMilli.convertMilliToDate())
             Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.vertical_margin)))
             CalendarView(
                 selectedDateMilli = uiState.selectedDateMilli,
@@ -129,7 +129,6 @@ fun HomeScreen(
             )
             Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.vertical_margin)))
             TaskList(
-                loadingState = uiState.isLoading,
                 tasks = uiState.monthlyTasks[uiState.selectedDateMilli] ?: emptyList(),
                 goToTaskDetail = { id ->
                     goToAddTask(uiState.selectedDateMilli, id)
