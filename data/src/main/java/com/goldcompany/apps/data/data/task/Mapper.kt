@@ -1,8 +1,8 @@
-package com.goldcompany.apps.data.data
+package com.goldcompany.apps.data.data.task
 
-import com.goldcompany.apps.data.db.TaskEntity
+import com.goldcompany.apps.data.db.task.TodoEntity
 
-fun TaskEntity.toExternal() = Task(
+fun TodoEntity.toExternal() = Todo(
     id = id.toString(),
     isCompleted = isCompleted,
     title = title,
@@ -10,9 +10,9 @@ fun TaskEntity.toExternal() = Task(
     dateMilli = dateTimeMilli
 )
 
-fun List<TaskEntity>.toExternal() = map(TaskEntity::toExternal)
+fun List<TodoEntity>.toExternal() = map(TodoEntity::toExternal)
 
-fun Task.toLocal() = TaskEntity(
+fun Todo.toLocal() = TodoEntity(
     id = id.toLong(),
     isCompleted = isCompleted,
     title = title,

@@ -1,11 +1,9 @@
 package com.goldcompany.apps.data.di
 
 import android.content.Context
-import androidx.room.Room
-import com.goldcompany.apps.data.db.TaskDao
-import com.goldcompany.apps.data.db.TodoDatabase
+import com.goldcompany.apps.data.db.task.TodoDao
+import com.goldcompany.apps.data.db.AppDatabase
 import com.goldcompany.apps.data.repository.TaskRepository
-import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -18,12 +16,12 @@ import javax.inject.Singleton
 object DatabaseModule {
     @Singleton
     @Provides
-    fun provideDataBase(@ApplicationContext context: Context): TodoDatabase {
-        return TodoDatabase.getInstance(context)
+    fun provideDataBase(@ApplicationContext context: Context): AppDatabase {
+        return AppDatabase.getInstance(context)
     }
 
     @Provides
-    fun provideTaskDao(database: TodoDatabase): TaskDao = database.taskDao()
+    fun provideTodoDao(database: AppDatabase): TodoDao = database.todoDao()
 }
 
 @Module
@@ -32,6 +30,6 @@ object RepositoryModule {
     @Singleton
     @Provides
     fun provideTaskRepository(
-        taskDao: TaskDao
-    ): TaskRepository = TaskRepository(taskDao)
+        todoDao: TodoDao
+    ): TaskRepository = TaskRepository(todoDao)
 }

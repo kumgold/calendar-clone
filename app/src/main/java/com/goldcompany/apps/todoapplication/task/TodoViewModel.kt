@@ -3,7 +3,7 @@ package com.goldcompany.apps.todoapplication.task
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.goldcompany.apps.data.data.Task
+import com.goldcompany.apps.data.data.task.Todo
 import com.goldcompany.apps.data.repository.TaskRepository
 import com.goldcompany.apps.todoapplication.R
 import com.goldcompany.apps.todoapplication.util.CURRENT_DATE_MILLI
@@ -122,7 +122,7 @@ class TaskViewModel @Inject constructor(
 
         viewModelScope.launch(Dispatchers.IO) {
             repository.addTask(
-                Task(
+                Todo(
                     isCompleted = _uiState.value.isCompleted,
                     title = _uiState.value.title,
                     description = _uiState.value.description,
@@ -138,7 +138,7 @@ class TaskViewModel @Inject constructor(
 
         viewModelScope.launch(Dispatchers.IO) {
             repository.updateTask(
-                Task(
+                Todo(
                     id = taskId!!,
                     isCompleted = _uiState.value.isCompleted,
                     title = _uiState.value.title,

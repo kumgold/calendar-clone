@@ -24,17 +24,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.state.updateAppWidgetState
-import com.goldcompany.apps.data.data.Task
+import com.goldcompany.apps.data.data.task.Todo
 import com.goldcompany.apps.todoapplication.R
-import com.goldcompany.apps.todoapplication.compose.LoadingAnimation
 import com.goldcompany.apps.todoapplication.widget.TaskWidget
 import com.goldcompany.apps.todoapplication.widget.TaskWidgetReceiver
 import kotlinx.coroutines.launch
@@ -42,11 +39,11 @@ import kotlinx.coroutines.launch
 @Composable
 fun TaskList(
     modifier: Modifier = Modifier,
-    tasks: List<Task>,
+    todos: List<Todo>,
     goToTaskDetail: (String) -> Unit,
     updateTask: (String, Boolean) -> Unit
 ) {
-    if (tasks.isEmpty()) {
+    if (todos.isEmpty()) {
         EmptyTask()
     } else {
         LazyColumn(
@@ -60,11 +57,11 @@ fun TaskList(
             verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.vertical_margin))
         ) {
             items(
-                items = tasks,
+                items = todos,
                 key = { task -> task.id }
             ) { task ->
                 TaskItem(
-                    task = task,
+                    todo = task,
                     updateTask = updateTask,
                     goToTaskDetail = goToTaskDetail
                 )
@@ -99,11 +96,11 @@ private fun EmptyTask() {
 
 @Composable
 private fun TaskItem(
-    task: Task,
+    todo: Todo,
     updateTask: (String, Boolean) -> Unit,
     goToTaskDetail: (String) -> Unit
 ) {
-    val isChecked = remember { mutableStateOf(task.isCompleted) }
+    val isChecked = remember { mutableStateOf(todo.isCompleted) }
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 
@@ -111,7 +108,7 @@ private fun TaskItem(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { goToTaskDetail(task.id) }
+            .clickable { goToTaskDetail(todo.id) }
             .padding(
                 vertical = dimensionResource(id = R.dimen.vertical_margin)
             )
@@ -120,10 +117,10 @@ private fun TaskItem(
             checked = isChecked.value,
             onCheckedChange = {
                 coroutineScope.launch {
-                    updateTaskWidget(context, task)
+                    updateTaskWidget(context, todo)
                 }
 
-                updateTask(task.id, it)
+                updateTask(todo.id, it)
                 isChecked.value = it
             },
             colors = CheckboxDefaults.colors().copy(
@@ -131,8 +128,8 @@ private fun TaskItem(
             )
         )
         Text(
-            text = task.title,
-            textDecoration = if (task.isCompleted) {
+            text = todo.title,
+            textDecoration = if (todo.isCompleted) {
                 TextDecoration.LineThrough
             } else {
                 TextDecoration.None
@@ -144,7 +141,7 @@ private fun TaskItem(
 
 private suspend fun updateTaskWidget(
     context: Context,
-    task: Task
+    todo: Todo
 ) {
     val manager = GlanceAppWidgetManager(context)
     manager.getGlanceIds(TaskWidget::class.java).forEach { id ->
@@ -152,10 +149,10 @@ private suspend fun updateTaskWidget(
         updateAppWidgetState(context, id) {
             val taskId = it[TaskWidgetReceiver.currentTaskId]
 
-            if (taskId == task.id) {
-                it[TaskWidgetReceiver.currentTaskState] = !task.isCompleted
-                it[TaskWidgetReceiver.currentTaskTitle] = task.title
-                it[TaskWidgetReceiver.currentTaskDescription] = task.description
+            if (taskId == todo.id) {
+                it[TaskWidgetReceiver.currentTaskState] = !todo.isCompleted
+                it[TaskWidgetReceiver.currentTaskTitle] = todo.title
+                it[TaskWidgetReceiver.currentTaskDescription] = todo.description
             }
         }
 

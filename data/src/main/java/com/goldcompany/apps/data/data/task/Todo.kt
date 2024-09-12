@@ -1,6 +1,6 @@
-package com.goldcompany.apps.data.data
+package com.goldcompany.apps.data.data.task
 
-data class Task(
+data class Todo(
     val id: String = System.currentTimeMillis().toString(),
     val isCompleted: Boolean,
     val title: String,

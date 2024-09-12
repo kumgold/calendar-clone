@@ -129,7 +129,7 @@ fun HomeScreen(
             )
             Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.vertical_margin)))
             TaskList(
-                tasks = uiState.monthlyTasks[uiState.selectedDateMilli] ?: emptyList(),
+                todos = uiState.monthlyTasks[uiState.selectedDateMilli] ?: emptyList(),
                 goToTaskDetail = { id ->
                     goToAddTask(uiState.selectedDateMilli, id)
                 },
