@@ -17,6 +17,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.goldcompany.apps.todoapplication.R
 import com.goldcompany.apps.todoapplication.compose.DetailScreenAppBar
 import com.goldcompany.apps.todoapplication.compose.TaskTextInput
+import com.goldcompany.apps.todoapplication.schedule.compose.ScheduleDateTimePicker
+import com.goldcompany.apps.todoapplication.util.convertDateToMilli
+import java.time.LocalDate
+import java.util.Calendar
 
 @Composable
 fun ScheduleScreen(
@@ -48,8 +52,25 @@ fun ScheduleScreen(
                 hintResource = R.string.title,
                 isSingleLine = true
             )
-            Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.vertical_margin)))
-
+            Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.horizontal_margin)))
+            ScheduleDateTimePicker(
+                text = R.string.start_date,
+                dateMilli = LocalDate.now().convertDateToMilli(),
+                hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY),
+                minute = Calendar.getInstance().get(Calendar.MINUTE),
+                onDateChange = { date -> },
+                onTimeChange = { h, m -> }
+            )
+            Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.default_margin)))
+            ScheduleDateTimePicker(
+                text = R.string.end_date,
+                dateMilli = LocalDate.now().convertDateToMilli(),
+                hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY) + 1,
+                minute = Calendar.getInstance().get(Calendar.MINUTE),
+                onDateChange = { date -> },
+                onTimeChange = { h, m -> }
+            )
+            Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.horizontal_margin)))
         }
     }
 }
