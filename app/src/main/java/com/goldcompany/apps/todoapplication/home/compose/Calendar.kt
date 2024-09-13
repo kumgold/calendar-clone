@@ -52,9 +52,9 @@ import java.util.Locale
 @Composable
 fun CalendarView(
     selectedDateMilli: Long,
-    monthlyTasks: Map<Long, List<Todo>>,
+    monthlyTodos: Map<Long, List<Todo>>,
     selectDateMilli: (Long) -> Unit,
-    getMonthlyTasks: (LocalDate, LocalDate) -> Unit
+    getMonthlyTodos: (LocalDate, LocalDate) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -91,7 +91,7 @@ fun CalendarView(
                 val isNextYear = (page%12 + 2 > 12)
 
                 selectDateMilli(displayDate.convertDateToMilli())
-                getMonthlyTasks(
+                getMonthlyTodos(
                     LocalDate.of(
                         yearRange.first + page/12,
                         page % 12 + 1,
@@ -134,9 +134,9 @@ fun CalendarView(
                     CalendarItem(
                         date = date,
                         isToday = (date == LocalDate.now()),
-                        isContainTasks = monthlyTasks.keys.contains(date.convertDateToMilli()),
+                        isContainTodos = monthlyTodos.keys.contains(date.convertDateToMilli()),
                         currentDateMilli = selectedDateMilli,
-                        getDailyTasks = selectDateMilli
+                        getDailyTodos = selectDateMilli
                     )
                 }
             }
@@ -165,9 +165,9 @@ private fun DayOfWeekView() {
 private fun CalendarItem(
     date: LocalDate,
     isToday: Boolean,
-    isContainTasks: Boolean,
+    isContainTodos: Boolean,
     currentDateMilli: Long,
-    getDailyTasks: (Long) -> Unit,
+    getDailyTodos: (Long) -> Unit,
 ) {
     val milli = date.convertDateToMilli()
 
@@ -188,7 +188,7 @@ private fun CalendarItem(
             )
             .clip(shape = RoundedCornerShape(10.dp))
             .clickable {
-                getDailyTasks(milli)
+                getDailyTodos(milli)
             }
     ) {
         Column(
@@ -197,7 +197,7 @@ private fun CalendarItem(
             Text(
                 text = (date.dayOfMonth).toString(),
             )
-            if (isContainTasks) {
+            if (isContainTodos) {
                 Box(
                     modifier = Modifier.size(5.dp)
                         .background(
@@ -226,9 +226,9 @@ private fun CalendarPreview() {
     Surface {
         CalendarView(
             selectedDateMilli = 0L,
-            monthlyTasks = mapOf(),
+            monthlyTodos = mapOf(),
             selectDateMilli = {},
-            getMonthlyTasks = { x,y -> }
+            getMonthlyTodos = { x, y -> }
         )
     }
 }

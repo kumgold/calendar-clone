@@ -9,30 +9,30 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TodoDao {
-    @Query("SELECT * FROM task")
-    fun getAllTasks(): Flow<List<TodoEntity>>
+    @Query("SELECT * FROM todo")
+    fun getAllTodos(): Flow<List<TodoEntity>>
 
-    @Query("SELECT * FROM task WHERE dateTimeMilli = :milli")
-    suspend fun getDailyTasks(milli: Long): List<TodoEntity>
+    @Query("SELECT * FROM todo WHERE dateTimeMilli = :milli")
+    suspend fun getDailyTodos(milli: Long): List<TodoEntity>
 
-    @Query("SELECT * FROM task WHERE dateTimeMilli >= :startMilli AND dateTimeMilli < :endMilli")
-    suspend fun getMonthlyTasks(startMilli: Long, endMilli: Long): List<TodoEntity>
+    @Query("SELECT * FROM todo WHERE dateTimeMilli >= :startMilli AND dateTimeMilli < :endMilli")
+    suspend fun getMonthlyTodos(startMilli: Long, endMilli: Long): List<TodoEntity>
 
-    @Query("SELECT * FROM task WHERE isCompleted = 0")
-    fun getAllTasksForWidget(): List<TodoEntity>
+    @Query("SELECT * FROM todo WHERE isCompleted = 0")
+    fun getAllTodosForWidget(): List<TodoEntity>
 
-    @Query("SELECT * FROM task WHERE id = :id")
-    suspend fun getTask(id: String): TodoEntity?
+    @Query("SELECT * FROM todo WHERE id = :id")
+    suspend fun getTodo(id: String): TodoEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertTask(todoEntity: TodoEntity)
+    suspend fun insertTodo(todoEntity: TodoEntity)
 
     @Update
-    suspend fun updateTask(todoEntity: TodoEntity)
+    suspend fun updateTodo(todoEntity: TodoEntity)
 
-    @Query("UPDATE task SET isCompleted = :completed WHERE id = :taskId")
-    suspend fun updateCompleted(taskId: Long, completed: Boolean)
+    @Query("UPDATE todo SET isCompleted = :completed WHERE id = :todoId")
+    suspend fun updateCompletedTodo(todoId: Long, completed: Boolean)
 
-    @Query("DELETE FROM task WHERE id = :taskId")
-    suspend fun deleteTask(taskId: Long)
+    @Query("DELETE FROM todo WHERE id = :todoId")
+    suspend fun deleteTodo(todoId: Long)
 }

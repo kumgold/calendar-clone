@@ -4,10 +4,10 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.goldcompany.apps.data.data.todo.Todo
-import com.goldcompany.apps.data.repository.TaskRepository
+import com.goldcompany.apps.data.repository.TodoRepository
 import com.goldcompany.apps.todoapplication.R
 import com.goldcompany.apps.todoapplication.util.CURRENT_DATE_MILLI
-import com.goldcompany.apps.todoapplication.util.TASK_ID
+import com.goldcompany.apps.todoapplication.util.TODO_ID
 import com.goldcompany.apps.todoapplication.util.convertDateToMilli
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import javax.inject.Inject
 
-data class TaskUiState(
+data class TodoUiState(
     val title: String = "",
     val description: String = "",
     val isCompleted: Boolean = false,
@@ -31,19 +31,19 @@ data class TaskUiState(
 )
 
 @HiltViewModel
-class TaskViewModel @Inject constructor(
-    private val repository: TaskRepository,
+class TodoViewModel @Inject constructor(
+    private val repository: TodoRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
-    private val taskId: String? = savedStateHandle[TASK_ID]
+    private val todoId: String? = savedStateHandle[TODO_ID]
     private val currentDateMilli: Long = savedStateHandle[CURRENT_DATE_MILLI] ?: LocalDate.now().convertDateToMilli()
 
-    private val _uiState = MutableStateFlow(TaskUiState())
-    val uiState: StateFlow<TaskUiState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(TodoUiState())
+    val uiState: StateFlow<TodoUiState> = _uiState.asStateFlow()
 
     init {
-        if (taskId != null) {
-            loadTask(taskId)
+        if (todoId != null) {
+            loadTodo(todoId)
         } else {
             _uiState.update {
                 it.copy(
@@ -55,12 +55,12 @@ class TaskViewModel @Inject constructor(
         }
     }
 
-    private fun loadTask(taskId: String) {
+    private fun loadTodo(taskId: String) {
         loading()
 
         viewModelScope.launch(Dispatchers.IO) {
             taskId.let { id ->
-                repository.getTask(id).let { task ->
+                repository.getTodo(id).let { task ->
                     if (task != null) {
                         _uiState.update {
                             it.copy(
@@ -102,7 +102,7 @@ class TaskViewModel @Inject constructor(
         }
     }
 
-    fun saveTask() {
+    fun saveTodo() {
         if (_uiState.value.title.isEmpty()) {
             _uiState.update {
                 it.copy(message = R.string.please_check_your_input)
@@ -110,18 +110,18 @@ class TaskViewModel @Inject constructor(
             return
         }
 
-        if (taskId == null) {
-            addTask()
+        if (todoId == null) {
+            addTodo()
         } else {
-            updateTask()
+            updateTodo()
         }
     }
 
-    private fun addTask() {
+    private fun addTodo() {
         loading()
 
         viewModelScope.launch(Dispatchers.IO) {
-            repository.addTask(
+            repository.addTodo(
                 Todo(
                     isCompleted = _uiState.value.isCompleted,
                     title = _uiState.value.title,
@@ -133,13 +133,13 @@ class TaskViewModel @Inject constructor(
         }
     }
 
-    private fun updateTask() {
+    private fun updateTodo() {
         loading()
 
         viewModelScope.launch(Dispatchers.IO) {
-            repository.updateTask(
+            repository.updateTodo(
                 Todo(
-                    id = taskId!!,
+                    id = todoId!!,
                     isCompleted = _uiState.value.isCompleted,
                     title = _uiState.value.title,
                     description = _uiState.value.description,
@@ -150,9 +150,9 @@ class TaskViewModel @Inject constructor(
         }
     }
 
-    fun deleteTask() {
+    fun deleteTodo() {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.deleteTask(taskId!!.toLong())
+            repository.deleteTodo(todoId!!.toLong())
             done()
         }
     }

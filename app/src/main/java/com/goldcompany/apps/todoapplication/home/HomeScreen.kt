@@ -34,7 +34,7 @@ import com.goldcompany.apps.todoapplication.R
 import com.goldcompany.apps.todoapplication.compose.HomeTopAppBar
 import com.goldcompany.apps.todoapplication.home.compose.AddSchedulesButton
 import com.goldcompany.apps.todoapplication.home.compose.CalendarView
-import com.goldcompany.apps.todoapplication.home.compose.TaskList
+import com.goldcompany.apps.todoapplication.home.compose.TodoList
 import com.goldcompany.apps.todoapplication.util.convertMilliToDate
 import com.goldcompany.apps.todoapplication.widget.TaskWidget
 import com.goldcompany.apps.todoapplication.widget.TaskWidgetReceiver
@@ -68,7 +68,7 @@ fun TaskActionBroadcastReceiver(
 fun HomeScreen(
     modifier: Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
-    goToAddTask: (Long, String?) -> Unit,
+    goToAddTodo: (Long, String?) -> Unit,
     goToAddSchedule: () -> Unit
 ) {
     val lifecycleOwner = rememberUpdatedState(newValue = LocalLifecycleOwner.current)
@@ -80,7 +80,7 @@ fun HomeScreen(
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_RESUME -> {
-                    viewModel.getMonthlyTasks(
+                    viewModel.getMonthlyTodos(
                         uiState.startLocalDate,
                         uiState.startLocalDate.plusMonths(1)
                     )
@@ -101,8 +101,8 @@ fun HomeScreen(
         floatingActionButton = {
             AddSchedulesButton(
                 isExpanded = isExpanded,
-                goToAddTask = {
-                    goToAddTask(uiState.selectedDateMilli, null)
+                goToAddTodo = {
+                    goToAddTodo(uiState.selectedDateMilli, null)
                 },
                 goToAddSchedule = {
                     goToAddSchedule()
@@ -119,22 +119,22 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.vertical_margin)))
             CalendarView(
                 selectedDateMilli = uiState.selectedDateMilli,
-                monthlyTasks = uiState.monthlyTasks,
+                monthlyTodos = uiState.monthlyTodos,
                 selectDateMilli = { milli ->
                     viewModel.selectDateMilli(milli)
                 },
-                getMonthlyTasks = { startDate, endDate ->
-                    viewModel.getMonthlyTasks(startDate, endDate)
+                getMonthlyTodos = { startDate, endDate ->
+                    viewModel.getMonthlyTodos(startDate, endDate)
                 }
             )
             Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.vertical_margin)))
-            TaskList(
-                todos = uiState.monthlyTasks[uiState.selectedDateMilli] ?: emptyList(),
-                goToTaskDetail = { id ->
-                    goToAddTask(uiState.selectedDateMilli, id)
+            TodoList(
+                todos = uiState.monthlyTodos[uiState.selectedDateMilli] ?: emptyList(),
+                goToTodoDetail = { id ->
+                    goToAddTodo(uiState.selectedDateMilli, id)
                 },
-                updateTask = { id, isCompleted ->
-                    viewModel.updateTask(id, isCompleted)
+                updateTodo = { id, isCompleted ->
+                    viewModel.updateTodo(id, isCompleted)
                 }
             )
         }
@@ -153,7 +153,7 @@ fun HomeScreen(
         val id = intent?.getStringExtra(TaskWidget.KEY_TASK_ID).toString()
         val isCompleted = intent?.getBooleanExtra(TaskWidget.KEY_TASK_STATE, false) ?: false
 
-        viewModel.updateTask(id, isCompleted)
+        viewModel.updateTodo(id, isCompleted)
     }
 }
 

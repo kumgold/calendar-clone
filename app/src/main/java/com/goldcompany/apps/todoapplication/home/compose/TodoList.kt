@@ -37,11 +37,11 @@ import com.goldcompany.apps.todoapplication.widget.TaskWidgetReceiver
 import kotlinx.coroutines.launch
 
 @Composable
-fun TaskList(
+fun TodoList(
     modifier: Modifier = Modifier,
     todos: List<Todo>,
-    goToTaskDetail: (String) -> Unit,
-    updateTask: (String, Boolean) -> Unit
+    goToTodoDetail: (String) -> Unit,
+    updateTodo: (String, Boolean) -> Unit
 ) {
     if (todos.isEmpty()) {
         EmptyTask()
@@ -58,12 +58,12 @@ fun TaskList(
         ) {
             items(
                 items = todos,
-                key = { task -> task.id }
-            ) { task ->
-                TaskItem(
-                    todo = task,
-                    updateTask = updateTask,
-                    goToTaskDetail = goToTaskDetail
+                key = { todo -> todo.id }
+            ) { todo ->
+                TodoItem(
+                    todo = todo,
+                    updateTodo = updateTodo,
+                    goToTodoDetail = goToTodoDetail
                 )
             }
         }
@@ -95,10 +95,10 @@ private fun EmptyTask() {
 }
 
 @Composable
-private fun TaskItem(
+private fun TodoItem(
     todo: Todo,
-    updateTask: (String, Boolean) -> Unit,
-    goToTaskDetail: (String) -> Unit
+    updateTodo: (String, Boolean) -> Unit,
+    goToTodoDetail: (String) -> Unit
 ) {
     val isChecked = remember { mutableStateOf(todo.isCompleted) }
     val coroutineScope = rememberCoroutineScope()
@@ -108,7 +108,7 @@ private fun TaskItem(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { goToTaskDetail(todo.id) }
+            .clickable { goToTodoDetail(todo.id) }
             .padding(
                 vertical = dimensionResource(id = R.dimen.vertical_margin)
             )
@@ -117,10 +117,10 @@ private fun TaskItem(
             checked = isChecked.value,
             onCheckedChange = {
                 coroutineScope.launch {
-                    updateTaskWidget(context, todo)
+                    updateTodoWidget(context, todo)
                 }
 
-                updateTask(todo.id, it)
+                updateTodo(todo.id, it)
                 isChecked.value = it
             },
             colors = CheckboxDefaults.colors().copy(
@@ -129,7 +129,7 @@ private fun TaskItem(
         )
         Text(
             text = todo.title,
-            textDecoration = if (todo.isCompleted) {
+            textDecoration = if (isChecked.value) {
                 TextDecoration.LineThrough
             } else {
                 TextDecoration.None
@@ -139,7 +139,7 @@ private fun TaskItem(
     }
 }
 
-private suspend fun updateTaskWidget(
+private suspend fun updateTodoWidget(
     context: Context,
     todo: Todo
 ) {

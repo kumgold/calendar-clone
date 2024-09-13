@@ -27,9 +27,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
@@ -44,7 +41,7 @@ import com.goldcompany.apps.todoapplication.R
 fun AddSchedulesButton(
     isExpanded: MutableState<Boolean>,
     goToAddSchedule: () -> Unit,
-    goToAddTask: () -> Unit
+    goToAddTodo: () -> Unit
 ) {
     val fabSize = 64.dp
     val expandedFabWidth by animateDpAsState(
@@ -86,7 +83,7 @@ fun AddSchedulesButton(
         FloatingActionButton(
             onClick = {
                 if (isExpanded.value) {
-                    goToAddTask()
+                    goToAddTodo()
                 }
 
                 isExpanded.value = !isExpanded.value
@@ -116,7 +113,7 @@ fun AddSchedulesButton(
                     )
             )
             Text(
-                text = stringResource(id = R.string.add_task),
+                text = stringResource(id = R.string.add_todo),
                 fontSize = 16.sp,
                 modifier = Modifier
                     .offset(

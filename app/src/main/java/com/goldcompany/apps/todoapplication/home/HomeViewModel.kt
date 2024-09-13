@@ -6,7 +6,7 @@ import androidx.compose.runtime.toMutableStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.goldcompany.apps.data.data.todo.Todo
-import com.goldcompany.apps.data.repository.TaskRepository
+import com.goldcompany.apps.data.repository.TodoRepository
 import com.goldcompany.apps.todoapplication.util.convertDateToMilli
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,7 +21,7 @@ import javax.inject.Inject
 
 data class TaskUiState(
     val todos: SnapshotStateList<Todo> = mutableStateListOf(),
-    val monthlyTasks: Map<Long, List<Todo>> = mapOf(),
+    val monthlyTodos: Map<Long, List<Todo>> = mapOf(),
     val selectedDateMilli: Long = LocalDate.now().convertDateToMilli(),
     val startLocalDate: LocalDate = LocalDate.now(),
     val isLoading: Boolean = false,
@@ -30,21 +30,21 @@ data class TaskUiState(
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val repository: TaskRepository
+    private val repository: TodoRepository
 ) : ViewModel() {
 
-    private val _tasks = MutableStateFlow<SnapshotStateList<Todo>>(mutableStateListOf())
-    private val _monthlyTasks = MutableStateFlow<Map<Long, List<Todo>>>(mapOf())
+    private val _todos = MutableStateFlow<SnapshotStateList<Todo>>(mutableStateListOf())
+    private val _monthlyTodos = MutableStateFlow<Map<Long, List<Todo>>>(mapOf())
     private val _selectedDateMilli = MutableStateFlow(LocalDate.now().convertDateToMilli())
     private val _startLocalDate = MutableStateFlow(LocalDate.now())
     private val _isLoading = MutableStateFlow(false)
 
     val uiState: StateFlow<TaskUiState> = combine(
-        _tasks, _monthlyTasks, _selectedDateMilli, _startLocalDate, _isLoading
+        _todos, _monthlyTodos, _selectedDateMilli, _startLocalDate, _isLoading
     ) { tasks, monthlyTasks, selectedDateMilli, startLocalDate, isLoading ->
         TaskUiState(
             todos = tasks.toMutableStateList(),
-            monthlyTasks = monthlyTasks,
+            monthlyTodos = monthlyTasks,
             selectedDateMilli = selectedDateMilli,
             startLocalDate = startLocalDate,
             isLoading = isLoading
@@ -56,29 +56,29 @@ class HomeViewModel @Inject constructor(
     )
 
     init {
-        getMonthlyTasks()
+        getMonthlyTodos()
     }
 
-    fun getMonthlyTasks(
+    fun getMonthlyTodos(
         startDate: LocalDate = LocalDate.now(),
         endDate: LocalDate = LocalDate.now().plusMonths(1)
     ) {
         viewModelScope.launch {
             val map = mutableMapOf<Long, List<Todo>>()
-            val list = repository.getMonthlyTasks(startDate.convertDateToMilli(), endDate.convertDateToMilli())
+            val list = repository.getMonthlyTodos(startDate.convertDateToMilli(), endDate.convertDateToMilli())
 
             list.map { task ->
                 map[task.dateMilli] = list.filter { it.dateMilli == task.dateMilli }
             }
 
-            _monthlyTasks.update { map }
+            _monthlyTodos.update { map }
         }
         _startLocalDate.update { startDate }
     }
 
-    fun updateTask(taskId: String, isCompleted: Boolean) {
+    fun updateTodo(taskId: String, isCompleted: Boolean) {
         viewModelScope.launch {
-            repository.updateCompleted(taskId.toLong(), isCompleted)
+            repository.updateCompletedTodo(taskId.toLong(), isCompleted)
         }
     }
 

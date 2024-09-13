@@ -3,7 +3,7 @@ package com.goldcompany.apps.data.di
 import android.content.Context
 import com.goldcompany.apps.data.db.todo.TodoDao
 import com.goldcompany.apps.data.db.AppDatabase
-import com.goldcompany.apps.data.repository.TaskRepository
+import com.goldcompany.apps.data.repository.TodoRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -31,5 +31,5 @@ object RepositoryModule {
     @Provides
     fun provideTaskRepository(
         todoDao: TodoDao
-    ): TaskRepository = TaskRepository(todoDao)
+    ): TodoRepository = TodoRepository(todoDao)
 }

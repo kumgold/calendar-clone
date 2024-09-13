@@ -13,9 +13,9 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.goldcompany.apps.todoapplication.home.HomeScreen
 import com.goldcompany.apps.todoapplication.schedule.ScheduleScreen
-import com.goldcompany.apps.todoapplication.todo.TaskScreen
+import com.goldcompany.apps.todoapplication.todo.TodoScreen
 import com.goldcompany.apps.todoapplication.util.CURRENT_DATE_MILLI
-import com.goldcompany.apps.todoapplication.util.TASK_ID
+import com.goldcompany.apps.todoapplication.util.TODO_ID
 
 @Composable
 fun TodoNavGraph(
@@ -36,8 +36,8 @@ fun TodoNavGraph(
         ) {
             HomeScreen(
                 modifier = modifier,
-                goToAddTask = { milli, id ->
-                    navActions.navigateTaskDetail(milli, id)
+                goToAddTodo = { milli, id ->
+                    navActions.navigateTodoDetail(milli, id)
                 },
                 goToAddSchedule = {
                     navActions.navigateScheduleDetail()
@@ -57,9 +57,9 @@ fun TodoNavGraph(
             )
         }
         dialog(
-            route = "${TodoDestinations.TASK}?currentDateMilli={$CURRENT_DATE_MILLI}&taskId={$TASK_ID}",
+            route = "${TodoDestinations.TODO}?currentDateMilli={$CURRENT_DATE_MILLI}&todoId={$TODO_ID}",
             arguments = listOf(
-                navArgument(TASK_ID) {
+                navArgument(TODO_ID) {
                     type = NavType.StringType
                     nullable = true
                 },
@@ -71,7 +71,7 @@ fun TodoNavGraph(
                 usePlatformDefaultWidth = false
             )
         ) {
-            TaskScreen(
+            TodoScreen(
                 navigateBack = {
                     navController.popBackStack()
                 }

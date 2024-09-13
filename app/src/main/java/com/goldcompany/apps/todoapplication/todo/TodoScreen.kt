@@ -49,8 +49,8 @@ import com.goldcompany.apps.todoapplication.util.convertMilliToDate
 import java.time.LocalDate
 
 @Composable
-fun TaskScreen(
-    viewModel: TaskViewModel = hiltViewModel(),
+fun TodoScreen(
+    viewModel: TodoViewModel = hiltViewModel(),
     navigateBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -67,10 +67,10 @@ fun TaskScreen(
             DetailScreenAppBar(
                 isEdit = uiState.isEdit,
                 deleteTask = {
-                    viewModel.deleteTask()
+                    viewModel.deleteTodo()
                 },
                 saveTask = {
-                    viewModel.saveTask()
+                    viewModel.saveTodo()
                 },
                 navigateBack = navigateBack
             )
@@ -79,7 +79,7 @@ fun TaskScreen(
         if (uiState.isLoading) {
             LoadingAnimation(modifier = Modifier.padding(paddingValue).wrapContentSize())
         } else {
-            EditTask(
+            Todo(
                 modifier = Modifier.padding(paddingValue).wrapContentSize(),
                 title = uiState.title,
                 description = uiState.description,
@@ -87,7 +87,7 @@ fun TaskScreen(
                 onTitleChange = viewModel::updateTitle,
                 onDescriptionChange = viewModel::updateDescription,
                 saveTask = {
-                    viewModel.saveTask()
+                    viewModel.saveTodo()
                 },
                 navigateBack = navigateBack,
                 onDateSelected = viewModel::updateDateMilli
@@ -111,7 +111,7 @@ fun TaskScreen(
 }
 
 @Composable
-private fun EditTask(
+private fun Todo(
     modifier: Modifier,
     title: String,
     description: String,
@@ -142,7 +142,7 @@ private fun EditTask(
                 color = MaterialTheme.colorScheme.outline
             )
             Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.default_margin)))
-            TaskDateSelector(
+            TodoDateSelector(
                 savedDate = dateMilli.convertMilliToDate(),
                 onDateSelected = onDateSelected
             )
@@ -181,7 +181,7 @@ private fun EditTask(
 }
 
 @Composable
-private fun TaskDateSelector(
+private fun TodoDateSelector(
     modifier: Modifier = Modifier,
     savedDate: String,
     onDateSelected: (Long) -> Unit
@@ -213,7 +213,7 @@ private fun TaskDateSelector(
     }
 
     if (isShowDatePickerDialog) {
-        TaskDatePickerDialog(
+        TodoDatePickerDialog(
             onDateSelected = {
                 date = it.convertMilliToDate()
                 onDateSelected(it)
@@ -225,7 +225,7 @@ private fun TaskDateSelector(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TaskDatePickerDialog(
+private fun TodoDatePickerDialog(
     onDateSelected: (Long) -> Unit,
     onDismiss: () -> Unit
 ) {

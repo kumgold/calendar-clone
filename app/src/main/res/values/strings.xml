@@ -14,13 +14,8 @@
     <string name="description">Description</string>
     <string name="app_widget_default_text">Manage your task on the widget.</string>
 
-<!--    Home-->
-    <string name="all_tasks">All tasks</string>
-    <string name="active_tasks">All active tasks</string>
-    <string name="completed_tasks">All completed tasks</string>
-
-<!--    Task-->
-    <string name="add_task">Add Task</string>
+<!--    Todo-->
+    <string name="add_todo">Add Todo</string>
     <string name="title_hint">Enter the title</string>
     <string name="description_hint">Enter the description</string>
     <string name="date">Date</string>
