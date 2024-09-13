@@ -48,7 +48,7 @@ fun TodoList(
     } else {
         LazyColumn(
             modifier = modifier
-                .padding(horizontal = dimensionResource(id = R.dimen.horizontal_margin))
+                .padding(horizontal = dimensionResource(id = R.dimen.default_margin))
                 .border(
                     width = 1.dp,
                     color = MaterialTheme.colorScheme.outline,
