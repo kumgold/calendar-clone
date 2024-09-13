@@ -1,2 +1,2 @@
-# todo-application
-To do Application
+# calendar-application
+Calendar Application

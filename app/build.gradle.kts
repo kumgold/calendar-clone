@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.goldcompany.apps.todoapplication"
+    namespace = "com.goldcompany.apps.calendar"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.goldcompany.apps.todoapplication"
+        applicationId = "com.goldcompany.apps.calendar"
         minSdk = 26
         targetSdk = 33
         versionCode = 1
