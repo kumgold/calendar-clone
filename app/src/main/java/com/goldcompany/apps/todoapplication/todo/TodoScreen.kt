@@ -34,6 +34,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -122,11 +125,21 @@ private fun Todo(
     navigateBack: () -> Unit,
     onDateSelected: (Long) -> Unit
 ) {
+    val keyboard = LocalSoftwareKeyboardController.current
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(focusRequester) {
+        focusRequester.requestFocus()
+        keyboard?.show()
+    }
+
     Column(
         modifier = modifier.padding(all = dimensionResource(id = R.dimen.default_margin))
     ) {
         TaskTextInput(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .focusRequester(focusRequester),
             text = title,
             onTextChange = onTitleChange,
             hintResource = R.string.title,

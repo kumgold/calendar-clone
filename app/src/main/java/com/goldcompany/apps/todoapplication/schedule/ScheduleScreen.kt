@@ -11,7 +11,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.dimensionResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.goldcompany.apps.todoapplication.R
@@ -40,13 +45,24 @@ fun ScheduleScreen(
             )
         }
     ) { paddingValue ->
+
+        val keyboard = LocalSoftwareKeyboardController.current
+        val focusRequester = remember { FocusRequester() }
+
+        LaunchedEffect(focusRequester) {
+            focusRequester.requestFocus()
+            keyboard?.show()
+        }
+
         Column(
             modifier = Modifier
                 .padding(paddingValue)
                 .padding(all = dimensionResource(id = R.dimen.default_margin))
         ) {
             TaskTextInput(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusRequester(focusRequester),
                 text = "",
                 onTextChange = {},
                 hintResource = R.string.title,
