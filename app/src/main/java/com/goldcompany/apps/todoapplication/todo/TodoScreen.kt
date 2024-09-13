@@ -154,7 +154,7 @@ private fun Todo(
                 text = stringResource(id = R.string.date),
                 color = MaterialTheme.colorScheme.outline
             )
-            Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.default_margin)))
+            Spacer(modifier = Modifier.weight(1f))
             TodoDateSelector(
                 savedDate = dateMilli.convertMilliToDate(),
                 onDateSelected = onDateSelected
@@ -170,26 +170,6 @@ private fun Todo(
             hintResource = R.string.description,
             isSingleLine = false
         )
-        Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.vertical_margin)))
-        Row(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Button(
-                modifier = Modifier.weight(1f),
-                onClick = { saveTask() },
-                shape = RoundedCornerShape(10.dp)
-            ) {
-                Text(text = stringResource(id = R.string.save))
-            }
-            Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.horizontal_margin)))
-            Button(
-                modifier = Modifier.weight(1f),
-                onClick = { navigateBack() },
-                shape = RoundedCornerShape(10.dp)
-            ) {
-                Text(text = stringResource(id = R.string.cancel))
-            }
-        }
     }
 }
 
