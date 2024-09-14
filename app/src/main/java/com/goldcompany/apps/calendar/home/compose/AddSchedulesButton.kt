@@ -1,5 +1,6 @@
 package com.goldcompany.apps.calendar.home.compose
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.EaseIn
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -19,6 +20,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.EditCalendar
+import androidx.compose.material.icons.filled.LibraryAddCheck
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
@@ -30,6 +34,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -74,7 +79,10 @@ fun AddSchedulesButton(
                     shape = RoundedCornerShape(18.dp)
                 )
         ) {
-            ExpandedFabItem(isExpanded.value) {
+            ExpandedFabItem(
+                icon = Icons.Filled.CalendarToday,
+                isExpanded = isExpanded.value
+            ) {
                 goToAddSchedule()
                 isExpanded.value = !isExpanded.value
             }
@@ -99,21 +107,39 @@ fun AddSchedulesButton(
                 focusedElevation = 0.dp,
             )
         ) {
-            Icon(
-                imageVector = Icons.Filled.Add,
-                contentDescription = null,
-                modifier = Modifier
-                    .size(24.dp)
-                    .offset(
-                        x = animateDpAsState(
-                            if (isExpanded.value) (-70).dp else 0.dp,
-                            animationSpec = spring(dampingRatio = 3f),
-                            label = ""
-                        ).value
+            Crossfade(targetState = isExpanded.value, label = "") { isExpanded ->
+                if (isExpanded) {
+                    Icon(
+                        imageVector =  Icons.Filled.LibraryAddCheck,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(24.dp)
+                            .offset(
+                                x = animateDpAsState(
+                                    if (isExpanded) (-70).dp else 0.dp,
+                                    animationSpec = spring(dampingRatio = 3f),
+                                    label = ""
+                                ).value
+                            )
                     )
-            )
+                } else {
+                    Icon(
+                        imageVector = Icons.Filled.Add,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(24.dp)
+                            .offset(
+                                x = animateDpAsState(
+                                    if (isExpanded) (-70).dp else 0.dp,
+                                    animationSpec = spring(dampingRatio = 3f),
+                                    label = ""
+                                ).value
+                            )
+                    )
+                }
+            }
             Text(
-                text = stringResource(id = R.string.add_todo),
+                text = stringResource(id = R.string.todo),
                 fontSize = 16.sp,
                 modifier = Modifier
                     .offset(
@@ -141,6 +167,7 @@ fun AddSchedulesButton(
 
 @Composable
 private fun ExpandedFabItem(
+    icon: ImageVector,
     isExpanded: Boolean,
     goToAddSchedule: () -> Unit
 ) {
@@ -154,12 +181,12 @@ private fun ExpandedFabItem(
             .padding(all = dimensionResource(id = R.dimen.default_margin_large))
     ) {
         Icon(
-            imageVector = Icons.Filled.Add,
+            imageVector = icon,
             contentDescription = null,
             modifier = Modifier.size(24.dp)
         )
         Text(
-            text = stringResource(id = R.string.add_schedule),
+            text = stringResource(id = R.string.schedule),
             textAlign = TextAlign.Center,
             fontSize = 16.sp,
             modifier = Modifier

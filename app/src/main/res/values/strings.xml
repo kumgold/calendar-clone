@@ -15,13 +15,13 @@
     <string name="app_widget_default_text">Manage your task on the widget.</string>
 
 <!--    Todo-->
-    <string name="add_todo">Add Todo</string>
+    <string name="todo">Todo</string>
     <string name="title_hint">Enter the title</string>
     <string name="description_hint">Enter the description</string>
     <string name="date">Date</string>
 
 <!--    Schedule-->
-    <string name="add_schedule">Add Schedule</string>
+    <string name="schedule">Schedule</string>
     <string name="start_date">Start Date</string>
     <string name="end_date">End Date</string>
 

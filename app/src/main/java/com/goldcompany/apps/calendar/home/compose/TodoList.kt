@@ -30,10 +30,10 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.state.updateAppWidgetState
-import com.goldcompany.apps.data.data.todo.Todo
 import com.goldcompany.apps.calendar.R
 import com.goldcompany.apps.calendar.widget.TaskWidget
 import com.goldcompany.apps.calendar.widget.TaskWidgetReceiver
+import com.goldcompany.apps.data.data.todo.Todo
 import kotlinx.coroutines.launch
 
 @Composable
@@ -77,7 +77,7 @@ private fun EmptyTask() {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = dimensionResource(id = R.dimen.horizontal_margin))
+            .padding(horizontal = dimensionResource(id = R.dimen.default_margin))
             .drawBehind {
                 val height = size.height
 
@@ -85,12 +85,17 @@ private fun EmptyTask() {
                     color = color,
                     start = Offset(0f, 0f),
                     end = Offset(0f, height),
-                    strokeWidth = 10f
+                    strokeWidth = 15f
                 )
-            }
+            },
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.horizontal_margin)))
-        Text(text = "일정이 없습니다.", style = MaterialTheme.typography.bodyMedium)
+        Text(
+            modifier = Modifier.padding(vertical = dimensionResource(id = R.dimen.default_margin_large)),
+            text = "일정이 없습니다.",
+            style = MaterialTheme.typography.bodyMedium
+        )
     }
 }
 
