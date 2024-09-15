@@ -67,6 +67,7 @@ fun TodoScreen(
         },
         topBar = {
             DetailScreenAppBar(
+                taskTitle = uiState.title,
                 isEdit = uiState.isEdit,
                 deleteTask = {
                     viewModel.deleteTodo()
@@ -88,10 +89,6 @@ fun TodoScreen(
                 dateMilli = uiState.dateMilli,
                 onTitleChange = viewModel::updateTitle,
                 onDescriptionChange = viewModel::updateDescription,
-                saveTask = {
-                    viewModel.saveTodo()
-                },
-                navigateBack = navigateBack,
                 onDateSelected = viewModel::updateDateMilli
             )
         }
@@ -120,8 +117,6 @@ private fun Todo(
     dateMilli: Long,
     onTitleChange: (String) -> Unit,
     onDescriptionChange: (String) -> Unit,
-    saveTask: () -> Unit,
-    navigateBack: () -> Unit,
     onDateSelected: (Long) -> Unit
 ) {
     val keyboard = LocalSoftwareKeyboardController.current

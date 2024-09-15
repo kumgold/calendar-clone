@@ -11,6 +11,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -18,6 +19,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.dimensionResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.goldcompany.apps.calendar.R
 import com.goldcompany.apps.calendar.compose.DetailScreenAppBar
 import com.goldcompany.apps.calendar.compose.TaskTextInput
@@ -31,12 +33,15 @@ fun ScheduleScreen(
     viewModel: ScheduleViewModel = hiltViewModel(),
     navigateBack: () -> Unit
 ) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
         topBar = {
             DetailScreenAppBar(
+                taskTitle = uiState.title,
                 isEdit = false,
                 deleteTask = {},
                 saveTask = {},

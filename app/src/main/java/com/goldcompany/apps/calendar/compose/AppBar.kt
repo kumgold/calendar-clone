@@ -22,6 +22,7 @@ import com.goldcompany.apps.calendar.R
 @Composable
 fun DetailScreenAppBar(
     modifier: Modifier = Modifier,
+    taskTitle: String,
     isEdit: Boolean,
     deleteTask: () -> Unit,
     saveTask: () -> Unit,
@@ -47,14 +48,20 @@ fun DetailScreenAppBar(
         },
         actions = {
             if (isEdit) {
-                TextButton(onClick = { deleteTask() }) {
+                TextButton(
+                    enabled = taskTitle.isNotEmpty(),
+                    onClick = { deleteTask() }
+                ) {
                     Text(
                         text = stringResource(id = R.string.delete),
                         color = MaterialTheme.colorScheme.onPrimary
                     )
                 }
             } else {
-                IconButton(onClick = { saveTask() }) {
+                IconButton(
+                    enabled = taskTitle.isNotEmpty(),
+                    onClick = { saveTask() }
+                ) {
                     Icon(imageVector = Icons.Default.Check, contentDescription = null)
                 }
             }
@@ -86,6 +93,7 @@ fun HomeTopAppBar(
 @Composable
 private fun TaskDetailAppBarPreview() {
     DetailScreenAppBar(
+        taskTitle = "task title",
         isEdit = true,
         deleteTask = {},
         saveTask = {},
