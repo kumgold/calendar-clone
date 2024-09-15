@@ -1,8 +1,10 @@
 package com.goldcompany.apps.data.db.schedule
 
 import androidx.room.ColumnInfo
+import androidx.room.Entity
 import androidx.room.PrimaryKey
 
+@Entity(tableName = "schedule")
 data class ScheduleEntity(
     @PrimaryKey(autoGenerate = true) @ColumnInfo val id: Long = 0,
     @ColumnInfo val title: String = "",
@@ -14,5 +16,5 @@ data class ScheduleEntity(
     @ColumnInfo val endHour: Int,
     @ColumnInfo val endMinute: Int,
     @ColumnInfo val isAllDay: Boolean,
-    @ColumnInfo val place: String
+    @ColumnInfo val place: String?
 )
