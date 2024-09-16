@@ -1,6 +1,5 @@
 package com.goldcompany.apps.calendar.home
 
-import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -34,7 +33,6 @@ import com.goldcompany.apps.calendar.R
 import com.goldcompany.apps.calendar.compose.HomeTopAppBar
 import com.goldcompany.apps.calendar.home.compose.AddSchedulesButton
 import com.goldcompany.apps.calendar.home.compose.CalendarView
-import com.goldcompany.apps.calendar.home.compose.ScheduleList
 import com.goldcompany.apps.calendar.home.compose.TodoList
 import com.goldcompany.apps.calendar.util.convertMilliToDate
 import com.goldcompany.apps.calendar.widget.TaskWidget
@@ -64,7 +62,6 @@ fun TaskActionBroadcastReceiver(
     }
 }
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun HomeScreen(
     modifier: Modifier,
@@ -76,7 +73,7 @@ fun HomeScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isExpanded = remember { mutableStateOf(false) }
 
-    DisposableEffect(key1 = lifecycleOwner, uiState.startLocalDate) {
+    DisposableEffect(lifecycleOwner, uiState.startLocalDate) {
         val lifecycle = lifecycleOwner.value.lifecycle
         val observer = LifecycleEventObserver { _, event ->
             when (event) {

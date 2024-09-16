@@ -96,7 +96,7 @@ private fun EmptyTask() {
         Text(
             modifier = Modifier.padding(vertical = dimensionResource(id = R.dimen.default_margin_large)),
             text = "일정이 없습니다.",
-            style = MaterialTheme.typography.bodyMedium
+            style = MaterialTheme.typography.bodySmall
         )
     }
 }
@@ -141,7 +141,7 @@ private fun TodoItem(
             } else {
                 TextDecoration.None
             },
-            style = MaterialTheme.typography.titleMedium
+            style = MaterialTheme.typography.bodySmall
         )
     }
 }
