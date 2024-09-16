@@ -34,6 +34,7 @@ import com.goldcompany.apps.calendar.R
 import com.goldcompany.apps.calendar.compose.HomeTopAppBar
 import com.goldcompany.apps.calendar.home.compose.AddSchedulesButton
 import com.goldcompany.apps.calendar.home.compose.CalendarView
+import com.goldcompany.apps.calendar.home.compose.ScheduleList
 import com.goldcompany.apps.calendar.home.compose.TodoList
 import com.goldcompany.apps.calendar.util.convertMilliToDate
 import com.goldcompany.apps.calendar.widget.TaskWidget
@@ -127,7 +128,6 @@ fun HomeScreen(
                     viewModel.getMonthlyTodos(startDate, endDate)
                 }
             )
-            Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.vertical_margin)))
             TodoList(
                 todos = uiState.monthlyTodos[uiState.selectedDateMilli] ?: emptyList(),
                 goToTodoDetail = { id ->

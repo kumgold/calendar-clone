@@ -27,7 +27,7 @@ class TodoRepository @Inject constructor(
         return todoDao.getTodo(id)?.toExternal()
     }
 
-    suspend fun addTodo(todo: Todo) {
+    suspend fun insertTodo(todo: Todo) {
         todoDao.insertTodo(todo.toLocal())
     }
 

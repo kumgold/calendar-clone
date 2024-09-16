@@ -94,15 +94,7 @@ fun TodoScreen(
         }
     }
 
-    uiState.message?.let { message ->
-        val snackBarMessage = stringResource(id = message)
-        LaunchedEffect(uiState.message) {
-            snackBarState.showSnackbar(snackBarMessage)
-            viewModel.shownSnackBarMessage()
-        }
-    }
-
-    LaunchedEffect(key1 = uiState.isDone) {
+    LaunchedEffect(uiState.isDone) {
         if (uiState.isDone) {
             navigateBack()
         }

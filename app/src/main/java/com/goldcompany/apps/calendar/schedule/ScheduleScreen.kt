@@ -43,8 +43,12 @@ fun ScheduleScreen(
             DetailScreenAppBar(
                 taskTitle = uiState.title,
                 isEdit = false,
-                deleteTask = {},
-                saveTask = {},
+                deleteTask = {
+                    viewModel.deleteSchedule()
+                },
+                saveTask = {
+                    viewModel.saveSchedule()
+                },
                 navigateBack = navigateBack
             )
         }
@@ -68,7 +72,9 @@ fun ScheduleScreen(
                     .fillMaxWidth()
                     .focusRequester(focusRequester),
                 text = "",
-                onTextChange = {},
+                onTextChange = { title ->
+                    viewModel.updateTitle(title)
+                },
                 hintResource = R.string.title,
                 isSingleLine = true
             )
@@ -91,6 +97,12 @@ fun ScheduleScreen(
                 onTimeChange = { h, m -> }
             )
             Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.horizontal_margin)))
+        }
+    }
+
+    LaunchedEffect(uiState.isDone) {
+        if (uiState.isDone) {
+            navigateBack()
         }
     }
 }

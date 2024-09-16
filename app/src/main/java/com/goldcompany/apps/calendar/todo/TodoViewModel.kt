@@ -3,12 +3,11 @@ package com.goldcompany.apps.calendar.todo
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.goldcompany.apps.data.data.todo.Todo
-import com.goldcompany.apps.data.repository.TodoRepository
-import com.goldcompany.apps.calendar.R
 import com.goldcompany.apps.calendar.util.CURRENT_DATE_MILLI
 import com.goldcompany.apps.calendar.util.TODO_ID
 import com.goldcompany.apps.calendar.util.convertDateToMilli
+import com.goldcompany.apps.data.data.todo.Todo
+import com.goldcompany.apps.data.repository.TodoRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -79,54 +78,39 @@ class TodoViewModel @Inject constructor(
     }
 
     private fun loading() {
-        _uiState.update {
-            it.copy(isLoading = true)
-        }
+        _uiState.update { it.copy(isLoading = true) }
     }
 
     fun updateTitle(newTitle: String) {
-        _uiState.update {
-            it.copy(title = newTitle)
-        }
+        _uiState.update { it.copy(title = newTitle) }
     }
 
     fun updateDescription(newDescription: String) {
-        _uiState.update {
-            it.copy(description = newDescription)
-        }
+        _uiState.update { it.copy(description = newDescription) }
     }
 
     fun updateDateMilli(milli: Long) {
-        _uiState.update {
-            it.copy(dateMilli = milli,)
-        }
+        _uiState.update { it.copy(dateMilli = milli,) }
     }
 
     fun saveTodo() {
-        if (_uiState.value.title.isEmpty()) {
-            _uiState.update {
-                it.copy(message = R.string.please_check_your_input)
-            }
-            return
-        }
+        loading()
 
         if (todoId == null) {
-            addTodo()
+            insertTodo()
         } else {
             updateTodo()
         }
     }
 
-    private fun addTodo() {
-        loading()
-
+    private fun insertTodo() {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.addTodo(
+            repository.insertTodo(
                 Todo(
-                    isCompleted = _uiState.value.isCompleted,
-                    title = _uiState.value.title,
-                    description = _uiState.value.description,
-                    dateMilli = _uiState.value.dateMilli
+                    isCompleted = uiState.value.isCompleted,
+                    title = uiState.value.title,
+                    description = uiState.value.description,
+                    dateMilli = uiState.value.dateMilli
                 )
             )
             done()
@@ -134,16 +118,14 @@ class TodoViewModel @Inject constructor(
     }
 
     private fun updateTodo() {
-        loading()
-
         viewModelScope.launch(Dispatchers.IO) {
             repository.updateTodo(
                 Todo(
                     id = todoId!!,
-                    isCompleted = _uiState.value.isCompleted,
-                    title = _uiState.value.title,
-                    description = _uiState.value.description,
-                    dateMilli = _uiState.value.dateMilli
+                    isCompleted = uiState.value.isCompleted,
+                    title = uiState.value.title,
+                    description = uiState.value.description,
+                    dateMilli = uiState.value.dateMilli
                 )
             )
             done()
@@ -161,9 +143,5 @@ class TodoViewModel @Inject constructor(
         _uiState.update {
             it.copy(isDone = true)
         }
-    }
-
-    fun shownSnackBarMessage() {
-        _uiState.update { it.copy(message = null) }
     }
 }
