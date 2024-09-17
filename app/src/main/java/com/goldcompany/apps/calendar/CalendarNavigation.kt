@@ -13,7 +13,7 @@ class TodoNavigation(private val navController: NavHostController) {
     fun navigateTodoDetail(currentDateMilli: Long, todoId: String?) {
         navController.navigate("${TodoDestinations.TODO}?currentDateMilli=$currentDateMilli&todoId=$todoId")
     }
-    fun navigateScheduleDetail() {
-        navController.navigate(SCHEDULE)
+    fun navigateScheduleDetail(currentDateMilli: Long, scheduleId: String?) {
+        navController.navigate("${SCHEDULE}?currentDateMilli=$currentDateMilli&scheduleId=$scheduleId")
     }
 }

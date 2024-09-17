@@ -3,7 +3,6 @@ package com.goldcompany.apps.calendar.schedule
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.goldcompany.apps.calendar.util.CURRENT_DATE_MILLI
 import com.goldcompany.apps.calendar.util.SCHEDULE_ID
 import com.goldcompany.apps.calendar.util.convertDateToMilli
@@ -15,6 +14,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.util.Calendar
 import javax.inject.Inject
 
 data class ScheduleUiState(
@@ -43,6 +43,45 @@ class ScheduleViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(ScheduleUiState())
     val uiState: StateFlow<ScheduleUiState> = _uiState
+
+    init {
+        if (scheduleId != null) {
+            loadSchedule(scheduleId)
+        } else {
+            _uiState.update {
+                it.copy(
+                    isLoading = false,
+                    startDateMilli = currentDateMilli,
+                    startTimeHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY),
+                    startTimeMinute = Calendar.getInstance().get(Calendar.MINUTE),
+                    endDateMilli = currentDateMilli,
+                    endTimeHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY) + 1,
+                    endTimeMinute = Calendar.getInstance().get(Calendar.MINUTE)
+                )
+            }
+        }
+    }
+
+    private fun loadSchedule(scheduleId: String) {
+        loading()
+
+        viewModelScope.launch {
+            repository.getSchedule(scheduleId)?.let { schedule ->
+                _uiState.update {
+                    it.copy(
+                        title = schedule.title,
+                        startDateMilli = schedule.startDateTimeMilli,
+                        startTimeHour = schedule.startHour,
+                        startTimeMinute = schedule.startMinute,
+                        endDateMilli = schedule.endDateTimeMilli,
+                        endTimeHour = schedule.endHour,
+                        endTimeMinute = schedule.endMinute,
+                        isAllDay = schedule.isAllDay
+                    )
+                }
+            }
+        }
+    }
 
     private fun loading() {
         _uiState.update { it.copy(isLoading = true) }
@@ -115,6 +154,7 @@ class ScheduleViewModel @Inject constructor(
     fun deleteSchedule() {
         viewModelScope.launch {
             repository.deleteSchedule(scheduleId!!.toLong())
+            done()
         }
     }
 }

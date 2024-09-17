@@ -81,18 +81,18 @@ fun ScheduleScreen(
             Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.horizontal_margin)))
             ScheduleDateTimePicker(
                 text = R.string.start_date,
-                dateMilli = LocalDate.now().convertDateToMilli(),
-                hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY),
-                minute = Calendar.getInstance().get(Calendar.MINUTE),
+                dateMilli = uiState.startDateMilli,
+                hour = uiState.startTimeHour,
+                minute = uiState.startTimeMinute,
                 onDateChange = { date -> },
                 onTimeChange = { h, m -> }
             )
             Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.default_margin)))
             ScheduleDateTimePicker(
                 text = R.string.end_date,
-                dateMilli = LocalDate.now().convertDateToMilli(),
-                hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY) + 1,
-                minute = Calendar.getInstance().get(Calendar.MINUTE),
+                dateMilli = uiState.endDateMilli,
+                hour = uiState.endTimeHour,
+                minute = uiState.endTimeMinute,
                 onDateChange = { date -> },
                 onTimeChange = { h, m -> }
             )

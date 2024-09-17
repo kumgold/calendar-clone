@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import com.goldcompany.apps.data.data.todo.Todo
 import com.goldcompany.apps.calendar.R
 import com.goldcompany.apps.calendar.util.convertDateToMilli
+import com.goldcompany.apps.data.data.schedule.Schedule
 import kotlinx.coroutines.flow.collectLatest
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -53,8 +54,10 @@ import java.util.Locale
 fun CalendarView(
     selectedDateMilli: Long,
     monthlyTodos: Map<Long, List<Todo>>,
+    schedules: List<Schedule>,
     selectDateMilli: (Long) -> Unit,
-    getMonthlyTodos: (LocalDate, LocalDate) -> Unit
+    getMonthlyTodos: (LocalDate, LocalDate) -> Unit,
+    getSchedules: (LocalDate, LocalDate) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -89,20 +92,22 @@ fun CalendarView(
                     )
                 }
                 val isNextYear = (page%12 + 2 > 12)
+                val currentMonth = LocalDate.of(
+                    yearRange.first + page/12,
+                    page % 12 + 1,
+                    1
+                )
+                val nextMonth = LocalDate.of(
+                    if (isNextYear) yearRange.first + page/12 + 1 else yearRange.first + page/12,
+                    if (isNextYear) 1 else page % 12 + 2,
+                    1
+                )
+
+                println("currentMonth = ${currentMonth.convertDateToMilli()}, nextMonth = ${nextMonth.convertDateToMilli()}")
 
                 selectDateMilli(displayDate.convertDateToMilli())
-                getMonthlyTodos(
-                    LocalDate.of(
-                        yearRange.first + page/12,
-                        page % 12 + 1,
-                        1
-                    ),
-                    LocalDate.of(
-                        if (isNextYear) yearRange.first + page/12 + 1 else yearRange.first + page/12,
-                        if (isNextYear) 1 else page % 12 + 1,
-                        1
-                    )
-                )
+                getMonthlyTodos(currentMonth, nextMonth)
+                getSchedules(currentMonth, nextMonth)
             }
         }
 
@@ -227,8 +232,10 @@ private fun CalendarPreview() {
         CalendarView(
             selectedDateMilli = 0L,
             monthlyTodos = mapOf(),
+            schedules = listOf(),
             selectDateMilli = {},
-            getMonthlyTodos = { x, y -> }
+            getMonthlyTodos = { x, y -> },
+            getSchedules = { x, y -> }
         )
     }
 }

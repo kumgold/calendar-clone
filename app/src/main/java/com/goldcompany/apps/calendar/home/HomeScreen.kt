@@ -33,6 +33,7 @@ import com.goldcompany.apps.calendar.R
 import com.goldcompany.apps.calendar.compose.HomeTopAppBar
 import com.goldcompany.apps.calendar.home.compose.AddSchedulesButton
 import com.goldcompany.apps.calendar.home.compose.CalendarView
+import com.goldcompany.apps.calendar.home.compose.ScheduleList
 import com.goldcompany.apps.calendar.home.compose.TodoList
 import com.goldcompany.apps.calendar.util.convertMilliToDate
 import com.goldcompany.apps.calendar.widget.TaskWidget
@@ -67,7 +68,7 @@ fun HomeScreen(
     modifier: Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
     goToAddTodo: (Long, String?) -> Unit,
-    goToAddSchedule: () -> Unit
+    goToAddSchedule: (Long, String?) -> Unit
 ) {
     val lifecycleOwner = rememberUpdatedState(newValue = LocalLifecycleOwner.current)
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -103,7 +104,7 @@ fun HomeScreen(
                     goToAddTodo(uiState.selectedDateMilli, null)
                 },
                 goToAddSchedule = {
-                    goToAddSchedule()
+                    goToAddSchedule(uiState.selectedDateMilli, null)
                 }
             )
         }
@@ -118,11 +119,21 @@ fun HomeScreen(
             CalendarView(
                 selectedDateMilli = uiState.selectedDateMilli,
                 monthlyTodos = uiState.monthlyTodos,
+                schedules = uiState.schedules,
                 selectDateMilli = { milli ->
                     viewModel.selectDateMilli(milli)
                 },
                 getMonthlyTodos = { startDate, endDate ->
                     viewModel.getMonthlyTodos(startDate, endDate)
+                },
+                getSchedules = { startDate, endDate ->
+                    viewModel.getSchedules(startDate, endDate)
+                }
+            )
+            ScheduleList(
+                schedules = uiState.schedules,
+                goToScheduleDetail = { id ->
+                    goToAddSchedule(uiState.selectedDateMilli, id)
                 }
             )
             TodoList(

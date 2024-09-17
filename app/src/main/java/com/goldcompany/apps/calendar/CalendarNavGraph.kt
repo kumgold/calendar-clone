@@ -39,8 +39,8 @@ fun TodoNavGraph(
                 goToAddTodo = { milli, id ->
                     navActions.navigateTodoDetail(milli, id)
                 },
-                goToAddSchedule = {
-                    navActions.navigateScheduleDetail()
+                goToAddSchedule = { milli, id ->
+                    navActions.navigateScheduleDetail(milli, id)
                 }
             )
         }

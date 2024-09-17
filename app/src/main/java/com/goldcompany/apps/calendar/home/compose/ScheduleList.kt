@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
@@ -20,7 +21,7 @@ import com.goldcompany.apps.data.data.schedule.Schedule
 fun ScheduleList(
     modifier: Modifier = Modifier,
     schedules: List<Schedule>,
-    goToScheduleDetail: () -> Unit
+    goToScheduleDetail: (String) -> Unit
 ) {
     Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.vertical_margin)))
     LazyColumn(
@@ -49,5 +50,5 @@ private fun ScheduleItem(
     schedule: Schedule,
     goToScheduleDetail: () -> Unit
 ) {
-
+    Text(text = schedule.title)
 }
