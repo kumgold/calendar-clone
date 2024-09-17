@@ -58,20 +58,16 @@ class TodoViewModel @Inject constructor(
         loading()
 
         viewModelScope.launch(Dispatchers.IO) {
-            taskId.let { id ->
-                repository.getTodo(id).let { task ->
-                    if (task != null) {
-                        _uiState.update {
-                            it.copy(
-                                title = task.title,
-                                description = task.description,
-                                isCompleted = task.isCompleted,
-                                dateMilli = task.dateMilli,
-                                isLoading = false,
-                                isEdit = true,
-                            )
-                        }
-                    }
+            repository.getTodo(taskId)?.let { task ->
+                _uiState.update {
+                    it.copy(
+                        title = task.title,
+                        description = task.description,
+                        isCompleted = task.isCompleted,
+                        dateMilli = task.dateMilli,
+                        isLoading = false,
+                        isEdit = true,
+                    )
                 }
             }
         }

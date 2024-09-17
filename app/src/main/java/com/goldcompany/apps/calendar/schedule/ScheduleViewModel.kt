@@ -9,8 +9,10 @@ import com.goldcompany.apps.calendar.util.convertDateToMilli
 import com.goldcompany.apps.data.data.schedule.Schedule
 import com.goldcompany.apps.data.repository.ScheduleRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -42,7 +44,7 @@ class ScheduleViewModel @Inject constructor(
     private val currentDateMilli: Long = savedStateHandle[CURRENT_DATE_MILLI] ?: LocalDate.now().convertDateToMilli()
 
     private val _uiState = MutableStateFlow(ScheduleUiState())
-    val uiState: StateFlow<ScheduleUiState> = _uiState
+    val uiState: StateFlow<ScheduleUiState> = _uiState.asStateFlow()
 
     init {
         if (scheduleId != null) {
@@ -50,13 +52,13 @@ class ScheduleViewModel @Inject constructor(
         } else {
             _uiState.update {
                 it.copy(
-                    isLoading = false,
                     startDateMilli = currentDateMilli,
                     startTimeHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY),
                     startTimeMinute = Calendar.getInstance().get(Calendar.MINUTE),
                     endDateMilli = currentDateMilli,
                     endTimeHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY) + 1,
-                    endTimeMinute = Calendar.getInstance().get(Calendar.MINUTE)
+                    endTimeMinute = Calendar.getInstance().get(Calendar.MINUTE),
+                    isLoading = false
                 )
             }
         }
@@ -65,7 +67,7 @@ class ScheduleViewModel @Inject constructor(
     private fun loadSchedule(scheduleId: String) {
         loading()
 
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             repository.getSchedule(scheduleId)?.let { schedule ->
                 _uiState.update {
                     it.copy(
@@ -76,7 +78,8 @@ class ScheduleViewModel @Inject constructor(
                         endDateMilli = schedule.endDateTimeMilli,
                         endTimeHour = schedule.endHour,
                         endTimeMinute = schedule.endMinute,
-                        isAllDay = schedule.isAllDay
+                        isAllDay = schedule.isAllDay,
+                        isLoading = false
                     )
                 }
             }

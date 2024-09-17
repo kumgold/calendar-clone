@@ -39,10 +39,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.goldcompany.apps.data.data.todo.Todo
 import com.goldcompany.apps.calendar.R
 import com.goldcompany.apps.calendar.util.convertDateToMilli
 import com.goldcompany.apps.data.data.schedule.Schedule
+import com.goldcompany.apps.data.data.todo.Todo
 import kotlinx.coroutines.flow.collectLatest
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -102,8 +102,6 @@ fun CalendarView(
                     if (isNextYear) 1 else page % 12 + 2,
                     1
                 )
-
-                println("currentMonth = ${currentMonth.convertDateToMilli()}, nextMonth = ${nextMonth.convertDateToMilli()}")
 
                 selectDateMilli(displayDate.convertDateToMilli())
                 getMonthlyTodos(currentMonth, nextMonth)

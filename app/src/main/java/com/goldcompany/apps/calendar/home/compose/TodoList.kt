@@ -47,9 +47,7 @@ fun TodoList(
     goToTodoDetail: (String) -> Unit,
     updateTodo: (String, Boolean) -> Unit
 ) {
-    if (todos.isEmpty()) {
-        EmptyTask()
-    } else {
+    if (todos.isNotEmpty()) {
         Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.vertical_margin)))
         LazyColumn(
             modifier = modifier
@@ -82,35 +80,6 @@ fun TodoList(
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun EmptyTask() {
-    val color = MaterialTheme.colorScheme.primary
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = dimensionResource(id = R.dimen.default_margin))
-            .drawBehind {
-                val height = size.height
-
-                drawLine(
-                    color = color,
-                    start = Offset(0f, 0f),
-                    end = Offset(0f, height),
-                    strokeWidth = 15f
-                )
-            },
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.horizontal_margin)))
-        Text(
-            modifier = Modifier.padding(vertical = dimensionResource(id = R.dimen.default_margin_large)),
-            text = "일정이 없습니다.",
-            style = MaterialTheme.typography.bodySmall
-        )
     }
 }
 

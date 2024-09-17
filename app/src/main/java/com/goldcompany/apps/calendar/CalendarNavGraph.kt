@@ -15,6 +15,7 @@ import com.goldcompany.apps.calendar.home.HomeScreen
 import com.goldcompany.apps.calendar.schedule.ScheduleScreen
 import com.goldcompany.apps.calendar.todo.TodoScreen
 import com.goldcompany.apps.calendar.util.CURRENT_DATE_MILLI
+import com.goldcompany.apps.calendar.util.SCHEDULE_ID
 import com.goldcompany.apps.calendar.util.TODO_ID
 
 @Composable
@@ -45,7 +46,16 @@ fun TodoNavGraph(
             )
         }
         dialog(
-            route = TodoDestinations.SCHEDULE,
+            route = "${TodoDestinations.SCHEDULE}?currentDateMilli={$CURRENT_DATE_MILLI}&scheduleId={$SCHEDULE_ID}",
+            arguments = listOf(
+                navArgument(SCHEDULE_ID) {
+                    type = NavType.StringType
+                    nullable = true
+                },
+                navArgument(CURRENT_DATE_MILLI) {
+                    type = NavType.LongType
+                }
+            ),
             dialogProperties = DialogProperties(
                 usePlatformDefaultWidth = false
             )

@@ -8,19 +8,26 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -165,3 +172,31 @@ fun HomeScreen(
     }
 }
 
+@Composable
+private fun EmptyTask() {
+    val color = MaterialTheme.colorScheme.primary
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = dimensionResource(id = R.dimen.default_margin))
+            .drawBehind {
+                val height = size.height
+
+                drawLine(
+                    color = color,
+                    start = Offset(0f, 0f),
+                    end = Offset(0f, height),
+                    strokeWidth = 15f
+                )
+            },
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.horizontal_margin)))
+        Text(
+            modifier = Modifier.padding(vertical = dimensionResource(id = R.dimen.default_margin_large)),
+            text = "일정이 없습니다.",
+            style = MaterialTheme.typography.bodySmall
+        )
+    }
+}
