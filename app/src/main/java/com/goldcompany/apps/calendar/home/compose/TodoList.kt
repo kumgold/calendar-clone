@@ -1,9 +1,9 @@
 package com.goldcompany.apps.calendar.home.compose
 
 import android.content.Context
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,8 +27,10 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.state.updateAppWidgetState
 import com.goldcompany.apps.calendar.R
@@ -37,6 +39,7 @@ import com.goldcompany.apps.calendar.widget.TaskWidgetReceiver
 import com.goldcompany.apps.data.data.todo.Todo
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TodoList(
     modifier: Modifier = Modifier,
@@ -55,9 +58,19 @@ fun TodoList(
                     width = 1.dp,
                     color = MaterialTheme.colorScheme.outline,
                     shape = RoundedCornerShape(5.dp)
-                ),
-            verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.vertical_margin))
+                )
         ) {
+            stickyHeader {
+                Text(
+                    modifier = Modifier.padding(
+                        top = dimensionResource(id = R.dimen.default_margin),
+                        start = dimensionResource(id = R.dimen.default_margin)
+                    ),
+                    text = stringResource(id = R.string.todo),
+                    color = MaterialTheme.colorScheme.outline,
+                    fontSize = 14.sp
+                )
+            }
             items(
                 items = todos,
                 key = { todo -> todo.id }
@@ -117,7 +130,7 @@ private fun TodoItem(
             .fillMaxWidth()
             .clickable { goToTodoDetail(todo.id) }
             .padding(
-                vertical = dimensionResource(id = R.dimen.vertical_margin)
+                vertical = dimensionResource(id = R.dimen.default_margin_small)
             )
     ) {
         Checkbox(
