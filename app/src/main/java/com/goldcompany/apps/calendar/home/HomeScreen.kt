@@ -86,10 +86,11 @@ fun HomeScreen(
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_RESUME -> {
-                    viewModel.getMonthlyTodos(
-                        uiState.startLocalDate,
-                        uiState.startLocalDate.plusMonths(1)
-                    )
+                    val startDate = uiState.startLocalDate
+                    val endDate = uiState.startLocalDate.plusMonths(1)
+
+                    viewModel.getMonthlyTodos(startDate, endDate)
+                    viewModel.getSchedules(startDate, endDate)
                 }
                 else -> {}
             }

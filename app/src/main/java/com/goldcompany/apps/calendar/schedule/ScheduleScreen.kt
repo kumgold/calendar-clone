@@ -41,7 +41,7 @@ fun ScheduleScreen(
         topBar = {
             DetailScreenAppBar(
                 taskTitle = uiState.title,
-                isEdit = false,
+                isEdit = uiState.isEdit,
                 deleteTask = {
                     viewModel.deleteSchedule()
                 },

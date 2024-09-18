@@ -32,6 +32,7 @@ data class ScheduleUiState(
     val isAllDay: Boolean = false,
     val isDone: Boolean = false,
     val isLoading: Boolean = false,
+    val isEdit: Boolean = false,
     val message: Int? = null
 )
 
@@ -79,7 +80,8 @@ class ScheduleViewModel @Inject constructor(
                         endTimeHour = schedule.endHour,
                         endTimeMinute = schedule.endMinute,
                         isAllDay = schedule.isAllDay,
-                        isLoading = false
+                        isLoading = false,
+                        isEdit = true
                     )
                 }
             }
