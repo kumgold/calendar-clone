@@ -116,7 +116,7 @@ class ScheduleViewModel @Inject constructor(
     }
 
     private fun insertSchedule() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             repository.insertSchedule(
                 Schedule(
                     title = uiState.value.title,
@@ -136,7 +136,7 @@ class ScheduleViewModel @Inject constructor(
     }
 
     private fun updateSchedule() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             repository.updateSchedule(
                 Schedule(
                     id = scheduleId!!,
@@ -157,7 +157,7 @@ class ScheduleViewModel @Inject constructor(
     }
 
     fun deleteSchedule() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             repository.deleteSchedule(scheduleId!!.toLong())
             done()
         }
