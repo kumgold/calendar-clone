@@ -91,8 +91,6 @@ private fun Schedule(
     val keyboard = LocalSoftwareKeyboardController.current
     val focusRequester = remember { FocusRequester() }
 
-    println("title = $title")
-
     LaunchedEffect(focusRequester) {
         focusRequester.requestFocus()
         keyboard?.show()
