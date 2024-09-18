@@ -20,6 +20,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -81,16 +82,18 @@ fun HomeScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isExpanded = remember { mutableStateOf(false) }
 
-    DisposableEffect(lifecycleOwner, uiState.startLocalDate) {
+    LaunchedEffect(uiState.currentMonthLocalDate) {
+        viewModel.getMonthlyTodos()
+        viewModel.getSchedules()
+    }
+
+    DisposableEffect(lifecycleOwner) {
         val lifecycle = lifecycleOwner.value.lifecycle
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_RESUME -> {
-                    val startDate = uiState.startLocalDate
-                    val endDate = uiState.startLocalDate.plusMonths(1)
-
-                    viewModel.getMonthlyTodos(startDate, endDate)
-                    viewModel.getSchedules(startDate, endDate)
+                    viewModel.getMonthlyTodos()
+                    viewModel.getSchedules()
                 }
                 else -> {}
             }
@@ -131,15 +134,12 @@ fun HomeScreen(
                 selectDateMilli = { milli ->
                     viewModel.selectDateMilli(milli)
                 },
-                getMonthlyTodos = { startDate, endDate ->
-                    viewModel.getMonthlyTodos(startDate, endDate)
-                },
-                getSchedules = { startDate, endDate ->
-                    viewModel.getSchedules(startDate, endDate)
+                setCurrentMonth = { date ->
+                    viewModel.setCurrentMonthDate(date)
                 }
             )
             ScheduleList(
-                schedules = uiState.schedules,
+                schedules = uiState.schedules.filter { it.startDateTimeMilli == uiState.selectedDateMilli },
                 goToScheduleDetail = { id ->
                     goToAddSchedule(uiState.selectedDateMilli, id)
                 }

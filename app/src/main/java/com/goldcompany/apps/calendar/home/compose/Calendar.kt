@@ -56,8 +56,7 @@ fun CalendarView(
     monthlyTodos: Map<Long, List<Todo>>,
     schedules: List<Schedule>,
     selectDateMilli: (Long) -> Unit,
-    getMonthlyTodos: (LocalDate, LocalDate) -> Unit,
-    getSchedules: (LocalDate, LocalDate) -> Unit
+    setCurrentMonth: (LocalDate) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -72,11 +71,11 @@ fun CalendarView(
             (yearRange.last - yearRange.first) * 12
         }
 
-        LaunchedEffect(key1 = currentLocalDate.dayOfWeek) {
+        LaunchedEffect(currentLocalDate.dayOfWeek) {
             currentLocalDate = LocalDate.now()
         }
 
-        LaunchedEffect(key1 = pagerState) {
+        LaunchedEffect(pagerState) {
             snapshotFlow { pagerState.currentPage }.collectLatest { page ->
                 val displayDate = if (page == initialPage) {
                     LocalDate.of(
@@ -91,21 +90,14 @@ fun CalendarView(
                         1
                     )
                 }
-                val isNextYear = (page%12 + 2 > 12)
                 val currentMonth = LocalDate.of(
                     yearRange.first + page/12,
                     page % 12 + 1,
                     1
                 )
-                val nextMonth = LocalDate.of(
-                    if (isNextYear) yearRange.first + page/12 + 1 else yearRange.first + page/12,
-                    if (isNextYear) 1 else page % 12 + 2,
-                    1
-                )
 
                 selectDateMilli(displayDate.convertDateToMilli())
-                getMonthlyTodos(currentMonth, nextMonth)
-                getSchedules(currentMonth, nextMonth)
+                setCurrentMonth(currentMonth)
             }
         }
 
@@ -139,7 +131,7 @@ fun CalendarView(
                         isToday = (date == LocalDate.now()),
                         isContainTodos = monthlyTodos.keys.contains(date.convertDateToMilli()),
                         currentDateMilli = selectedDateMilli,
-                        getDailyTodos = selectDateMilli
+                        getDailyTasks = selectDateMilli
                     )
                 }
             }
@@ -170,7 +162,7 @@ private fun CalendarItem(
     isToday: Boolean,
     isContainTodos: Boolean,
     currentDateMilli: Long,
-    getDailyTodos: (Long) -> Unit,
+    getDailyTasks: (Long) -> Unit,
 ) {
     val milli = date.convertDateToMilli()
 
@@ -191,7 +183,7 @@ private fun CalendarItem(
             )
             .clip(shape = RoundedCornerShape(10.dp))
             .clickable {
-                getDailyTodos(milli)
+                getDailyTasks(milli)
             }
     ) {
         Column(
@@ -232,8 +224,7 @@ private fun CalendarPreview() {
             monthlyTodos = mapOf(),
             schedules = listOf(),
             selectDateMilli = {},
-            getMonthlyTodos = { x, y -> },
-            getSchedules = { x, y -> }
+            setCurrentMonth = {}
         )
     }
 }

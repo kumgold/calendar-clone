@@ -3,6 +3,7 @@ package com.goldcompany.apps.calendar.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.goldcompany.apps.calendar.util.convertDateToMilli
+import com.goldcompany.apps.calendar.util.convertMilliToDate
 import com.goldcompany.apps.data.data.schedule.Schedule
 import com.goldcompany.apps.data.data.todo.Todo
 import com.goldcompany.apps.data.repository.ScheduleRepository
@@ -22,7 +23,7 @@ data class TaskUiState(
     val monthlyTodos: Map<Long, List<Todo>> = mapOf(),
     val schedules: List<Schedule> = listOf(),
     val selectedDateMilli: Long = LocalDate.now().convertDateToMilli(),
-    val startLocalDate: LocalDate = LocalDate.now(),
+    val currentMonthLocalDate: LocalDate = LocalDate.now(),
     val isLoading: Boolean = false,
     val userMessage: Int? = null
 )
@@ -36,17 +37,17 @@ class HomeViewModel @Inject constructor(
     private val _monthlyTodos = MutableStateFlow<Map<Long, List<Todo>>>(mapOf())
     private val _schedules = MutableStateFlow<List<Schedule>>(listOf())
     private val _selectedDateMilli = MutableStateFlow(LocalDate.now().convertDateToMilli())
-    private val _startLocalDate = MutableStateFlow(LocalDate.now())
+    private val _currentMonthLocalDate = MutableStateFlow(LocalDate.now())
     private val _isLoading = MutableStateFlow(false)
 
     val uiState: StateFlow<TaskUiState> = combine(
-        _monthlyTodos, _schedules, _selectedDateMilli, _startLocalDate, _isLoading
-    ) { tasks, schedules, selectedDateMilli, startLocalDate, isLoading ->
+        _monthlyTodos, _schedules, _selectedDateMilli, _currentMonthLocalDate, _isLoading
+    ) { tasks, schedules, selectedDateMilli, currentMonthLocalDate, isLoading ->
         TaskUiState(
             monthlyTodos = tasks,
             schedules = schedules,
             selectedDateMilli = selectedDateMilli,
-            startLocalDate = startLocalDate,
+            currentMonthLocalDate = currentMonthLocalDate,
             isLoading = isLoading
         )
     }.stateIn(
@@ -55,10 +56,10 @@ class HomeViewModel @Inject constructor(
         initialValue = TaskUiState(isLoading = true)
     )
 
-    fun getMonthlyTodos(
-        startDate: LocalDate = LocalDate.now(),
-        endDate: LocalDate = LocalDate.now().plusMonths(1)
-    ) {
+    fun getMonthlyTodos() {
+        val startDate = _currentMonthLocalDate.value
+        val endDate = _currentMonthLocalDate.value.plusMonths(1)
+
         viewModelScope.launch {
             val map = mutableMapOf<Long, List<Todo>>()
             val list = todoRepository.getMonthlyTodos(
@@ -72,13 +73,12 @@ class HomeViewModel @Inject constructor(
 
             _monthlyTodos.update { map }
         }
-        _startLocalDate.update { startDate }
     }
 
-    fun getSchedules(
-        startDate: LocalDate = LocalDate.now(),
-        endDate: LocalDate = LocalDate.now().plusMonths(1)
-    ) {
+    fun getSchedules() {
+        val startDate = _currentMonthLocalDate.value
+        val endDate = _currentMonthLocalDate.value.plusMonths(1)
+
         viewModelScope.launch {
             val schedules = scheduleRepository.getMonthlySchedules(
                 startMilli = startDate.convertDateToMilli(),
@@ -87,7 +87,6 @@ class HomeViewModel @Inject constructor(
 
             _schedules.update { schedules }
         }
-        _startLocalDate.update { startDate }
     }
 
     fun updateTodo(taskId: String, isCompleted: Boolean) {
@@ -98,5 +97,9 @@ class HomeViewModel @Inject constructor(
 
     fun selectDateMilli(milli: Long) {
         _selectedDateMilli.update { milli }
+    }
+
+    fun setCurrentMonthDate(currentMonth: LocalDate) {
+        _currentMonthLocalDate.value = currentMonth
     }
 }
