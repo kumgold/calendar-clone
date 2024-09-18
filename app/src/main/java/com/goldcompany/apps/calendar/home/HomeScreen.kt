@@ -112,10 +112,10 @@ fun HomeScreen(
             AddSchedulesButton(
                 isExpanded = isExpanded,
                 goToAddTodo = {
-                    goToAddTodo(uiState.selectedDateMilli, null)
+                    goToAddTodo(uiState.currentDateMilli, null)
                 },
                 goToAddSchedule = {
-                    goToAddSchedule(uiState.selectedDateMilli, null)
+                    goToAddSchedule(uiState.currentDateMilli, null)
                 }
             )
         }
@@ -125,29 +125,29 @@ fun HomeScreen(
                 .padding(paddingValues)
                 .background(MaterialTheme.colorScheme.background),
         ) {
-            HomeTopAppBar(title = uiState.selectedDateMilli.convertMilliToDate())
+            HomeTopAppBar(title = uiState.currentDateMilli.convertMilliToDate())
             Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.vertical_margin)))
             CalendarView(
-                selectedDateMilli = uiState.selectedDateMilli,
+                selectedDateMilli = uiState.currentDateMilli,
                 monthlyTodos = uiState.monthlyTodos,
                 schedules = uiState.schedules,
-                selectDateMilli = { milli ->
-                    viewModel.selectDateMilli(milli)
+                setCurrentDateMilli = { milli ->
+                    viewModel.setCurrentDateMilli(milli)
                 },
                 setCurrentMonth = { date ->
                     viewModel.setCurrentMonthDate(date)
                 }
             )
             ScheduleList(
-                schedules = uiState.schedules.filter { it.startDateTimeMilli == uiState.selectedDateMilli },
+                schedules = uiState.schedules.filter { it.startDateTimeMilli == uiState.currentDateMilli },
                 goToScheduleDetail = { id ->
-                    goToAddSchedule(uiState.selectedDateMilli, id)
+                    goToAddSchedule(uiState.currentDateMilli, id)
                 }
             )
             TodoList(
-                todos = uiState.monthlyTodos[uiState.selectedDateMilli] ?: emptyList(),
+                todos = uiState.monthlyTodos[uiState.currentDateMilli] ?: emptyList(),
                 goToTodoDetail = { id ->
-                    goToAddTodo(uiState.selectedDateMilli, id)
+                    goToAddTodo(uiState.currentDateMilli, id)
                 },
                 updateTodo = { id, isCompleted ->
                     viewModel.updateTodo(id, isCompleted)

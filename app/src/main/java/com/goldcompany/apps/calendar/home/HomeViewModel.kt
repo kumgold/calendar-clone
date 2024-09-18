@@ -3,7 +3,6 @@ package com.goldcompany.apps.calendar.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.goldcompany.apps.calendar.util.convertDateToMilli
-import com.goldcompany.apps.calendar.util.convertMilliToDate
 import com.goldcompany.apps.data.data.schedule.Schedule
 import com.goldcompany.apps.data.data.todo.Todo
 import com.goldcompany.apps.data.repository.ScheduleRepository
@@ -22,7 +21,7 @@ import javax.inject.Inject
 data class TaskUiState(
     val monthlyTodos: Map<Long, List<Todo>> = mapOf(),
     val schedules: List<Schedule> = listOf(),
-    val selectedDateMilli: Long = LocalDate.now().convertDateToMilli(),
+    val currentDateMilli: Long = LocalDate.now().convertDateToMilli(),
     val currentMonthLocalDate: LocalDate = LocalDate.now(),
     val isLoading: Boolean = false,
     val userMessage: Int? = null
@@ -36,17 +35,17 @@ class HomeViewModel @Inject constructor(
 
     private val _monthlyTodos = MutableStateFlow<Map<Long, List<Todo>>>(mapOf())
     private val _schedules = MutableStateFlow<List<Schedule>>(listOf())
-    private val _selectedDateMilli = MutableStateFlow(LocalDate.now().convertDateToMilli())
+    private val _currentDateMilli = MutableStateFlow(LocalDate.now().convertDateToMilli())
     private val _currentMonthLocalDate = MutableStateFlow(LocalDate.now())
     private val _isLoading = MutableStateFlow(false)
 
     val uiState: StateFlow<TaskUiState> = combine(
-        _monthlyTodos, _schedules, _selectedDateMilli, _currentMonthLocalDate, _isLoading
-    ) { tasks, schedules, selectedDateMilli, currentMonthLocalDate, isLoading ->
+        _monthlyTodos, _schedules, _currentDateMilli, _currentMonthLocalDate, _isLoading
+    ) { tasks, schedules, currentDateMilli, currentMonthLocalDate, isLoading ->
         TaskUiState(
             monthlyTodos = tasks,
             schedules = schedules,
-            selectedDateMilli = selectedDateMilli,
+            currentDateMilli = currentDateMilli,
             currentMonthLocalDate = currentMonthLocalDate,
             isLoading = isLoading
         )
@@ -95,11 +94,11 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun selectDateMilli(milli: Long) {
-        _selectedDateMilli.update { milli }
+    fun setCurrentDateMilli(milli: Long) {
+        _currentDateMilli.update { milli }
     }
 
     fun setCurrentMonthDate(currentMonth: LocalDate) {
-        _currentMonthLocalDate.value = currentMonth
+        _currentMonthLocalDate.update { currentMonth }
     }
 }
