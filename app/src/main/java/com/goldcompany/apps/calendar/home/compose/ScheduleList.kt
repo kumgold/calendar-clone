@@ -19,10 +19,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.goldcompany.apps.calendar.R
 import com.goldcompany.apps.calendar.util.convertMilliToDate
+import com.goldcompany.apps.calendar.util.getDateString
 import com.goldcompany.apps.data.data.schedule.Schedule
 
 @Composable
@@ -84,20 +86,80 @@ private fun ScheduleItem(
                 style = MaterialTheme.typography.bodySmall
             )
             Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.default_margin_small)))
-            Row {
-                Text(
-                    text = schedule.startDateTimeMilli.convertMilliToDate(),
-                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp)
+            if (schedule.startDateTimeMilli == schedule.endDateTimeMilli) {
+                ScheduleTime(
+                    startHour = schedule.startHour,
+                    startMinute = schedule.startMinute,
+                    endHour = schedule.endHour,
+                    endMinute = schedule.endMinute,
+                    isAllDay = schedule.isAllDay
                 )
-                Text(
-                    text = " - ",
-                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp)
-                )
-                Text(
-                    text = schedule.endDateTimeMilli.convertMilliToDate(),
-                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp)
+            } else {
+                ScheduleDate(
+                    startDate = schedule.startDateTimeMilli,
+                    startHour = schedule.startHour,
+                    startMinute = schedule.startMinute,
+                    endDate = schedule.endDateTimeMilli,
+                    endHour = schedule.endHour,
+                    endMinute = schedule.endMinute
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun ScheduleTime(
+    startHour: Int,
+    startMinute: Int,
+    endHour: Int,
+    endMinute: Int,
+    isAllDay: Boolean
+) {
+    if (isAllDay) {
+        Text(
+            text = stringResource(id = R.string.all_day),
+            style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp)
+        )
+    } else {
+        Row {
+            Text(
+                text = "${startHour.getDateString()}:${startMinute.getDateString()}",
+                style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp)
+            )
+            Text(
+                text = " - ",
+                style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp)
+            )
+            Text(
+                text = "${endHour.getDateString()}:${endMinute.getDateString()}",
+                style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun ScheduleDate(
+    startDate: Long,
+    startHour: Int,
+    startMinute: Int,
+    endDate: Long,
+    endHour: Int,
+    endMinute: Int
+) {
+    Row {
+        Text(
+            text = startDate.convertMilliToDate() + " " + "${startHour.getDateString()}:${startMinute.getDateString()}",
+            style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp)
+        )
+        Text(
+            text = " - ",
+            style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp)
+        )
+        Text(
+            text = endDate.convertMilliToDate() + " " + "${endHour.getDateString()}:${endMinute.getDateString()}",
+            style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp)
+        )
     }
 }

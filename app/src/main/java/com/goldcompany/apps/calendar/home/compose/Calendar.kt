@@ -129,7 +129,13 @@ fun CalendarView(
                     CalendarItem(
                         date = date,
                         isToday = (date == LocalDate.now()),
-                        isContainTodos = monthlyTodos.keys.contains(date.convertDateToMilli()),
+                        isContainTasks = (
+                                monthlyTodos.keys.contains(date.convertDateToMilli()) ||
+                                        schedules.any {
+                                            it.startDateTimeMilli <= date.convertDateToMilli() &&
+                                                    it.endDateTimeMilli >= date.convertDateToMilli()
+                                        }
+                                ),
                         currentDateMilli = selectedDateMilli,
                         setCurrentDateMilli = setCurrentDateMilli
                     )
@@ -160,7 +166,7 @@ private fun DayOfWeekView() {
 private fun CalendarItem(
     date: LocalDate,
     isToday: Boolean,
-    isContainTodos: Boolean,
+    isContainTasks: Boolean,
     currentDateMilli: Long,
     setCurrentDateMilli: (Long) -> Unit,
 ) {
@@ -192,7 +198,7 @@ private fun CalendarItem(
             Text(
                 text = (date.dayOfMonth).toString(),
             )
-            if (isContainTodos) {
+            if (isContainTasks) {
                 Box(
                     modifier = Modifier.size(5.dp)
                         .background(

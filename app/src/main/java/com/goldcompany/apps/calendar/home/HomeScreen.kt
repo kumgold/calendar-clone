@@ -139,7 +139,10 @@ fun HomeScreen(
                 }
             )
             ScheduleList(
-                schedules = uiState.schedules.filter { it.startDateTimeMilli == uiState.currentDateMilli },
+                schedules = uiState.schedules.filter {
+                    it.startDateTimeMilli <= uiState.currentDateMilli &&
+                            it.endDateTimeMilli >= uiState.currentDateMilli
+                },
                 goToScheduleDetail = { id ->
                     goToAddSchedule(uiState.currentDateMilli, id)
                 }

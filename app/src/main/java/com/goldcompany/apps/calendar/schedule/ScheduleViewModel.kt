@@ -105,6 +105,42 @@ class ScheduleViewModel @Inject constructor(
         _uiState.update { it.copy(title = newTitle) }
     }
 
+    fun updateStartDateMilli(milli: Long) {
+        _uiState.update { it.copy(startDateMilli = milli) }
+    }
+
+    fun updateStartDateTime(hour: Int, minute: Int) {
+        _uiState.update {
+            it.copy(
+                startTimeHour = hour,
+                startTimeMinute = minute
+            )
+        }
+    }
+
+    fun updateEndDateTime(hour: Int, minute: Int) {
+        _uiState.update {
+            it.copy(
+                endTimeHour = hour,
+                endTimeMinute = minute
+            )
+        }
+    }
+
+    fun updateEndDateMilli(milli: Long) {
+        _uiState.update { it.copy(endDateMilli = milli) }
+    }
+
+    fun setIsAllDay(check: Boolean) {
+        _uiState.update {
+            it.copy(
+                startDateMilli = currentDateMilli,
+                endDateMilli = currentDateMilli,
+                isAllDay = check
+            )
+        }
+    }
+
     fun saveSchedule() {
         loading()
 

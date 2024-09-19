@@ -13,6 +13,8 @@
     <string name="title">Title</string>
     <string name="description">Description</string>
     <string name="app_widget_default_text">Manage your task on the widget.</string>
+    <string name="all_day">All day</string>
+    <string name="delete_description">Are you sure you want to delete it?</string>
 
 <!--    Todo-->
     <string name="todo">Todo</string>

@@ -20,3 +20,11 @@ fun Long.convertMilliToDate(): String {
 
     return formatter.format(date)
 }
+
+fun Int.getDateString(): String {
+    return if (this/10 < 1) {
+        "0$this"
+    } else {
+        this.toString()
+    }
+}

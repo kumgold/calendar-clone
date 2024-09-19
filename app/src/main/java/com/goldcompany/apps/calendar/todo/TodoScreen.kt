@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.goldcompany.apps.calendar.R
+import com.goldcompany.apps.calendar.compose.DeleteCautionDialog
 import com.goldcompany.apps.calendar.compose.DetailScreenAppBar
 import com.goldcompany.apps.calendar.compose.LoadingAnimation
 import com.goldcompany.apps.calendar.compose.TaskTextInput
@@ -56,6 +57,7 @@ fun TodoScreen(
     navigateBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val showDialog = remember { mutableStateOf(false) }
     val snackBarState = remember { SnackbarHostState() }
 
     Scaffold(
@@ -70,7 +72,7 @@ fun TodoScreen(
                 taskTitle = uiState.title,
                 isEdit = uiState.isEdit,
                 deleteTask = {
-                    viewModel.deleteTodo()
+                    showDialog.value = true
                 },
                 saveTask = {
                     viewModel.saveTodo()
@@ -92,6 +94,15 @@ fun TodoScreen(
                 onDateSelected = viewModel::updateDateMilli
             )
         }
+    }
+
+    if (showDialog.value) {
+        DeleteCautionDialog(
+            showDialog = showDialog,
+            deleteTask = {
+                viewModel.deleteTodo()
+            }
+        )
     }
 
     LaunchedEffect(uiState.isDone) {
