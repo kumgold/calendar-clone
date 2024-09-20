@@ -133,11 +133,7 @@ class ScheduleViewModel @Inject constructor(
 
     fun setIsAllDay(check: Boolean) {
         _uiState.update {
-            it.copy(
-                startDateMilli = currentDateMilli,
-                endDateMilli = currentDateMilli,
-                isAllDay = check
-            )
+            it.copy(isAllDay = check)
         }
     }
 

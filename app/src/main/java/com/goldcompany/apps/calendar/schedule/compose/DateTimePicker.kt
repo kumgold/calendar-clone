@@ -13,13 +13,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TimePicker
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -36,9 +33,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.goldcompany.apps.calendar.R
-import com.goldcompany.apps.calendar.util.convertDateToMilli
+import com.goldcompany.apps.calendar.compose.TaskDatePickerDialog
 import com.goldcompany.apps.calendar.util.convertMilliToDate
-import java.time.LocalDate
+import com.goldcompany.apps.calendar.util.getDateString
 import java.util.Calendar
 
 @Composable
@@ -61,7 +58,7 @@ fun ScheduleDateTimePicker(
         )
         Spacer(modifier = Modifier.weight(1f))
         ScheduleDateSelector(
-            savedDate = dateMilli.convertMilliToDate(),
+            savedDateMilli = dateMilli,
             onDateChange = onDateChange
         )
         Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.default_margin)))
@@ -74,12 +71,12 @@ fun ScheduleDateTimePicker(
 }
 
 @Composable
-private fun ScheduleDateSelector(
+fun ScheduleDateSelector(
     modifier: Modifier = Modifier,
-    savedDate: String,
+    savedDateMilli: Long,
     onDateChange: (Long) -> Unit
 ) {
-    var date by remember { mutableStateOf(savedDate) }
+    var date by remember { mutableStateOf(savedDateMilli.convertMilliToDate()) }
     var isShowDatePickerDialog by remember {
         mutableStateOf(false)
     }
@@ -107,58 +104,14 @@ private fun ScheduleDateSelector(
     }
 
     if (isShowDatePickerDialog) {
-        ScheduleDatePickerDialog(
+        TaskDatePickerDialog(
+            savedDateMilli = savedDateMilli,
             onDateChange = {
                 date = it.convertMilliToDate()
                 onDateChange(it)
             },
             onDismiss = { isShowDatePickerDialog = false }
         )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun ScheduleDatePickerDialog(
-    onDateChange: (Long) -> Unit,
-    onDismiss: () -> Unit
-) {
-    val datePickerState = rememberDatePickerState()
-    val selectedDate = datePickerState.selectedDateMillis
-
-    DatePickerDialog(
-        onDismissRequest = { onDismiss() },
-        confirmButton = {
-            Button(
-                onClick = {
-                    val currentTime = LocalDate.now().convertDateToMilli()
-
-                    onDateChange(selectedDate ?: currentTime)
-                    onDismiss()
-                },
-                shape = RoundedCornerShape(10.dp)
-            ) {
-                Text(
-                    text = stringResource(id = R.string.ok),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-        },
-        dismissButton = {
-            Button(
-                onClick = {
-                    onDismiss()
-                },
-                shape = RoundedCornerShape(10.dp)
-            ) {
-                Text(
-                    text = stringResource(id = R.string.cancel),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-        }
-    ) {
-        DatePicker(state = datePickerState)
     }
 }
 
@@ -169,9 +122,9 @@ private fun ScheduleTimeSelector(
     minute: Int,
     onDateTimeChange: (Int, Int) -> Unit
 ) {
-    val h = if (hour/10 < 1) { "0$hour" } else { hour.toString() }
-    val m = if (minute/10 < 1) { "0$minute" } else { minute.toString() }
-    val time = remember { mutableStateOf("$h:$m") }
+    val time = remember {
+        mutableStateOf("${hour.getDateString()}:${minute.getDateString()}")
+    }
     var isShowDatePickerDialog by remember {
         mutableStateOf(false)
     }
@@ -200,9 +153,7 @@ private fun ScheduleTimeSelector(
 
     if (isShowDatePickerDialog) {
         Dialog(
-            onDismissRequest = {
-                isShowDatePickerDialog = false
-            }
+            onDismissRequest = { isShowDatePickerDialog = false }
         ) {
             ScheduleTimePickerDialog(
                 time = time,

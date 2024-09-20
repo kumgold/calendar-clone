@@ -101,7 +101,8 @@ private fun ScheduleItem(
                     startMinute = schedule.startMinute,
                     endDate = schedule.endDateTimeMilli,
                     endHour = schedule.endHour,
-                    endMinute = schedule.endMinute
+                    endMinute = schedule.endMinute,
+                    isAllDay = schedule.isAllDay
                 )
             }
         }
@@ -146,11 +147,23 @@ private fun ScheduleDate(
     startMinute: Int,
     endDate: Long,
     endHour: Int,
-    endMinute: Int
+    endMinute: Int,
+    isAllDay: Boolean
 ) {
+    val start = if (isAllDay) {
+        startDate.convertMilliToDate()
+    } else {
+        startDate.convertMilliToDate() + " " + "${startHour.getDateString()}:${startMinute.getDateString()}"
+    }
+    val end = if (isAllDay) {
+        endDate.convertMilliToDate()
+    } else {
+        endDate.convertMilliToDate() + " " + "${endHour.getDateString()}:${endMinute.getDateString()}"
+    }
+
     Row {
         Text(
-            text = startDate.convertMilliToDate() + " " + "${startHour.getDateString()}:${startMinute.getDateString()}",
+            text = start,
             style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp)
         )
         Text(
@@ -158,7 +171,7 @@ private fun ScheduleDate(
             style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp)
         )
         Text(
-            text = endDate.convertMilliToDate() + " " + "${endHour.getDateString()}:${endMinute.getDateString()}",
+            text = end,
             style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp)
         )
     }

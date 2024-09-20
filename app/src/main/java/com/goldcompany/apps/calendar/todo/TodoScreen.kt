@@ -14,16 +14,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -46,10 +41,9 @@ import com.goldcompany.apps.calendar.R
 import com.goldcompany.apps.calendar.compose.DeleteCautionDialog
 import com.goldcompany.apps.calendar.compose.DetailScreenAppBar
 import com.goldcompany.apps.calendar.compose.LoadingAnimation
+import com.goldcompany.apps.calendar.compose.TaskDatePickerDialog
 import com.goldcompany.apps.calendar.compose.TaskTextInput
-import com.goldcompany.apps.calendar.util.convertDateToMilli
 import com.goldcompany.apps.calendar.util.convertMilliToDate
-import java.time.LocalDate
 
 @Composable
 fun TodoScreen(
@@ -153,7 +147,7 @@ private fun Todo(
             )
             Spacer(modifier = Modifier.weight(1f))
             TodoDateSelector(
-                savedDate = dateMilli.convertMilliToDate(),
+                savedDateMilli = dateMilli,
                 onDateSelected = onDateSelected
             )
         }
@@ -173,10 +167,10 @@ private fun Todo(
 @Composable
 private fun TodoDateSelector(
     modifier: Modifier = Modifier,
-    savedDate: String,
+    savedDateMilli: Long,
     onDateSelected: (Long) -> Unit
 ) {
-    var date by remember { mutableStateOf(savedDate) }
+    var date by remember { mutableStateOf(savedDateMilli.convertMilliToDate()) }
     var isShowDatePickerDialog by remember {
         mutableStateOf(false)
     }
@@ -203,55 +197,13 @@ private fun TodoDateSelector(
     }
 
     if (isShowDatePickerDialog) {
-        TodoDatePickerDialog(
-            onDateSelected = {
+        TaskDatePickerDialog(
+            savedDateMilli = savedDateMilli,
+            onDateChange = {
                 date = it.convertMilliToDate()
                 onDateSelected(it)
             },
             onDismiss = { isShowDatePickerDialog = false }
         )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun TodoDatePickerDialog(
-    onDateSelected: (Long) -> Unit,
-    onDismiss: () -> Unit
-) {
-    val datePickerState = rememberDatePickerState()
-    val selectedDate = datePickerState.selectedDateMillis
-
-    DatePickerDialog(
-        onDismissRequest = { onDismiss() },
-        confirmButton = {
-            Button(
-                onClick = {
-                    val currentTime = LocalDate.now().convertDateToMilli()
-
-                    onDateSelected(selectedDate ?: currentTime)
-                    onDismiss()
-                },
-                shape = RoundedCornerShape(10.dp)
-            ) {
-                Text(
-                    text = stringResource(id = R.string.ok),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-        },
-        dismissButton = {
-            Button(
-                onClick = { onDismiss() },
-                shape = RoundedCornerShape(10.dp)
-            ) {
-                Text(
-                    text = stringResource(id = R.string.cancel),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-        }
-    ) {
-        DatePicker(state = datePickerState)
     }
 }

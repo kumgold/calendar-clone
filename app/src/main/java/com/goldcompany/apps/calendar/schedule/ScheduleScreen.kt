@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -34,6 +35,7 @@ import com.goldcompany.apps.calendar.compose.DeleteCautionDialog
 import com.goldcompany.apps.calendar.compose.DetailScreenAppBar
 import com.goldcompany.apps.calendar.compose.LoadingAnimation
 import com.goldcompany.apps.calendar.compose.TaskTextInput
+import com.goldcompany.apps.calendar.schedule.compose.ScheduleDateSelector
 import com.goldcompany.apps.calendar.schedule.compose.ScheduleDateTimePicker
 
 @Composable
@@ -140,6 +142,32 @@ private fun Schedule(
             isSingleLine = true
         )
         Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.horizontal_margin)))
+        AnimatedVisibility(visible = isAllDay) {
+            Column {
+                Row {
+                    Text(
+                        text = stringResource(id = R.string.date),
+                        color = MaterialTheme.colorScheme.outline,
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    ScheduleDateSelector(
+                        savedDateMilli = startDateMilli,
+                        onDateChange = { milli ->
+                            updateStartDateMilli(milli)
+                        }
+                    )
+                    Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.default_margin)))
+                    ScheduleDateSelector(
+                        savedDateMilli = endDateMilli,
+                        onDateChange = { milli ->
+                            updateEndDateMilli(milli)
+                        }
+                    )
+                }
+                Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.horizontal_margin)))
+            }
+        }
         AnimatedVisibility(visible = !isAllDay) {
             Column {
                 ScheduleDateTimePicker(
