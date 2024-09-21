@@ -36,7 +36,12 @@ fun DetailScreenAppBar(
             titleContentColor = MaterialTheme.colorScheme.onPrimary,
             actionIconContentColor = MaterialTheme.colorScheme.onPrimary
         ),
-        title = {},
+        title = {
+            Text(
+                text = taskTitle,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        },
         navigationIcon = {
             IconButton(onClick = navigateBack) {
                 Icon(

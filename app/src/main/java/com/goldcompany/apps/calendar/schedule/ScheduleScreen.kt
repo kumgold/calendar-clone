@@ -45,6 +45,7 @@ import com.goldcompany.apps.calendar.compose.LoadingAnimation
 import com.goldcompany.apps.calendar.compose.TaskTextInput
 import com.goldcompany.apps.calendar.schedule.compose.ScheduleDateSelector
 import com.goldcompany.apps.calendar.schedule.compose.ScheduleDateTimePicker
+import com.goldcompany.apps.data.data.schedule.Schedule
 import java.time.LocalDateTime
 import java.time.ZoneId
 
@@ -54,6 +55,7 @@ fun ScheduleScreen(
     navigateBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val schedule by viewModel.schedule.collectAsStateWithLifecycle()
     val showDialog = remember { mutableStateOf(false) }
 
     Scaffold(
@@ -62,7 +64,7 @@ fun ScheduleScreen(
             .background(MaterialTheme.colorScheme.background),
         topBar = {
             DetailScreenAppBar(
-                taskTitle = uiState.title,
+                taskTitle = stringResource(id = R.string.schedule),
                 isEdit = uiState.isEdit,
                 deleteTask = {
                     showDialog.value = true
@@ -79,17 +81,11 @@ fun ScheduleScreen(
                 .padding(paddingValue)
                 .wrapContentSize())
         } else {
-            Schedule(
+            EditSchedule(
                 modifier = Modifier.padding(paddingValue),
-                title = uiState.title,
-                startDateMilli = uiState.startDateMilli,
-                startTimeHour = uiState.startTimeHour,
-                startTimeMinute = uiState.startTimeMinute,
-                endDateMilli = uiState.endDateMilli,
-                endTimeHour = uiState.endTimeHour,
-                endTimeMinute = uiState.endTimeMinute,
-                isAllDay = uiState.isAllDay,
+                schedule = schedule,
                 updateTitle = viewModel::updateTitle,
+                updateDescription = viewModel::updateDescription,
                 updateStartDateMilli = viewModel::updateStartDateMilli,
                 updateStartDateTime = viewModel::updateStartDateTime,
                 updateEndDateMilli = viewModel::updateEndDateMilli,
@@ -112,7 +108,7 @@ fun ScheduleScreen(
     LaunchedEffect(uiState.isDone) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(context, AlarmReceiver::class.java).apply {
-            putExtra("MESSAGE", uiState.title)
+            putExtra("MESSAGE", schedule.title)
         }
         val pendingIntent = PendingIntent.getBroadcast(
             context,
@@ -133,17 +129,11 @@ fun ScheduleScreen(
 }
 
 @Composable
-private fun Schedule(
+private fun EditSchedule(
     modifier: Modifier,
-    title: String,
-    startDateMilli: Long,
-    startTimeHour: Int,
-    startTimeMinute: Int,
-    endDateMilli: Long,
-    endTimeHour: Int,
-    endTimeMinute: Int,
-    isAllDay: Boolean,
+    schedule: Schedule,
     updateTitle: (String) -> Unit,
+    updateDescription: (String) -> Unit,
     updateStartDateMilli: (Long) -> Unit,
     updateStartDateTime: (Int, Int) -> Unit,
     updateEndDateMilli: (Long) -> Unit,
@@ -165,13 +155,13 @@ private fun Schedule(
             modifier = Modifier
                 .fillMaxWidth()
                 .focusRequester(focusRequester),
-            text = title,
+            text = schedule.title,
             onTextChange = { title -> updateTitle(title) },
             hintResource = R.string.title,
             isSingleLine = true
         )
         Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.horizontal_margin)))
-        AnimatedVisibility(visible = isAllDay) {
+        AnimatedVisibility(visible = schedule.isAllDay) {
             Column {
                 Row {
                     Text(
@@ -181,14 +171,14 @@ private fun Schedule(
                     )
                     Spacer(modifier = Modifier.weight(1f))
                     ScheduleDateSelector(
-                        savedDateMilli = startDateMilli,
+                        savedDateMilli = schedule.startDateTimeMilli,
                         onDateChange = { milli ->
                             updateStartDateMilli(milli)
                         }
                     )
                     Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.default_margin)))
                     ScheduleDateSelector(
-                        savedDateMilli = endDateMilli,
+                        savedDateMilli = schedule.endDateTimeMilli,
                         onDateChange = { milli ->
                             updateEndDateMilli(milli)
                         }
@@ -197,22 +187,22 @@ private fun Schedule(
                 Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.horizontal_margin)))
             }
         }
-        AnimatedVisibility(visible = !isAllDay) {
+        AnimatedVisibility(visible = !schedule.isAllDay) {
             Column {
                 ScheduleDateTimePicker(
                     text = R.string.start_date,
-                    dateMilli = startDateMilli,
-                    hour = startTimeHour,
-                    minute = startTimeMinute,
+                    dateMilli = schedule.startDateTimeMilli,
+                    hour = schedule.startHour,
+                    minute = schedule.startMinute,
                     onDateChange = { milli -> updateStartDateMilli(milli) },
                     onTimeChange = { h, m -> updateStartDateTime(h, m) }
                 )
                 Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.default_margin)))
                 ScheduleDateTimePicker(
                     text = R.string.end_date,
-                    dateMilli = endDateMilli,
-                    hour = endTimeHour,
-                    minute = endTimeMinute,
+                    dateMilli = schedule.endDateTimeMilli,
+                    hour = schedule.endHour,
+                    minute = schedule.endMinute,
                     onDateChange = { milli -> updateEndDateMilli(milli) },
                     onTimeChange = { h, m -> updateEndDateTime(h, m) }
                 )
@@ -220,11 +210,19 @@ private fun Schedule(
             }
         }
         AllDaySwitch(
-            isAllDay = isAllDay,
+            isAllDay = schedule.isAllDay,
             setIsAllDay = { check -> setIsAllDay(check) }
         )
+        Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.default_margin)))
+        TaskTextInput(
+            modifier = Modifier.fillMaxWidth(),
+            text = schedule.description,
+            onTextChange = { description -> updateDescription(description) },
+            hintResource = R.string.description,
+            isSingleLine = true
+        )
         Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.horizontal_margin)))
-        AlarmButton(savedDateMilli = startDateMilli)
+        AlarmButton(savedDateMilli = schedule.startDateTimeMilli)
     }
 }
 
@@ -257,9 +255,7 @@ private fun AllDaySwitch(
 
 @SuppressLint("ScheduleExactAlarm")
 @Composable
-private fun AlarmButton(
-    savedDateMilli: Long,
-) {
+private fun AlarmButton(savedDateMilli: Long) {
     Row(
         modifier = Modifier
             .fillMaxWidth()

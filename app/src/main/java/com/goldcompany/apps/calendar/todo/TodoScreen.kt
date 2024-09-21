@@ -63,7 +63,7 @@ fun TodoScreen(
         },
         topBar = {
             DetailScreenAppBar(
-                taskTitle = uiState.title,
+                taskTitle = stringResource(id = R.string.todo),
                 isEdit = uiState.isEdit,
                 deleteTask = {
                     showDialog.value = true
@@ -76,10 +76,14 @@ fun TodoScreen(
         }
     ) { paddingValue ->
         if (uiState.isLoading) {
-            LoadingAnimation(modifier = Modifier.padding(paddingValue).wrapContentSize())
+            LoadingAnimation(modifier = Modifier
+                .padding(paddingValue)
+                .wrapContentSize())
         } else {
-            Todo(
-                modifier = Modifier.padding(paddingValue).wrapContentSize(),
+            EditTodo(
+                modifier = Modifier
+                    .padding(paddingValue)
+                    .wrapContentSize(),
                 title = uiState.title,
                 description = uiState.description,
                 dateMilli = uiState.dateMilli,
@@ -107,7 +111,7 @@ fun TodoScreen(
 }
 
 @Composable
-private fun Todo(
+private fun EditTodo(
     modifier: Modifier,
     title: String,
     description: String,

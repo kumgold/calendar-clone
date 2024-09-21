@@ -5,6 +5,7 @@ import com.goldcompany.apps.data.db.schedule.ScheduleEntity
 fun ScheduleEntity.toExternal() = Schedule(
     id = id.toString(),
     title = title,
+    description = description,
     startDateTimeMilli = startDateMilli,
     startHour = startHour,
     startMinute = startMinute,
@@ -18,6 +19,7 @@ fun ScheduleEntity.toExternal() = Schedule(
 fun Schedule.toLocal() = ScheduleEntity(
     id = id.toLong(),
     title = title,
+    description = description,
     startDateMilli = startDateTimeMilli,
     startHour = startHour,
     startMinute = startMinute,

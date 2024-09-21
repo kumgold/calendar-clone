@@ -5,11 +5,11 @@ data class Schedule(
     val title: String = "",
     val description: String = "",
     val startDateTimeMilli: Long = System.currentTimeMillis(),
-    val startHour: Int,
-    val startMinute: Int,
+    val startHour: Int = 0,
+    val startMinute: Int = 0,
     val endDateTimeMilli: Long = System.currentTimeMillis(),
-    val endHour: Int,
-    val endMinute: Int,
+    val endHour: Int = 0,
+    val endMinute: Int = 0,
     val isAllDay: Boolean = false,
     val place: String? = null
 )

@@ -1,5 +1,6 @@
 package com.goldcompany.apps.calendar.schedule
 
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,25 +12,19 @@ import com.goldcompany.apps.data.repository.ScheduleRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.util.Calendar
 import javax.inject.Inject
 
+@Stable
 data class ScheduleUiState(
-    val title: String = "",
-    val description: String = "",
-    val startDateMilli: Long = 0L,
-    val startTimeHour: Int = 0,
-    val startTimeMinute: Int = 0,
-    val endDateMilli: Long = 0L,
-    val endTimeHour: Int = 0,
-    val endTimeMinute: Int = 0,
-    val place: String = "",
-    val isAllDay: Boolean = false,
     val isDone: Boolean = false,
     val isLoading: Boolean = false,
     val isEdit: Boolean = false,
@@ -44,25 +39,43 @@ class ScheduleViewModel @Inject constructor(
     private val scheduleId: String? = savedStateHandle[SCHEDULE_ID]
     private val currentDateMilli: Long = savedStateHandle[CURRENT_DATE_MILLI] ?: LocalDate.now().convertDateToMilli()
 
-    private val _uiState = MutableStateFlow(ScheduleUiState())
-    val uiState: StateFlow<ScheduleUiState> = _uiState.asStateFlow()
+    private val _schedule = MutableStateFlow(Schedule())
+    val schedule: StateFlow<Schedule> = _schedule.asStateFlow()
+
+    private val _isDone = MutableStateFlow(false)
+    private val _isLoading = MutableStateFlow(false)
+    private val _isEdit = MutableStateFlow(false)
+    private val _message = MutableStateFlow<Int?>(null)
+
+    val uiState: StateFlow<ScheduleUiState> = combine(
+        _isDone,
+        _isLoading,
+        _isEdit,
+        _message
+    ) { isDone, isLoading, isEdit, message ->
+        ScheduleUiState(isDone, isLoading, isEdit, message)
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(1000),
+        initialValue = ScheduleUiState(isLoading = true)
+    )
 
     init {
         if (scheduleId != null) {
             loadSchedule(scheduleId)
         } else {
-            _uiState.update {
+            _schedule.update {
                 it.copy(
-                    startDateMilli = currentDateMilli,
-                    startTimeHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY),
-                    startTimeMinute = Calendar.getInstance().get(Calendar.MINUTE),
-                    endDateMilli = currentDateMilli,
-                    endTimeHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY) + 1,
-                    endTimeMinute = Calendar.getInstance().get(Calendar.MINUTE),
-                    isLoading = false
+                    startDateTimeMilli = currentDateMilli,
+                    startHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY),
+                    startMinute = Calendar.getInstance().get(Calendar.MINUTE),
+                    endDateTimeMilli = currentDateMilli,
+                    endHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY) + 1,
+                    endMinute = Calendar.getInstance().get(Calendar.MINUTE)
                 )
             }
         }
+        _isLoading.update { false }
     }
 
     private fun loadSchedule(scheduleId: String) {
@@ -70,69 +83,56 @@ class ScheduleViewModel @Inject constructor(
 
         viewModelScope.launch(Dispatchers.IO) {
             repository.getSchedule(scheduleId)?.let { schedule ->
-                _uiState.update {
-                    it.copy(
-                        title = schedule.title,
-                        startDateMilli = schedule.startDateTimeMilli,
-                        startTimeHour = schedule.startHour,
-                        startTimeMinute = schedule.startMinute,
-                        endDateMilli = schedule.endDateTimeMilli,
-                        endTimeHour = schedule.endHour,
-                        endTimeMinute = schedule.endMinute,
-                        isAllDay = schedule.isAllDay,
-                        isLoading = false,
-                        isEdit = true
-                    )
-                }
+                _schedule.update { schedule }
+                _isEdit.update { true }
             }
         }
     }
 
     private fun loading() {
-        _uiState.update { it.copy(isLoading = true) }
+        _isLoading.update { true }
     }
 
     private fun done() {
-        _uiState.update {
-            it.copy(
-                isLoading = false,
-                isDone = true
-            )
-        }
+        _isDone.update { true }
     }
 
     fun updateTitle(newTitle: String) {
-        _uiState.update { it.copy(title = newTitle) }
+        _schedule.update { it.copy(title = newTitle) }
+    }
+
+    fun updateDescription(description: String) {
+        _schedule.update { it.copy(description = description) }
     }
 
     fun updateStartDateMilli(milli: Long) {
-        _uiState.update { it.copy(startDateMilli = milli) }
+        _schedule.update { it.copy(startDateTimeMilli = milli) }
     }
 
     fun updateStartDateTime(hour: Int, minute: Int) {
-        _uiState.update {
+        _schedule.update {
             it.copy(
-                startTimeHour = hour,
-                startTimeMinute = minute
+                startHour = hour,
+                startMinute = minute
             )
         }
     }
 
     fun updateEndDateTime(hour: Int, minute: Int) {
-        _uiState.update {
+        _schedule.update {
             it.copy(
-                endTimeHour = hour,
-                endTimeMinute = minute
+                endHour = hour,
+                endMinute = minute
             )
         }
     }
 
     fun updateEndDateMilli(milli: Long) {
-        _uiState.update { it.copy(endDateMilli = milli) }
+        _schedule.update { it.copy(endDateTimeMilli = milli) }
     }
 
     fun setIsAllDay(check: Boolean) {
-        _uiState.update {
+        _schedule.update {
             it.copy(isAllDay = check)
         }
     }
@@ -149,41 +149,14 @@ class ScheduleViewModel @Inject constructor(
 
     private fun insertSchedule() {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.insertSchedule(
-                Schedule(
-                    title = uiState.value.title,
-                    description = uiState.value.description,
-                    startDateTimeMilli = uiState.value.startDateMilli,
-                    startHour = uiState.value.startTimeHour,
-                    startMinute = uiState.value.startTimeMinute,
-                    endDateTimeMilli = uiState.value.endDateMilli,
-                    endHour = uiState.value.endTimeHour,
-                    endMinute = uiState.value.endTimeMinute,
-                    isAllDay = uiState.value.isAllDay,
-                    place = uiState.value.place
-                )
-            )
+            repository.insertSchedule(schedule.value)
             done()
         }
     }
 
     private fun updateSchedule() {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.updateSchedule(
-                Schedule(
-                    id = scheduleId!!,
-                    title = uiState.value.title,
-                    description = uiState.value.description,
-                    startDateTimeMilli = uiState.value.startDateMilli,
-                    startHour = uiState.value.startTimeHour,
-                    startMinute = uiState.value.startTimeMinute,
-                    endDateTimeMilli = uiState.value.endDateMilli,
-                    endHour = uiState.value.endTimeHour,
-                    endMinute = uiState.value.endTimeMinute,
-                    isAllDay = uiState.value.isAllDay,
-                    place = uiState.value.place
-                )
-            )
+            repository.updateSchedule(schedule.value)
             done()
         }
     }
