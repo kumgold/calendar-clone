@@ -1,7 +1,13 @@
 package com.goldcompany.apps.calendar.schedule
 
+import android.annotation.SuppressLint
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -25,18 +31,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.goldcompany.apps.calendar.R
+import com.goldcompany.apps.calendar.alarm.AlarmReceiver
 import com.goldcompany.apps.calendar.compose.DeleteCautionDialog
 import com.goldcompany.apps.calendar.compose.DetailScreenAppBar
 import com.goldcompany.apps.calendar.compose.LoadingAnimation
 import com.goldcompany.apps.calendar.compose.TaskTextInput
 import com.goldcompany.apps.calendar.schedule.compose.ScheduleDateSelector
 import com.goldcompany.apps.calendar.schedule.compose.ScheduleDateTimePicker
+import java.time.LocalDateTime
+import java.time.ZoneId
 
 @Composable
 fun ScheduleScreen(
@@ -65,7 +75,9 @@ fun ScheduleScreen(
         }
     ) { paddingValue ->
         if (uiState.isLoading) {
-            LoadingAnimation(modifier = Modifier.padding(paddingValue).wrapContentSize())
+            LoadingAnimation(modifier = Modifier
+                .padding(paddingValue)
+                .wrapContentSize())
         } else {
             Schedule(
                 modifier = Modifier.padding(paddingValue),
@@ -96,8 +108,25 @@ fun ScheduleScreen(
         )
     }
 
+    val context = LocalContext.current
     LaunchedEffect(uiState.isDone) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent(context, AlarmReceiver::class.java).apply {
+            putExtra("MESSAGE", uiState.title)
+        }
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            0,
+            intent,
+            PendingIntent.FLAG_IMMUTABLE
+        )
+
         if (uiState.isDone) {
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                LocalDateTime.now().plusSeconds(2).atZone(ZoneId.systemDefault()).toEpochSecond(),
+                pendingIntent
+            )
             navigateBack()
         }
     }
@@ -194,6 +223,8 @@ private fun Schedule(
             isAllDay = isAllDay,
             setIsAllDay = { check -> setIsAllDay(check) }
         )
+        Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.horizontal_margin)))
+        AlarmButton(savedDateMilli = startDateMilli)
     }
 }
 
@@ -220,6 +251,32 @@ private fun AllDaySwitch(
                 checked = !checked
                 setIsAllDay(checked)
             }
+        )
+    }
+}
+
+@SuppressLint("ScheduleExactAlarm")
+@Composable
+private fun AlarmButton(
+    savedDateMilli: Long,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+
+            },
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = stringResource(id = R.string.alarm),
+            color = MaterialTheme.colorScheme.outline,
+            style = MaterialTheme.typography.titleMedium
+        )
+        Spacer(modifier = Modifier.weight(1f))
+        Text(
+            text = "",
+            style = MaterialTheme.typography.bodyMedium
         )
     }
 }
