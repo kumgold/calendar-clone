@@ -43,8 +43,11 @@ import com.goldcompany.apps.calendar.compose.DeleteCautionDialog
 import com.goldcompany.apps.calendar.compose.DetailScreenAppBar
 import com.goldcompany.apps.calendar.compose.LoadingAnimation
 import com.goldcompany.apps.calendar.compose.TaskTextInput
+import com.goldcompany.apps.calendar.schedule.compose.AlarmTimerBottomSheet
 import com.goldcompany.apps.calendar.schedule.compose.ScheduleDateSelector
 import com.goldcompany.apps.calendar.schedule.compose.ScheduleDateTimePicker
+import com.goldcompany.apps.calendar.util.ALARM_BUNDLE_DESCRIPTION
+import com.goldcompany.apps.calendar.util.ALARM_BUNDLE_TITLE
 import com.goldcompany.apps.data.data.schedule.Schedule
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -84,13 +87,15 @@ fun ScheduleScreen(
             EditSchedule(
                 modifier = Modifier.padding(paddingValue),
                 schedule = schedule,
+                alarmList = uiState.alarmList.toList(),
                 updateTitle = viewModel::updateTitle,
                 updateDescription = viewModel::updateDescription,
                 updateStartDateMilli = viewModel::updateStartDateMilli,
                 updateStartDateTime = viewModel::updateStartDateTime,
                 updateEndDateMilli = viewModel::updateEndDateMilli,
                 updateEndDateTime = viewModel::updateEndDateTime,
-                setIsAllDay = viewModel::setIsAllDay
+                setIsAllDay = viewModel::setIsAllDay,
+                setTimer = viewModel::setTimer
             )
         }
     }
@@ -105,24 +110,30 @@ fun ScheduleScreen(
     }
 
     val context = LocalContext.current
-    LaunchedEffect(uiState.isDone) {
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val intent = Intent(context, AlarmReceiver::class.java).apply {
-            putExtra("MESSAGE", schedule.title)
-        }
-        val pendingIntent = PendingIntent.getBroadcast(
-            context,
-            0,
-            intent,
-            PendingIntent.FLAG_IMMUTABLE
-        )
+    val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
+    LaunchedEffect(uiState.isDone) {
         if (uiState.isDone) {
-            alarmManager.setExactAndAllowWhileIdle(
-                AlarmManager.RTC_WAKEUP,
-                LocalDateTime.now().plusSeconds(2).atZone(ZoneId.systemDefault()).toEpochSecond(),
-                pendingIntent
+            val intent = Intent(context, AlarmReceiver::class.java).apply {
+                putExtra(ALARM_BUNDLE_TITLE, schedule.title)
+                putExtra(ALARM_BUNDLE_DESCRIPTION, schedule.description)
+            }
+            val pendingIntent = PendingIntent.getBroadcast(
+                context,
+                0,
+                intent,
+                PendingIntent.FLAG_IMMUTABLE
             )
+
+            uiState.alarmList.forEach {
+                if (it.checked) {
+                    alarmManager.setExactAndAllowWhileIdle(
+                        AlarmManager.RTC_WAKEUP,
+                        it.dateTime.atZone(ZoneId.systemDefault()).toEpochSecond(),
+                        pendingIntent
+                    )
+                }
+            }
             navigateBack()
         }
     }
@@ -132,13 +143,15 @@ fun ScheduleScreen(
 private fun EditSchedule(
     modifier: Modifier,
     schedule: Schedule,
+    alarmList: List<AlarmItem>,
     updateTitle: (String) -> Unit,
     updateDescription: (String) -> Unit,
     updateStartDateMilli: (Long) -> Unit,
     updateStartDateTime: (Int, Int) -> Unit,
     updateEndDateMilli: (Long) -> Unit,
     updateEndDateTime: (Int, Int) -> Unit,
-    setIsAllDay: (Boolean) -> Unit
+    setIsAllDay: (Boolean) -> Unit,
+    setTimer: (Int) -> Unit
 ) {
     val keyboard = LocalSoftwareKeyboardController.current
     val focusRequester = remember { FocusRequester() }
@@ -222,7 +235,11 @@ private fun EditSchedule(
             isSingleLine = true
         )
         Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.horizontal_margin)))
-        AlarmButton(savedDateMilli = schedule.startDateTimeMilli)
+        AlarmButton(
+            savedDateMilli = schedule.startDateTimeMilli,
+            alarmList = alarmList,
+            setTimer = setTimer
+        )
     }
 }
 
@@ -253,14 +270,19 @@ private fun AllDaySwitch(
     }
 }
 
-@SuppressLint("ScheduleExactAlarm")
 @Composable
-private fun AlarmButton(savedDateMilli: Long) {
+private fun AlarmButton(
+    savedDateMilli: Long,
+    alarmList: List<AlarmItem>,
+    setTimer: (Int) -> Unit
+) {
+    val showBottomSheet = remember { mutableStateOf(false) }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable {
-
+                showBottomSheet.value = true
             },
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -273,6 +295,14 @@ private fun AlarmButton(savedDateMilli: Long) {
         Text(
             text = "",
             style = MaterialTheme.typography.bodyMedium
+        )
+    }
+
+    if (showBottomSheet.value) {
+        AlarmTimerBottomSheet(
+            showBottomSheet = showBottomSheet,
+            alarmList = alarmList,
+            setTimer = setTimer
         )
     }
 }
