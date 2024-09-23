@@ -1,6 +1,5 @@
 package com.goldcompany.apps.calendar.schedule
 
-import android.annotation.SuppressLint
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
@@ -49,7 +48,6 @@ import com.goldcompany.apps.calendar.schedule.compose.ScheduleDateTimePicker
 import com.goldcompany.apps.calendar.util.ALARM_BUNDLE_DESCRIPTION
 import com.goldcompany.apps.calendar.util.ALARM_BUNDLE_TITLE
 import com.goldcompany.apps.data.data.schedule.Schedule
-import java.time.LocalDateTime
 import java.time.ZoneId
 
 @Composable
