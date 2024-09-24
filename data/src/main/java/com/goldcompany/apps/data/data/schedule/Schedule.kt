@@ -11,5 +11,6 @@ data class Schedule(
     val endHour: Int = 0,
     val endMinute: Int = 0,
     val isAllDay: Boolean = false,
-    val place: String? = null
+    val place: String? = null,
+    val alarmList: MutableList<Long> = mutableListOf()
 )

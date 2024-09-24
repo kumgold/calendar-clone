@@ -16,5 +16,6 @@ data class ScheduleEntity(
     @ColumnInfo val endHour: Int,
     @ColumnInfo val endMinute: Int,
     @ColumnInfo val isAllDay: Boolean,
-    @ColumnInfo val place: String?
+    @ColumnInfo val place: String?,
+    @ColumnInfo val alarmList: List<Long> = emptyList()
 )

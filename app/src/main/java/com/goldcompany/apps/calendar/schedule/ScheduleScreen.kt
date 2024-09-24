@@ -48,7 +48,6 @@ import com.goldcompany.apps.calendar.schedule.compose.ScheduleDateTimePicker
 import com.goldcompany.apps.calendar.util.ALARM_BUNDLE_DESCRIPTION
 import com.goldcompany.apps.calendar.util.ALARM_BUNDLE_TITLE
 import com.goldcompany.apps.data.data.schedule.Schedule
-import java.time.ZoneId
 
 @Composable
 fun ScheduleScreen(
@@ -85,7 +84,6 @@ fun ScheduleScreen(
             EditSchedule(
                 modifier = Modifier.padding(paddingValue),
                 schedule = schedule,
-                alarmList = uiState.alarmList.toList(),
                 updateTitle = viewModel::updateTitle,
                 updateDescription = viewModel::updateDescription,
                 updateStartDateMilli = viewModel::updateStartDateMilli,
@@ -123,14 +121,12 @@ fun ScheduleScreen(
                 PendingIntent.FLAG_IMMUTABLE
             )
 
-            uiState.alarmList.forEach {
-                if (it.checked) {
-                    alarmManager.setExactAndAllowWhileIdle(
-                        AlarmManager.RTC_WAKEUP,
-                        it.dateTime.atZone(ZoneId.systemDefault()).toEpochSecond(),
-                        pendingIntent
-                    )
-                }
+            schedule.alarmList.forEach {
+                alarmManager.setExactAndAllowWhileIdle(
+                    AlarmManager.RTC_WAKEUP,
+                    it,
+                    pendingIntent
+                )
             }
             navigateBack()
         }
@@ -141,7 +137,6 @@ fun ScheduleScreen(
 private fun EditSchedule(
     modifier: Modifier,
     schedule: Schedule,
-    alarmList: List<AlarmItem>,
     updateTitle: (String) -> Unit,
     updateDescription: (String) -> Unit,
     updateStartDateMilli: (Long) -> Unit,
@@ -149,7 +144,7 @@ private fun EditSchedule(
     updateEndDateMilli: (Long) -> Unit,
     updateEndDateTime: (Int, Int) -> Unit,
     setIsAllDay: (Boolean) -> Unit,
-    setTimer: (Int) -> Unit
+    setTimer: (Long) -> Unit
 ) {
     val keyboard = LocalSoftwareKeyboardController.current
     val focusRequester = remember { FocusRequester() }
@@ -234,8 +229,7 @@ private fun EditSchedule(
         )
         Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.horizontal_margin)))
         AlarmButton(
-            savedDateMilli = schedule.startDateTimeMilli,
-            alarmList = alarmList,
+            schedule = schedule,
             setTimer = setTimer
         )
     }
@@ -270,9 +264,8 @@ private fun AllDaySwitch(
 
 @Composable
 private fun AlarmButton(
-    savedDateMilli: Long,
-    alarmList: List<AlarmItem>,
-    setTimer: (Int) -> Unit
+    schedule: Schedule,
+    setTimer: (Long) -> Unit
 ) {
     val showBottomSheet = remember { mutableStateOf(false) }
 
@@ -299,7 +292,7 @@ private fun AlarmButton(
     if (showBottomSheet.value) {
         AlarmTimerBottomSheet(
             showBottomSheet = showBottomSheet,
-            alarmList = alarmList,
+            schedule = schedule,
             setTimer = setTimer
         )
     }

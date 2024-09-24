@@ -1,9 +1,6 @@
 package com.goldcompany.apps.calendar.schedule
 
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.runtime.toMutableStateList
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -22,26 +19,16 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.Instant
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.ZoneId
 import java.util.Calendar
 import javax.inject.Inject
 
 @Stable
 data class ScheduleUiState(
-    val alarmList: SnapshotStateList<AlarmItem> = mutableStateListOf(),
     val isDone: Boolean = false,
     val isLoading: Boolean = false,
     val isEdit: Boolean = false,
     val message: Int? = null
-)
-
-data class AlarmItem(
-    val displayText: String,
-    val dateTime: LocalDateTime,
-    val checked: Boolean
 )
 
 @HiltViewModel
@@ -59,60 +46,14 @@ class ScheduleViewModel @Inject constructor(
     private val _isLoading = MutableStateFlow(false)
     private val _isEdit = MutableStateFlow(false)
     private val _message = MutableStateFlow<Int?>(null)
-    private val _alarmList = MutableStateFlow(listOf(
-        AlarmItem(
-            "당일 오전 0시",
-            Instant.ofEpochMilli(currentDateMilli)
-                .atZone(ZoneId.systemDefault())
-                .toLocalDate()
-                .atStartOfDay(),
-            false
-        ),
-        AlarmItem(
-            "당일 오전 8시",
-            Instant.ofEpochMilli(currentDateMilli)
-                .atZone(ZoneId.systemDefault())
-                .toLocalDate()
-                .atStartOfDay()
-                .plusHours(8),
-            false
-        ),
-        AlarmItem(
-            "당일 정오",
-            Instant.ofEpochMilli(currentDateMilli)
-                .atZone(ZoneId.systemDefault())
-                .toLocalDate()
-                .atStartOfDay()
-                .plusHours(12),
-            false
-        ),
-        AlarmItem(
-            "당일 이벤트 시작 5분 전",
-            Instant.ofEpochMilli(currentDateMilli)
-                .atZone(ZoneId.systemDefault())
-                .toLocalDateTime()
-                .minusMinutes(5),
-            true
-        ),
-        AlarmItem(
-            "당일 이벤트 시작 1시간 전",
-            Instant.ofEpochMilli(currentDateMilli)
-                .atZone(ZoneId.systemDefault())
-                .toLocalDateTime()
-                .minusHours(1),
-            false
-        ),
-    ).toMutableStateList())
 
     val uiState: StateFlow<ScheduleUiState> = combine(
-        _alarmList,
         _isDone,
         _isLoading,
         _isEdit,
         _message
-    ) { list, isDone, isLoading, isEdit, message ->
+    ) { isDone, isLoading, isEdit, message ->
         ScheduleUiState(
-            list,
             isDone,
             isLoading,
             isEdit,
@@ -232,10 +173,11 @@ class ScheduleViewModel @Inject constructor(
         }
     }
 
-    fun setTimer(index: Int) {
-        _alarmList.update {
-            it[index] = it[index].copy(checked = !it[index].checked)
-            it
+    fun setTimer(timer: Long) {
+        if (_schedule.value.alarmList.contains(timer)) {
+            _schedule.value.alarmList.remove(timer)
+        } else {
+            _schedule.value.alarmList.add(timer)
         }
     }
 }

@@ -13,7 +13,8 @@ fun ScheduleEntity.toExternal() = Schedule(
     endHour = endHour,
     endMinute = endMinute,
     isAllDay = isAllDay,
-    place = null
+    place = null,
+    alarmList = alarmList.toMutableList()
 )
 
 fun Schedule.toLocal() = ScheduleEntity(
@@ -27,5 +28,6 @@ fun Schedule.toLocal() = ScheduleEntity(
     endHour = endHour,
     endMinute = endMinute,
     isAllDay = isAllDay,
-    place = place
+    place = place,
+    alarmList = alarmList
 )

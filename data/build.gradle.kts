@@ -44,6 +44,8 @@ dependencies {
     implementation("androidx.room:room-common:$room_version")
     ksp("androidx.room:room-compiler:$room_version")
 
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+
     // Hilt
     implementation("com.google.dagger:hilt-android:$hilt_version")
     ksp("com.google.dagger:hilt-android-compiler:$hilt_version")
