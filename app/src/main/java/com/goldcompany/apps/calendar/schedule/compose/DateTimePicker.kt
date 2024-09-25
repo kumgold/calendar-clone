@@ -44,8 +44,8 @@ fun ScheduleDateTimePicker(
     dateMilli: Long,
     hour: Int,
     minute: Int,
-    onDateChange: (Long) -> Unit,
-    onTimeChange: (Int, Int) -> Unit
+    onDateChange: (Long) -> Boolean,
+    onTimeChange: (Int, Int) -> Boolean
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -74,7 +74,7 @@ fun ScheduleDateTimePicker(
 fun ScheduleDateSelector(
     modifier: Modifier = Modifier,
     savedDateMilli: Long,
-    onDateChange: (Long) -> Unit
+    onDateChange: (Long) -> Boolean
 ) {
     var date by remember { mutableStateOf(savedDateMilli.convertMilliToDate()) }
     var isShowDatePickerDialog by remember {
@@ -107,8 +107,9 @@ fun ScheduleDateSelector(
         TaskDatePickerDialog(
             savedDateMilli = savedDateMilli,
             onDateChange = {
-                date = it.convertMilliToDate()
-                onDateChange(it)
+                if (onDateChange(it)) {
+                    date = it.convertMilliToDate()
+                }
             },
             onDismiss = { isShowDatePickerDialog = false }
         )
@@ -120,7 +121,7 @@ private fun ScheduleTimeSelector(
     modifier: Modifier = Modifier,
     hour: Int,
     minute: Int,
-    onDateTimeChange: (Int, Int) -> Unit
+    onDateTimeChange: (Int, Int) -> Boolean
 ) {
     val time = remember {
         mutableStateOf("${hour.getDateString()}:${minute.getDateString()}")
@@ -157,6 +158,8 @@ private fun ScheduleTimeSelector(
         ) {
             ScheduleTimePickerDialog(
                 time = time,
+                hour = hour,
+                minute = minute,
                 onTimeChange = { h, m ->
                     onDateTimeChange(h, m)
                 },
@@ -170,13 +173,14 @@ private fun ScheduleTimeSelector(
 @Composable
 private fun ScheduleTimePickerDialog(
     time: MutableState<String>,
-    onTimeChange: (Int, Int) -> Unit,
+    hour: Int,
+    minute: Int,
+    onTimeChange: (Int, Int) -> Boolean,
     onDismiss: () -> Unit
 ) {
-    val currentTime = Calendar.getInstance()
     val timePickerState = rememberTimePickerState(
-        initialHour = currentTime.get(Calendar.HOUR_OF_DAY),
-        initialMinute = currentTime.get(Calendar.MINUTE),
+        initialHour = hour,
+        initialMinute = minute,
         is24Hour = false,
     )
 
@@ -199,8 +203,9 @@ private fun ScheduleTimePickerDialog(
             Button(
                 modifier = Modifier.weight(1f),
                 onClick = {
-                    time.value = "${timePickerState.hour}:${timePickerState.minute}"
-                    onTimeChange(timePickerState.hour, timePickerState.minute)
+                    if (onTimeChange(timePickerState.hour, timePickerState.minute)) {
+                        time.value = "${timePickerState.hour.getDateString()}:${timePickerState.minute.getDateString()}"
+                    }
                     onDismiss()
                 },
                 shape = RoundedCornerShape(10.dp)

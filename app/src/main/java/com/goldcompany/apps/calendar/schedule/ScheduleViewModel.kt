@@ -4,6 +4,7 @@ import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.goldcompany.apps.calendar.R
 import com.goldcompany.apps.calendar.util.CURRENT_DATE_MILLI
 import com.goldcompany.apps.calendar.util.SCHEDULE_ID
 import com.goldcompany.apps.calendar.util.convertDateToMilli
@@ -110,30 +111,60 @@ class ScheduleViewModel @Inject constructor(
         _schedule.update { it.copy(description = description) }
     }
 
-    fun updateStartDateMilli(milli: Long) {
+    fun updateStartDateMilli(milli: Long): Boolean {
+        if (milli > schedule.value.endDateTimeMilli) {
+            _message.value = R.string.end_date_time_error
+            return false
+        }
         _schedule.update { it.copy(startDateTimeMilli = milli) }
+
+        return true
     }
 
-    fun updateStartDateTime(hour: Int, minute: Int) {
+    fun updateStartDateTime(hour: Int, minute: Int): Boolean {
+        val s = schedule.value
+        if (s.startDateTimeMilli == s.endDateTimeMilli) {
+            if ((hour == s.endHour && minute > s.endMinute) || hour > s.endHour) {
+                _message.value = R.string.end_date_time_error
+                return false
+            }
+        }
         _schedule.update {
             it.copy(
                 startHour = hour,
                 startMinute = minute
             )
         }
+
+        return true
     }
 
-    fun updateEndDateTime(hour: Int, minute: Int) {
+    fun updateEndDateTime(hour: Int, minute: Int): Boolean {
+        val s = schedule.value
+        if (s.startDateTimeMilli == s.endDateTimeMilli) {
+            if ((hour == s.startHour && minute < s.startMinute) || hour < s.startHour) {
+                _message.value = R.string.end_date_time_error
+                return false
+            }
+        }
         _schedule.update {
             it.copy(
                 endHour = hour,
                 endMinute = minute
             )
         }
+
+        return true
     }
 
-    fun updateEndDateMilli(milli: Long) {
+    fun updateEndDateMilli(milli: Long): Boolean {
+        if (milli < schedule.value.startDateTimeMilli) {
+            _message.value = R.string.end_date_time_error
+            return false
+        }
         _schedule.update { it.copy(endDateTimeMilli = milli) }
+
+        return true
     }
 
     fun setIsAllDay(check: Boolean) {
@@ -179,5 +210,9 @@ class ScheduleViewModel @Inject constructor(
         } else {
             _schedule.value.alarmList.add(timer)
         }
+    }
+
+    fun shownMessage() {
+        _message.value = null
     }
 }

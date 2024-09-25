@@ -16,8 +16,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,6 +43,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.goldcompany.apps.calendar.R
 import com.goldcompany.apps.calendar.alarm.AlarmReceiver
+import com.goldcompany.apps.calendar.alarm.getTimerList
 import com.goldcompany.apps.calendar.compose.DeleteCautionDialog
 import com.goldcompany.apps.calendar.compose.DetailScreenAppBar
 import com.goldcompany.apps.calendar.compose.LoadingAnimation
@@ -47,7 +53,9 @@ import com.goldcompany.apps.calendar.schedule.compose.ScheduleDateSelector
 import com.goldcompany.apps.calendar.schedule.compose.ScheduleDateTimePicker
 import com.goldcompany.apps.calendar.util.ALARM_BUNDLE_DESCRIPTION
 import com.goldcompany.apps.calendar.util.ALARM_BUNDLE_TITLE
+import com.goldcompany.apps.calendar.util.convertDateToMilli
 import com.goldcompany.apps.data.data.schedule.Schedule
+import java.time.LocalDate
 
 @Composable
 fun ScheduleScreen(
@@ -57,6 +65,7 @@ fun ScheduleScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val schedule by viewModel.schedule.collectAsStateWithLifecycle()
     val showDialog = remember { mutableStateOf(false) }
+    val snackBarState = remember { SnackbarHostState() }
 
     Scaffold(
         modifier = Modifier
@@ -74,6 +83,9 @@ fun ScheduleScreen(
                 },
                 navigateBack = navigateBack
             )
+        },
+        snackbarHost = {
+            SnackbarHost(hostState = snackBarState)
         }
     ) { paddingValue ->
         if (uiState.isLoading) {
@@ -105,28 +117,40 @@ fun ScheduleScreen(
         )
     }
 
-    val context = LocalContext.current
-    val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+    uiState.message?.let { message ->
+        val m = stringResource(id = message)
+        LaunchedEffect(message) {
+            snackBarState.showSnackbar(m)
+            viewModel.shownMessage()
+        }
+    }
 
+    val context = LocalContext.current
     LaunchedEffect(uiState.isDone) {
         if (uiState.isDone) {
+            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             val intent = Intent(context, AlarmReceiver::class.java).apply {
                 putExtra(ALARM_BUNDLE_TITLE, schedule.title)
                 putExtra(ALARM_BUNDLE_DESCRIPTION, schedule.description)
             }
-            val pendingIntent = PendingIntent.getBroadcast(
-                context,
-                0,
-                intent,
-                PendingIntent.FLAG_IMMUTABLE
-            )
+            val currentTimeMilli = LocalDate.now().convertDateToMilli()
 
-            schedule.alarmList.forEach {
-                alarmManager.setExactAndAllowWhileIdle(
-                    AlarmManager.RTC_WAKEUP,
-                    it,
-                    pendingIntent
-                )
+            schedule.alarmList.forEach { milli ->
+                if (currentTimeMilli <= milli) {
+                    val pendingIntent = PendingIntent.getBroadcast(
+                        context,
+                        milli.hashCode(),
+                        intent,
+                        PendingIntent.FLAG_IMMUTABLE
+                    )
+
+                    alarmManager.cancel(pendingIntent)
+                    alarmManager.setExactAndAllowWhileIdle(
+                        AlarmManager.RTC_WAKEUP,
+                        milli,
+                        pendingIntent
+                    )
+                }
             }
             navigateBack()
         }
@@ -139,10 +163,10 @@ private fun EditSchedule(
     schedule: Schedule,
     updateTitle: (String) -> Unit,
     updateDescription: (String) -> Unit,
-    updateStartDateMilli: (Long) -> Unit,
-    updateStartDateTime: (Int, Int) -> Unit,
-    updateEndDateMilli: (Long) -> Unit,
-    updateEndDateTime: (Int, Int) -> Unit,
+    updateStartDateMilli: (Long) -> Boolean,
+    updateStartDateTime: (Int, Int) -> Boolean,
+    updateEndDateMilli: (Long) -> Boolean,
+    updateEndDateTime: (Int, Int) -> Boolean,
     setIsAllDay: (Boolean) -> Unit,
     setTimer: (Long) -> Unit
 ) {
@@ -268,6 +292,23 @@ private fun AlarmButton(
     setTimer: (Long) -> Unit
 ) {
     val showBottomSheet = remember { mutableStateOf(false) }
+    val timer = getTimerList(
+        schedule.alarmList,
+        schedule.startDateTimeMilli,
+        schedule.startHour,
+        schedule.startMinute,
+        schedule.isAllDay
+    )
+    val notice = if (timer.none { it.checked }) {
+        "Set the alarm"
+    } else {
+        timer.first().displayText + " " +
+                if (timer.size > 1) {
+                    "${timer.size-1} others"
+                } else {
+                    ""
+                }
+    }
 
     Row(
         modifier = Modifier
@@ -277,14 +318,10 @@ private fun AlarmButton(
             },
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = stringResource(id = R.string.alarm),
-            color = MaterialTheme.colorScheme.outline,
-            style = MaterialTheme.typography.titleMedium
-        )
+        Icon(imageVector = Icons.Default.Notifications, contentDescription = null)
         Spacer(modifier = Modifier.weight(1f))
         Text(
-            text = "",
+            text = notice,
             style = MaterialTheme.typography.bodyMedium
         )
     }
@@ -292,7 +329,7 @@ private fun AlarmButton(
     if (showBottomSheet.value) {
         AlarmTimerBottomSheet(
             showBottomSheet = showBottomSheet,
-            schedule = schedule,
+            timer = timer,
             setTimer = setTimer
         )
     }
