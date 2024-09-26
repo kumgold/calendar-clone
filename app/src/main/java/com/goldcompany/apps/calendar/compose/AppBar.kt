@@ -1,5 +1,6 @@
 package com.goldcompany.apps.calendar.compose
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
@@ -14,8 +15,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.goldcompany.apps.calendar.util.convertMilliToDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,8 +87,13 @@ fun DetailScreenAppBar(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeTopAppBar(
-    title: String
+    currentDateMilli: Long,
+    onDateChange: (Long) -> Unit
 ) {
+    var isShowDatePickerDialog by remember {
+        mutableStateOf(false)
+    }
+
     TopAppBar(
         modifier = Modifier.fillMaxWidth(),
         colors = TopAppBarColors(
@@ -93,9 +104,24 @@ fun HomeTopAppBar(
             actionIconContentColor = MaterialTheme.colorScheme.onPrimary
         ),
         title = {
-            Text(text = title)
+            Text(
+                modifier = Modifier.clickable {
+                    isShowDatePickerDialog = true
+                },
+                text = currentDateMilli.convertMilliToDate()
+            )
         }
     )
+
+    if (isShowDatePickerDialog) {
+        TaskDatePickerDialog(
+            savedDateMilli = currentDateMilli,
+            onDateChange = {
+                onDateChange(it)
+            },
+            onDismiss = { isShowDatePickerDialog = false }
+        )
+    }
 }
 
 @Preview
@@ -114,6 +140,7 @@ private fun TaskDetailAppBarPreview() {
 @Composable
 private fun HomeTopAppBarPreview() {
     HomeTopAppBar(
-        title = "title"
+        currentDateMilli = 0L,
+        onDateChange = {}
     )
 }

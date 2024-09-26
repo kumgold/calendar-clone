@@ -3,6 +3,7 @@ package com.goldcompany.apps.calendar.util
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.TimeZone
@@ -19,6 +20,10 @@ fun Long.convertMilliToDate(): String {
     val date = LocalDateTime.ofInstant(instant, TimeZone.getTimeZone("UTC").toZoneId())
 
     return formatter.format(date)
+}
+
+fun Long.convertMilliToLocalDate(): LocalDate {
+    return Instant.ofEpochMilli(this).atZone(ZoneId.systemDefault()).toLocalDate()
 }
 
 fun Int.getDateString(): String {

@@ -73,8 +73,10 @@ fun TaskDatePickerDialog(
     onDateChange: (Long) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val currentDate = LocalDate.now()
     val datePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = savedDateMilli
+        initialSelectedDateMillis = savedDateMilli,
+        yearRange = IntRange(currentDate.year - 50, currentDate.year + 50)
     )
 
     DatePickerDialog(

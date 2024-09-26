@@ -31,6 +31,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -40,10 +41,14 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.goldcompany.apps.calendar.R
+import com.goldcompany.apps.calendar.compose.HomeTopAppBar
 import com.goldcompany.apps.calendar.util.convertDateToMilli
+import com.goldcompany.apps.calendar.util.convertMilliToDate
+import com.goldcompany.apps.calendar.util.convertMilliToLocalDate
 import com.goldcompany.apps.data.data.schedule.Schedule
 import com.goldcompany.apps.data.data.todo.Todo
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.TextStyle
@@ -60,16 +65,16 @@ fun CalendarView(
 ) {
     Column(
         modifier = Modifier
-            .padding(horizontal = dimensionResource(id = R.dimen.default_margin))
             .fillMaxWidth()
             .wrapContentHeight()
     ) {
         var currentLocalDate by remember { mutableStateOf(LocalDate.now()) }
-        val yearRange = IntRange(currentLocalDate.year - 40, currentLocalDate.year + 40)
+        val yearRange = IntRange(currentLocalDate.year - 50, currentLocalDate.year + 50)
         val initialPage = (currentLocalDate.year - yearRange.first) * 12 + currentLocalDate.monthValue - 1
         val pagerState = rememberPagerState(initialPage = initialPage) {
             (yearRange.last - yearRange.first) * 12
         }
+        val scope = rememberCoroutineScope()
 
         LaunchedEffect(currentLocalDate.dayOfWeek) {
             currentLocalDate = LocalDate.now()
@@ -101,6 +106,18 @@ fun CalendarView(
             }
         }
 
+        HomeTopAppBar(
+            currentDateMilli = selectedDateMilli,
+            onDateChange = { milli ->
+                scope.launch {
+                    val date = milli.convertMilliToLocalDate()
+                    val page = (date.year - yearRange.first) * 12 + (date.monthValue - 1)
+                    pagerState.animateScrollToPage(page)
+                }
+                setCurrentDateMilli(milli)
+            }
+        )
+        Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.vertical_margin)))
         DayOfWeekView()
         Spacer(modifier = Modifier.height(20.dp))
         HorizontalPager(state = pagerState) { page ->

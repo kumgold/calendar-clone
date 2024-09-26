@@ -46,6 +46,8 @@ import com.goldcompany.apps.calendar.home.compose.TodoList
 import com.goldcompany.apps.calendar.util.convertMilliToDate
 import com.goldcompany.apps.calendar.widget.TaskWidget
 import com.goldcompany.apps.calendar.widget.TaskWidgetReceiver
+import com.goldcompany.apps.data.data.schedule.Schedule
+import com.goldcompany.apps.data.data.todo.Todo
 
 @Composable
 fun TaskActionBroadcastReceiver(
@@ -120,13 +122,17 @@ fun HomeScreen(
             )
         }
     ) { paddingValues ->
+        val todoList = uiState.monthlyTodos[uiState.currentDateMilli] ?: emptyList()
+        val scheduleList = uiState.schedules.filter {
+            it.startDateTimeMilli <= uiState.currentDateMilli &&
+                    it.endDateTimeMilli >= uiState.currentDateMilli
+        }
+
         Column(
             modifier = modifier
                 .padding(paddingValues)
                 .background(MaterialTheme.colorScheme.background),
         ) {
-            HomeTopAppBar(title = uiState.currentDateMilli.convertMilliToDate())
-            Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.vertical_margin)))
             CalendarView(
                 selectedDateMilli = uiState.currentDateMilli,
                 monthlyTodos = uiState.monthlyTodos,
@@ -156,6 +162,10 @@ fun HomeScreen(
                     viewModel.updateTodo(id, isCompleted)
                 }
             )
+            EmptyTask(
+                todoList = todoList,
+                scheduleList = scheduleList
+            )
         }
 
         if (isExpanded.value) {
@@ -177,30 +187,35 @@ fun HomeScreen(
 }
 
 @Composable
-private fun EmptyTask() {
-    val color = MaterialTheme.colorScheme.primary
+private fun EmptyTask(
+    todoList: List<Todo>,
+    scheduleList: List<Schedule>
+) {
+    if (todoList.isEmpty() && scheduleList.isEmpty()) {
+        val color = MaterialTheme.colorScheme.tertiary
 
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = dimensionResource(id = R.dimen.default_margin))
-            .drawBehind {
-                val height = size.height
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = dimensionResource(id = R.dimen.default_margin))
+                .drawBehind {
+                    val height = size.height
 
-                drawLine(
-                    color = color,
-                    start = Offset(0f, 0f),
-                    end = Offset(0f, height),
-                    strokeWidth = 15f
-                )
-            },
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.horizontal_margin)))
-        Text(
-            modifier = Modifier.padding(vertical = dimensionResource(id = R.dimen.default_margin_large)),
-            text = "일정이 없습니다.",
-            style = MaterialTheme.typography.bodySmall
-        )
+                    drawLine(
+                        color = color,
+                        start = Offset(0f, 0f),
+                        end = Offset(0f, height),
+                        strokeWidth = 15f
+                    )
+                },
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.horizontal_margin)))
+            Text(
+                modifier = Modifier.padding(vertical = dimensionResource(id = R.dimen.default_margin_large)),
+                text = "일정이 없습니다.",
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
     }
 }
