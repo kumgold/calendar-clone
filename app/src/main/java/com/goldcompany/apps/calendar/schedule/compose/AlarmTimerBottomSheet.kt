@@ -30,9 +30,6 @@ import androidx.compose.ui.res.stringResource
 import com.goldcompany.apps.calendar.R
 import com.goldcompany.apps.calendar.alarm.AlarmItem
 import kotlinx.coroutines.launch
-import java.time.Instant
-import java.time.ZoneId
-import java.util.Calendar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

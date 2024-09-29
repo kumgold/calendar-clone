@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
@@ -38,12 +37,10 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.goldcompany.apps.calendar.R
-import com.goldcompany.apps.calendar.compose.HomeTopAppBar
 import com.goldcompany.apps.calendar.home.compose.AddSchedulesButton
 import com.goldcompany.apps.calendar.home.compose.CalendarView
 import com.goldcompany.apps.calendar.home.compose.ScheduleList
 import com.goldcompany.apps.calendar.home.compose.TodoList
-import com.goldcompany.apps.calendar.util.convertMilliToDate
 import com.goldcompany.apps.calendar.widget.TaskWidget
 import com.goldcompany.apps.calendar.widget.TaskWidgetReceiver
 import com.goldcompany.apps.data.data.schedule.Schedule
